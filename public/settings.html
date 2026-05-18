@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — Habit Tracker</title>
+  <link rel="stylesheet" href="https://assets.nhs.uk/nhsuk-frontend/6.1.2/nhsuk-frontend.min.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="nhsuk-header" role="banner">
+    <div class="nhsuk-width-container">
+      <div class="nhsuk-header__content">
+        <div class="nhsuk-header__logo">
+          <span class="nhsuk-header__link nhsuk-header__link--service-name">Habit Tracker</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="nhsuk-width-container">
+    <main class="nhsuk-main-wrapper" id="maincontent">
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-two-thirds">
+
+          <nav class="app-nav">
+            <a href="/">Check in</a>
+            <a href="/calendar.html">Calendar</a>
+          </nav>
+
+          <h1 class="nhsuk-heading-xl">Settings</h1>
+
+          <!-- Supplements -->
+          <section class="app-section">
+            <h2 class="app-section-title">Supplements</h2>
+            <p class="nhsuk-body">These appear as checkboxes on every check-in.</p>
+
+            <ul class="nhsuk-list" id="supplement-list">
+              <li class="nhsuk-u-secondary-text-color">Loading…</li>
+            </ul>
+
+            <div style="display:flex;gap:8px;align-items:flex-end;margin-top:12px">
+              <div class="nhsuk-form-group" style="margin:0;flex:1">
+                <label class="nhsuk-label" for="new-supplement">Add supplement</label>
+                <input class="nhsuk-input" id="new-supplement" type="text" placeholder="e.g. Vitamin D">
+              </div>
+              <button class="nhsuk-button" id="add-supplement-btn" style="margin:0">Add</button>
+            </div>
+            <p id="supp-feedback" class="nhsuk-body-s" style="margin-top:8px;display:none"></p>
+          </section>
+
+          <!-- Weights -->
+          <section class="app-section">
+            <h2 class="app-section-title">Score weights</h2>
+            <p class="nhsuk-body">Adjust how much each category contributes to your overall score. Values are normalised automatically.</p>
+            <p class="nhsuk-body-s nhsuk-u-secondary-text-color">Total: <span id="weights-total">100</span>%</p>
+
+            <div id="weights-form">
+              <div class="app-weight-row"><label>Mood</label><input type="range" id="w-mood" min="0" max="100" step="5" value="20"><span class="app-weight-value" id="wv-mood">20%</span></div>
+              <div class="app-weight-row"><label>Focus</label><input type="range" id="w-focus" min="0" max="100" step="5" value="20"><span class="app-weight-value" id="wv-focus">20%</span></div>
+              <div class="app-weight-row"><label>Sleep</label><input type="range" id="w-sleep" min="0" max="100" step="5" value="15"><span class="app-weight-value" id="wv-sleep">15%</span></div>
+              <div class="app-weight-row"><label>Exercise</label><input type="range" id="w-exercise" min="0" max="100" step="5" value="15"><span class="app-weight-value" id="wv-exercise">15%</span></div>
+              <div class="app-weight-row"><label>Mindfulness</label><input type="range" id="w-mindfulness" min="0" max="100" step="5" value="10"><span class="app-weight-value" id="wv-mindfulness">10%</span></div>
+              <div class="app-weight-row"><label>Alcohol</label><input type="range" id="w-alcohol" min="0" max="100" step="5" value="10"><span class="app-weight-value" id="wv-alcohol">10%</span></div>
+              <div class="app-weight-row"><label>Outside time</label><input type="range" id="w-outside" min="0" max="100" step="5" value="10"><span class="app-weight-value" id="wv-outside">10%</span></div>
+            </div>
+
+            <button class="nhsuk-button" id="save-weights-btn" style="margin-top:16px">Save weights</button>
+            <p id="weights-feedback" class="nhsuk-body-s" style="margin-top:8px;display:none"></p>
+          </section>
+
+          <!-- Export -->
+          <section class="app-section">
+            <h2 class="app-section-title">Export data</h2>
+            <p class="nhsuk-body">Download all your check-ins for analysis.</p>
+            <div class="app-nav">
+              <a href="/api/export?format=csv" class="nhsuk-button nhsuk-button--secondary" download="habit-tracker-export.csv">Download CSV</a>
+              <a href="/api/export?format=json" class="nhsuk-button nhsuk-button--secondary" download="habit-tracker-export.json">Download JSON</a>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/settings.js"></script>
+</body>
+</html>

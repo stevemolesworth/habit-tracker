@@ -1,0 +1,63 @@
+import { supabase } from './_shared/supabase.js'
+
+function calcHoursSlept(bedtime, wakeTime) {
+  if (!bedtime || !wakeTime) return null
+  const [bh, bm] = bedtime.split(':').map(Number)
+  const [wh, wm] = wakeTime.split(':').map(Number)
+  let diff = (wh * 60 + wm) - (bh * 60 + bm)
+  if (diff < 0) diff += 24 * 60
+  return Math.round((diff / 60) * 100) / 100
+}
+
+export default async function handler(req) {
+  if (req.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 })
+  }
+
+  let body
+  try {
+    body = await req.json()
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+  }
+
+  const {
+    check_in_type, check_in_date,
+    bedtime, wake_time, sleep_quality,
+    global_mood, focus_financial, focus_consulting, focus_opiner,
+    exercised, exercise_types, session_count,
+    alcohol_spirits, alcohol_beer, alcohol_wine,
+    mindfulness_meditation, mindfulness_yoga,
+    supplements,
+    outside_time, social_media, p, m, s,
+    notes
+  } = body
+
+  if (!check_in_type || !check_in_date) {
+    return new Response(JSON.stringify({ error: 'check_in_type and check_in_date are required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+  }
+
+  const hours_slept = calcHoursSlept(bedtime, wake_time)
+
+  const { data, error } = await supabase
+    .from('check_ins')
+    .insert([{
+      check_in_type, check_in_date,
+      bedtime, wake_time, hours_slept, sleep_quality,
+      global_mood, focus_financial, focus_consulting, focus_opiner,
+      exercised, exercise_types, session_count,
+      alcohol_spirits, alcohol_beer, alcohol_wine,
+      mindfulness_meditation, mindfulness_yoga,
+      supplements,
+      outside_time, social_media, p, m, s,
+      notes
+    }])
+    .select()
+    .single()
+
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
+  }
+
+  return new Response(JSON.stringify(data), { status: 201, headers: { 'Content-Type': 'application/json' } })
+}

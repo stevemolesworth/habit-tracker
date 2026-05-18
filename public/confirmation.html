@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-in saved — Habit Tracker</title>
+  <link rel="stylesheet" href="https://assets.nhs.uk/nhsuk-frontend/6.1.2/nhsuk-frontend.min.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="nhsuk-header" role="banner">
+    <div class="nhsuk-width-container">
+      <div class="nhsuk-header__content">
+        <div class="nhsuk-header__logo">
+          <span class="nhsuk-header__link nhsuk-header__link--service-name">Habit Tracker</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="nhsuk-width-container">
+    <main class="nhsuk-main-wrapper" id="maincontent">
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-two-thirds">
+
+          <div class="nhsuk-panel nhsuk-panel--confirmation" style="margin-bottom:32px">
+            <h1 class="nhsuk-panel__title">Check-in saved</h1>
+            <div class="nhsuk-panel__body" id="panel-type">Morning check-in recorded</div>
+          </div>
+
+          <!-- Quote -->
+          <div class="nhsuk-card" style="margin-bottom:24px">
+            <div class="nhsuk-card__content">
+              <p class="app-quote" id="quote-text">Loading…</p>
+              <p class="app-quote-author" id="quote-author"></p>
+            </div>
+          </div>
+
+          <!-- Score -->
+          <div class="nhsuk-card" id="score-card" style="display:none;margin-bottom:24px">
+            <div class="nhsuk-card__content">
+              <h2 class="nhsuk-heading-s">Your last score</h2>
+              <p class="app-score" id="score-value">—</p>
+              <p class="app-score-label" id="score-label"></p>
+            </div>
+          </div>
+
+          <nav class="app-nav" style="margin-top:24px">
+            <a href="/" class="nhsuk-button nhsuk-button--secondary">New check-in</a>
+            <a href="/calendar.html">Calendar</a>
+            <a href="/settings.html">Settings</a>
+          </nav>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/confirmation.js"></script>
+</body>
+</html>

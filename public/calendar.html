@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar — Habit Tracker</title>
+  <link rel="stylesheet" href="https://assets.nhs.uk/nhsuk-frontend/6.1.2/nhsuk-frontend.min.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="nhsuk-header" role="banner">
+    <div class="nhsuk-width-container">
+      <div class="nhsuk-header__content">
+        <div class="nhsuk-header__logo">
+          <span class="nhsuk-header__link nhsuk-header__link--service-name">Habit Tracker</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="nhsuk-width-container">
+    <main class="nhsuk-main-wrapper" id="maincontent">
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-full">
+
+          <nav class="app-nav">
+            <a href="/">Check in</a>
+            <a href="/settings.html">Settings</a>
+          </nav>
+
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <button class="nhsuk-button nhsuk-button--secondary" id="prev-month" style="margin:0">&#8249;</button>
+            <h1 class="nhsuk-heading-l" id="month-label" style="margin:0;flex:1;text-align:center"></h1>
+            <button class="nhsuk-button nhsuk-button--secondary" id="next-month" style="margin:0">&#8250;</button>
+          </div>
+
+          <!-- Calendar grid -->
+          <div class="app-calendar" id="calendar-grid">
+            <div class="app-calendar__header">Mon</div>
+            <div class="app-calendar__header">Tue</div>
+            <div class="app-calendar__header">Wed</div>
+            <div class="app-calendar__header">Thu</div>
+            <div class="app-calendar__header">Fri</div>
+            <div class="app-calendar__header">Sat</div>
+            <div class="app-calendar__header">Sun</div>
+          </div>
+
+          <!-- Day detail panel -->
+          <div id="day-detail" style="display:none;margin-top:24px">
+            <h2 class="nhsuk-heading-m" id="day-detail-title"></h2>
+            <div id="day-detail-content"></div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/calendar.js"></script>
+</body>
+</html>

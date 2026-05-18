@@ -1,0 +1,188 @@
+/* Custom overrides on top of NHS Design System */
+
+.app-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #d8dde0;
+}
+
+.app-section:last-of-type {
+  border-bottom: none;
+}
+
+.app-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #212b32;
+  margin-bottom: 16px;
+}
+
+/* Inline radio group for scale ratings */
+.nhsuk-radios--inline .nhsuk-radios__item {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Calendar grid */
+.app-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.app-calendar__header {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4c6272;
+  padding: 4px 0;
+}
+
+.app-calendar__day {
+  min-height: 56px;
+  padding: 4px;
+  background: #f0f4f5;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.app-calendar__day:hover {
+  background: #d8e8f0;
+}
+
+.app-calendar__day--empty {
+  background: transparent;
+  cursor: default;
+}
+
+.app-calendar__day--today {
+  background: #005eb8;
+  color: #fff;
+}
+
+.app-calendar__day--today:hover {
+  background: #003d78;
+}
+
+.app-calendar__day-number {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.app-calendar__badges {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.app-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 2px;
+  color: #fff;
+}
+
+.app-badge--morning { background: #007f3b; }
+.app-badge--evening { background: #330072; }
+
+/* Score display */
+.app-score {
+  display: inline-block;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #005eb8;
+  line-height: 1;
+}
+
+.app-score-label {
+  font-size: 0.875rem;
+  color: #4c6272;
+  margin-top: 4px;
+}
+
+/* Weight sliders */
+.app-weight-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.app-weight-row label {
+  flex: 0 0 140px;
+  font-size: 0.875rem;
+}
+
+.app-weight-row input[type="range"] {
+  flex: 1;
+}
+
+.app-weight-value {
+  flex: 0 0 36px;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* Nav links */
+.app-nav {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.app-nav a {
+  color: #005eb8;
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+/* Morning/evening toggle */
+.app-type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.app-type-toggle a {
+  padding: 8px 20px;
+  border: 2px solid #005eb8;
+  border-radius: 4px;
+  color: #005eb8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.app-type-toggle a.active {
+  background: #005eb8;
+  color: #fff;
+}
+
+/* Confirmation quote card */
+.app-quote {
+  font-size: 1.25rem;
+  font-style: italic;
+  color: #212b32;
+  margin-bottom: 8px;
+}
+
+.app-quote-author {
+  font-size: 0.875rem;
+  color: #4c6272;
+}
+
+@media (max-width: 640px) {
+  .app-calendar__day {
+    min-height: 44px;
+    padding: 2px;
+  }
+  .app-calendar__day-number {
+    font-size: 0.7rem;
+  }
+}
