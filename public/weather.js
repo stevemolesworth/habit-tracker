@@ -68,7 +68,12 @@ async function fetchForecastWeather(lat, lng, postcode) {
 }
 
 async function fetchHistoricalWeather(lat, lng, date, postcode) {
-  const url = `https://archive-api.open-meteo.com/v1/archive` +
+  // Archive API has a 2–5 day lag; use forecast API for recent dates
+  const daysAgo = Math.round((Date.now() - new Date(date + 'T12:00:00').getTime()) / 86400000)
+  const base = daysAgo <= 7
+    ? `https://api.open-meteo.com/v1/forecast`
+    : `https://archive-api.open-meteo.com/v1/archive`
+  const url = `${base}` +
     `?latitude=${lat}&longitude=${lng}` +
     `&start_date=${date}&end_date=${date}` +
     `&hourly=temperature_2m,weather_code` +
