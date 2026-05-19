@@ -330,17 +330,52 @@ async function loadReport() {
 
 // ── Init ──────────────────────────────────────────────────────
 
-document.getElementById('date-to').value = todayStr()
-document.getElementById('date-from').value = daysAgo(30)
+function monthRange(offset = 0) {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = now.getMonth() + offset
+  const first = new Date(y, m, 1)
+  const last = new Date(y, m + 1, 0)
+  return {
+    from: first.toISOString().slice(0, 10),
+    to: last.toISOString().slice(0, 10)
+  }
+}
+
+function setActivePreset(id) {
+  ['preset-this-month', 'preset-last-month', 'preset-date-range'].forEach(bid => {
+    document.getElementById(bid).classList.toggle('nhsuk-button--active-preset', bid === id)
+  })
+}
+
+document.getElementById('preset-this-month').addEventListener('click', () => {
+  const { from, to } = monthRange(0)
+  document.getElementById('date-range-inputs').style.display = 'none'
+  document.getElementById('date-from').value = from
+  document.getElementById('date-to').value = to
+  setActivePreset('preset-this-month')
+  loadReport()
+})
+
+document.getElementById('preset-last-month').addEventListener('click', () => {
+  const { from, to } = monthRange(-1)
+  document.getElementById('date-range-inputs').style.display = 'none'
+  document.getElementById('date-from').value = from
+  document.getElementById('date-to').value = to
+  setActivePreset('preset-last-month')
+  loadReport()
+})
+
+document.getElementById('preset-date-range').addEventListener('click', () => {
+  document.getElementById('date-range-inputs').style.display = 'flex'
+  setActivePreset('preset-date-range')
+})
 
 document.getElementById('apply-btn').addEventListener('click', loadReport)
 
-document.querySelectorAll('[data-preset]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.getElementById('date-to').value = todayStr()
-    document.getElementById('date-from').value = daysAgo(Number(btn.dataset.preset))
-    loadReport()
-  })
-})
-
+// Default to this month on load
+const { from: initFrom, to: initTo } = monthRange(0)
+document.getElementById('date-from').value = initFrom
+document.getElementById('date-to').value = initTo
+setActivePreset('preset-this-month')
 loadReport()
