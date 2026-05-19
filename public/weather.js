@@ -105,16 +105,22 @@ async function fetchHistoricalWeather(lat, lng, date, postcode) {
   return { current, hourly, postcode }
 }
 
-export function buildWeatherStrip(weatherData, type, showNow = true) {
-  const { current, hourly } = weatherData
+export function buildWeatherStrip(weatherData, type) {
+  const { hourly } = weatherData
 
-  const cards = showNow
-    ? [weatherCard('Now', wmoEmoji(current.code), current.temp, false)]
-    : []
+  const temps = hourly.map(h => h.temp).filter(t => t !== null)
+  const avgTemp = temps.length
+    ? Math.round(temps.reduce((a, b) => a + b, 0) / temps.length)
+    : null
 
-  hourly.forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)))
+  const avgRow = `<tr class="nhsuk-table__row">
+    <td class="nhsuk-table__cell"><strong>Average</strong></td>
+    <td class="nhsuk-table__cell"></td>
+    <td class="nhsuk-table__cell"><strong>${avgTemp !== null ? `${avgTemp}°C` : '—'}</strong></td>
+  </tr>`
 
-  const rows = cards.join('')
+  const hourlyRows = hourly.map(h => weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)).join('')
+
   return `<table class="nhsuk-table">
     <thead class="nhsuk-table__head">
       <tr class="nhsuk-table__row">
@@ -123,7 +129,7 @@ export function buildWeatherStrip(weatherData, type, showNow = true) {
         <th class="nhsuk-table__header" scope="col">Temp</th>
       </tr>
     </thead>
-    <tbody class="nhsuk-table__body">${rows}</tbody>
+    <tbody class="nhsuk-table__body">${avgRow}${hourlyRows}</tbody>
   </table>`
 }
 
