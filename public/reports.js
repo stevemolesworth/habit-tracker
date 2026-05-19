@@ -343,11 +343,4 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
   })
 })
 
-document.getElementById('notes-modal-close').addEventListener('click', () => {
-  document.getElementById('notes-modal').style.display = 'none'
-})
-document.getElementById('notes-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) e.currentTarget.style.display = 'none'
-})
-
 loadReport()
