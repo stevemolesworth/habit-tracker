@@ -1,4 +1,5 @@
 import { api } from '/api.js'
+import { buildWeatherStrip } from '/weather.js'
 
 const params = new URLSearchParams(location.search)
 const id = params.get('id')
@@ -97,6 +98,16 @@ async function loadCheckin() {
 
     // Notes
     setInput('notes', checkin.notes)
+
+    // Weather
+    const weatherSection = document.getElementById('weather-section')
+    const weatherStrip = document.getElementById('weather-strip')
+    weatherSection.style.display = ''
+    if (checkin.weather_snapshot?.hourly?.length) {
+      weatherStrip.innerHTML = buildWeatherStrip(checkin.weather_snapshot, checkin.check_in_type)
+    } else {
+      weatherStrip.innerHTML = '<p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin:0">No weather data recorded</p>'
+    }
 
     // Exercise toggle
     document.getElementById('exercised').addEventListener('change', (e) => {

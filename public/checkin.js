@@ -49,7 +49,10 @@ document.getElementById('notes-label').textContent = isMorning
 async function loadWeather() {
   const strip = document.getElementById('weather-strip')
   const postcode = document.getElementById('weather-postcode').value.trim()
-  if (!postcode) return
+  if (!postcode) {
+    strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">No weather data recorded</span>'
+    return
+  }
   strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>'
   try {
     currentWeatherData = await fetchWeather(postcode, today)
