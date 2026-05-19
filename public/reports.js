@@ -143,7 +143,7 @@ function renderMood(days, labels) {
     data: { labels, datasets: [{ ...LINE, tension: 0.4, spanGaps: true, label: 'Mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
+      scales: { x: xAxis(labels), y: { min: 0.5, max: 5.5, ticks: { stepSize: 1, callback: v => Number.isInteger(v) ? v : '' }, grid: { color: '#f0f4f5' } } },
       plugins: { legend: { display: false }, tooltip: tooltipTitle(days) },
       onClick: chartOnClick(days)
     }
