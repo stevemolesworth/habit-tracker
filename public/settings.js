@@ -52,6 +52,31 @@ document.getElementById('new-supplement').addEventListener('keydown', (e) => {
   }
 })
 
+// ── Location ─────────────────────────────────────────────────
+
+async function loadPostcode() {
+  try {
+    const w = await api.getWeights()
+    if (w?.default_postcode) {
+      document.getElementById('default-postcode').value = w.default_postcode
+    }
+  } catch { /* leave blank */ }
+}
+
+document.getElementById('save-postcode-btn').addEventListener('click', async () => {
+  const value = document.getElementById('default-postcode').value.trim().replace(/\s+/g, '').toUpperCase()
+  if (!value) {
+    showFeedback('postcode-feedback', 'Please enter a postcode.', true)
+    return
+  }
+  try {
+    await api.updateWeights({ default_postcode: value })
+    showFeedback('postcode-feedback', 'Postcode saved.')
+  } catch (err) {
+    showFeedback('postcode-feedback', `Error: ${err.message}`, true)
+  }
+})
+
 // ── Weights ──────────────────────────────────────────────────
 
 const weightKeys = ['mood', 'focus', 'sleep', 'exercise', 'mindfulness', 'alcohol', 'outside']
@@ -121,5 +146,6 @@ function showFeedback(id, msg, isError = false) {
 
 // ── Init ──────────────────────────────────────────────────────
 
+loadPostcode()
 loadSupplements()
 loadWeights()

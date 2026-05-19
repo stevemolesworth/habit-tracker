@@ -1,4 +1,5 @@
 import { api } from '/api.js'
+import { fetchWeather, buildWeatherStrip } from '/weather.js'
 
 const params = new URLSearchParams(location.search)
 const today = new Date().toISOString().slice(0, 10)
@@ -15,8 +16,46 @@ document.getElementById('checkin-date').textContent = new Date().toLocaleDateStr
 document.getElementById('toggle-morning').classList.toggle('active', type === 'morning')
 document.getElementById('toggle-evening').classList.toggle('active', type === 'evening')
 
-// Show/hide sleep section
-document.getElementById('sleep-section').style.display = type === 'morning' ? '' : 'none'
+// Show/hide sections based on check-in type
+const isMorning = type === 'morning'
+document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
+document.getElementById('focus-section').style.display = isMorning ? 'none' : ''
+document.getElementById('exercise-section').style.display = isMorning ? 'none' : ''
+document.getElementById('alcohol-section').style.display = isMorning ? 'none' : ''
+document.getElementById('mindfulness-section').style.display = isMorning ? 'none' : ''
+document.getElementById('behaviours-section').style.display = isMorning ? 'none' : ''
+document.getElementById('notes-label').textContent = isMorning
+  ? 'What would make today good?'
+  : 'What made today good? Anything you\'d like to achieve tomorrow?'
+
+// Weather
+let currentWeatherData = null
+
+async function loadWeather() {
+  const strip = document.getElementById('weather-strip')
+  const postcode = document.getElementById('weather-postcode').value.trim()
+  if (!postcode) return
+  strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>'
+  try {
+    currentWeatherData = await fetchWeather(postcode)
+    strip.innerHTML = buildWeatherStrip(currentWeatherData, type)
+  } catch (err) {
+    strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Could not load weather: ${err.message}</span>`
+  }
+}
+
+document.getElementById('weather-refresh-btn').addEventListener('click', loadWeather)
+
+// Load default postcode from settings then fetch weather
+;(async () => {
+  try {
+    const config = await api.getWeights()
+    if (config?.default_postcode) {
+      document.getElementById('weather-postcode').value = config.default_postcode
+    }
+  } catch { /* fall back to value already in HTML */ }
+  loadWeather()
+})()
 
 // Exercise details toggle
 document.getElementById('exercised').addEventListener('change', (e) => {
@@ -34,7 +73,7 @@ async function loadSupplements() {
     }
     list.innerHTML = supplements.map(s => `
       <div class="nhsuk-checkboxes__item">
-        <input class="nhsuk-checkboxes__input" id="supp-${s.id}" name="supplement" type="checkbox" value="${s.name}">
+        <input class="nhsuk-checkboxes__input" id="supp-${s.id}" name="supplement" type="checkbox" value="${s.name}" tabindex="0">
         <label class="nhsuk-label nhsuk-checkboxes__label" for="supp-${s.id}">${s.name}</label>
       </div>
     `).join('')
@@ -83,7 +122,9 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     p: bool('p'),
     m: bool('m'),
     s: bool('s'),
-    notes: get('notes') || null
+    notes: get('notes') || null,
+    weather_postcode: currentWeatherData?.postcode || null,
+    weather_snapshot: currentWeatherData ? { current: currentWeatherData.current, hourly: currentWeatherData.hourly } : null
   }
 
   if (type === 'morning') {

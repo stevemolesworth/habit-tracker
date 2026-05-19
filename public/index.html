@@ -21,7 +21,7 @@
   <div class="nhsuk-width-container">
     <main class="nhsuk-main-wrapper" id="maincontent">
       <div class="nhsuk-grid-row">
-        <div class="nhsuk-grid-column-two-thirds">
+        <div class="nhsuk-grid-column-full">
 
           <nav class="app-nav">
             <a href="/calendar.html">Calendar</a>
@@ -34,7 +34,13 @@
           </div>
 
           <h1 class="nhsuk-heading-xl" id="page-heading">Morning check-in</h1>
-          <p class="nhsuk-body" id="checkin-date"></p>
+          <p class="nhsuk-heading-m" id="checkin-date"></p>
+
+        </div>
+      </div>
+
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-two-thirds">
 
           <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" style="display:none">
             <h2 class="nhsuk-error-summary__title" id="error-summary-title">There was a problem</h2>
@@ -62,7 +68,7 @@
                 <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
                 <div class="nhsuk-radios nhsuk-radios--inline" id="sleep_quality">
                   <div class="nhsuk-radios__item">
-                    <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1">
+                    <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0">
                     <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
                   </div>
                   <div class="nhsuk-radios__item">
@@ -77,25 +83,32 @@
               </fieldset>
             </section>
 
-            <!-- Mood & Focus -->
-            <section class="app-section">
-              <h2 class="app-section-title">Mood &amp; Focus</h2>
+            <!-- Mood -->
+            <section class="app-section" id="mood-section">
+              <h2 class="app-section-title">Mood</h2>
+              <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
 
               <fieldset class="nhsuk-fieldset">
                 <legend class="nhsuk-fieldset__legend nhsuk-label">Overall mood</legend>
                 <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1"><label class="nhsuk-label nhsuk-radios__label" for="gm-1">1</label></div>
+                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="gm-1">1</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-2" name="global_mood" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="gm-2">2</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-3" name="global_mood" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="gm-3">3</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-4" name="global_mood" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="gm-4">4</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-5" name="global_mood" type="radio" value="5"><label class="nhsuk-label nhsuk-radios__label" for="gm-5">5</label></div>
                 </div>
               </fieldset>
+            </section>
 
-              <fieldset class="nhsuk-fieldset" style="margin-top:16px">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Focus — Financial admin</legend>
+            <!-- Focus -->
+            <section class="app-section" id="focus-section">
+              <h2 class="app-section-title">Focus</h2>
+              <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
+
+              <fieldset class="nhsuk-fieldset">
+                <legend class="nhsuk-fieldset__legend nhsuk-label">Financial admin</legend>
                 <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-1" name="focus_financial" type="radio" value="1"><label class="nhsuk-label nhsuk-radios__label" for="ff-1">1</label></div>
+                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-1" name="focus_financial" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="ff-1">1</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-2" name="focus_financial" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="ff-2">2</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-3" name="focus_financial" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="ff-3">3</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-4" name="focus_financial" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="ff-4">4</label></div>
@@ -104,9 +117,9 @@
               </fieldset>
 
               <fieldset class="nhsuk-fieldset" style="margin-top:16px">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Focus — Consulting</legend>
+                <legend class="nhsuk-fieldset__legend nhsuk-label">Consulting</legend>
                 <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-1" name="focus_consulting" type="radio" value="1"><label class="nhsuk-label nhsuk-radios__label" for="fc-1">1</label></div>
+                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-1" name="focus_consulting" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="fc-1">1</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-2" name="focus_consulting" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="fc-2">2</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-3" name="focus_consulting" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="fc-3">3</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-4" name="focus_consulting" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="fc-4">4</label></div>
@@ -115,9 +128,9 @@
               </fieldset>
 
               <fieldset class="nhsuk-fieldset" style="margin-top:16px">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Focus — Opiner</legend>
+                <legend class="nhsuk-fieldset__legend nhsuk-label">Opiner</legend>
                 <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-1" name="focus_opiner" type="radio" value="1"><label class="nhsuk-label nhsuk-radios__label" for="fo-1">1</label></div>
+                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-1" name="focus_opiner" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="fo-1">1</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-2" name="focus_opiner" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="fo-2">2</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-3" name="focus_opiner" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="fo-3">3</label></div>
                   <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-4" name="focus_opiner" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="fo-4">4</label></div>
@@ -127,12 +140,12 @@
             </section>
 
             <!-- Exercise -->
-            <section class="app-section">
+            <section class="app-section" id="exercise-section">
               <h2 class="app-section-title">Exercise</h2>
 
               <div class="nhsuk-form-group">
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="exercised" name="exercised" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="exercised" name="exercised" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="exercised">Exercised today</label>
                 </div>
               </div>
@@ -141,11 +154,11 @@
                 <legend class="nhsuk-fieldset__legend nhsuk-label">Type(s)</legend>
                 <div class="nhsuk-checkboxes">
                   <div class="nhsuk-checkboxes__item">
-                    <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic">
+                    <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0">
                     <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin)</label>
                   </div>
                   <div class="nhsuk-checkboxes__item">
-                    <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength">
+                    <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" tabindex="0">
                     <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
                   </div>
                 </div>
@@ -157,7 +170,7 @@
             </section>
 
             <!-- Alcohol -->
-            <section class="app-section">
+            <section class="app-section" id="alcohol-section">
               <h2 class="app-section-title">Alcohol (units)</h2>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
                 <div class="nhsuk-form-group">
@@ -176,15 +189,15 @@
             </section>
 
             <!-- Mindfulness -->
-            <section class="app-section">
+            <section class="app-section" id="mindfulness-section">
               <h2 class="app-section-title">Mindfulness</h2>
               <div class="nhsuk-checkboxes">
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="mindfulness_meditation" name="mindfulness_meditation" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="mindfulness_meditation" name="mindfulness_meditation" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="mindfulness_meditation">Meditation</label>
                 </div>
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="mindfulness_yoga" name="mindfulness_yoga" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="mindfulness_yoga" name="mindfulness_yoga" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="mindfulness_yoga">Yoga</label>
                 </div>
               </div>
@@ -199,27 +212,27 @@
             </section>
 
             <!-- Behaviours -->
-            <section class="app-section">
+            <section class="app-section" id="behaviours-section">
               <h2 class="app-section-title">Behaviours</h2>
               <div class="nhsuk-checkboxes">
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="outside_time" name="outside_time" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="outside_time" name="outside_time" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="outside_time">Got outside into nature</label>
                 </div>
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="social_media" name="social_media" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="social_media" name="social_media" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="social_media">Social media</label>
                 </div>
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="behaviour_p" name="p" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="behaviour_p" name="p" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="behaviour_p">P</label>
                 </div>
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="behaviour_m" name="m" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="behaviour_m" name="m" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="behaviour_m">M</label>
                 </div>
                 <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="behaviour_s" name="s" type="checkbox">
+                  <input class="nhsuk-checkboxes__input" id="behaviour_s" name="s" type="checkbox" tabindex="0">
                   <label class="nhsuk-label nhsuk-checkboxes__label" for="behaviour_s">S</label>
                 </div>
               </div>
@@ -229,7 +242,7 @@
             <section class="app-section">
               <h2 class="app-section-title">Notes</h2>
               <div class="nhsuk-form-group">
-                <label class="nhsuk-label" for="notes">Optional notes</label>
+                <label class="nhsuk-label" for="notes" id="notes-label">Optional notes</label>
                 <textarea class="nhsuk-textarea" id="notes" name="notes" rows="4"></textarea>
               </div>
             </section>
@@ -238,6 +251,22 @@
           </form>
 
         </div>
+
+        <div class="nhsuk-grid-column-one-third">
+          <div id="weather-widget">
+            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
+              <div class="nhsuk-form-group" style="margin:0;flex:1">
+                <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="weather-postcode">Postcode</label>
+                <input class="nhsuk-input nhsuk-input--width-5" id="weather-postcode" type="text" value="HP52JU">
+              </div>
+              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-refresh-btn" style="margin:0">Refresh</button>
+            </div>
+            <div id="weather-strip">
+              <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>

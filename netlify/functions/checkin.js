@@ -30,7 +30,8 @@ export default async function handler(req) {
     mindfulness_meditation, mindfulness_yoga,
     supplements,
     outside_time, social_media, p, m, s,
-    notes
+    notes,
+    weather_postcode, weather_snapshot
   } = body
 
   if (!check_in_type || !check_in_date) {
@@ -38,11 +39,12 @@ export default async function handler(req) {
   }
 
   const hours_slept = calcHoursSlept(bedtime, wake_time)
+  const submitted_at = new Date().toISOString()
 
   const { data, error } = await supabase
     .from('check_ins')
     .insert([{
-      check_in_type, check_in_date,
+      check_in_type, check_in_date, submitted_at,
       bedtime, wake_time, hours_slept, sleep_quality,
       global_mood, focus_financial, focus_consulting, focus_opiner,
       exercised, exercise_types, session_count,
@@ -50,7 +52,8 @@ export default async function handler(req) {
       mindfulness_meditation, mindfulness_yoga,
       supplements,
       outside_time, social_media, p, m, s,
-      notes
+      notes,
+      weather_postcode, weather_snapshot
     }])
     .select()
     .single()
