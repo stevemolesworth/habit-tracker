@@ -9,11 +9,13 @@ const WMO_EMOJI = {
   95: '⛈️', 96: '⛈️', 99: '⛈️'
 }
 
+const SLOTS = [6, 8, 10, 12, 14, 16, 18, 20, 22]
+
 export function wmoEmoji(code) {
   return WMO_EMOJI[code] ?? '🌡️'
 }
 
-export async function fetchWeather(postcode) {
+export async function fetchWeather(postcode, date = null) {
   const clean = postcode.replace(/\s+/g, '').toUpperCase()
 
   const geoRes = await fetch(`https://api.postcodes.io/postcodes/${clean}`)
@@ -21,6 +23,18 @@ export async function fetchWeather(postcode) {
   const geo = await geoRes.json()
   const { latitude: lat, longitude: lng } = geo.result
 
+  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date())
+  const targetDate = date || todayStr
+  const isPast = targetDate < todayStr
+
+  if (isPast) {
+    return fetchHistoricalWeather(lat, lng, targetDate, clean)
+  } else {
+    return fetchForecastWeather(lat, lng, clean)
+  }
+}
+
+async function fetchForecastWeather(lat, lng, postcode) {
   const url = `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
     `&current=temperature_2m,weather_code` +
@@ -33,11 +47,8 @@ export async function fetchWeather(postcode) {
 
   const currentHour = new Date().getHours()
 
-  // 2-hourly slots covering the day
-  const slots = [6, 8, 10, 12, 14, 16, 18, 20, 22]
-  const hourly = slots.map(h => {
-    const timeStr = `T${String(h).padStart(2, '0')}:00`
-    const idx = wx.hourly.time.findIndex(t => t.endsWith(timeStr))
+  const hourly = SLOTS.map(h => {
+    const idx = wx.hourly.time.findIndex(t => t.endsWith(`T${String(h).padStart(2, '0')}:00`))
     if (idx === -1) return null
     return {
       time: `${String(h).padStart(2, '0')}:00`,
@@ -53,7 +64,40 @@ export async function fetchWeather(postcode) {
     code: wx.current.weather_code
   }
 
-  return { current, hourly, postcode: clean }
+  return { current, hourly, postcode }
+}
+
+async function fetchHistoricalWeather(lat, lng, date, postcode) {
+  const url = `https://archive-api.open-meteo.com/v1/archive` +
+    `?latitude=${lat}&longitude=${lng}` +
+    `&start_date=${date}&end_date=${date}` +
+    `&hourly=temperature_2m,weather_code` +
+    `&temperature_unit=celsius&timezone=Europe%2FLondon`
+
+  const wxRes = await fetch(url)
+  if (!wxRes.ok) throw new Error('Could not fetch historical weather')
+  const wx = await wxRes.json()
+
+  const hourly = SLOTS.map(h => {
+    const idx = wx.hourly.time.findIndex(t => t.endsWith(`T${String(h).padStart(2, '0')}:00`))
+    if (idx === -1) return null
+    return {
+      time: `${String(h).padStart(2, '0')}:00`,
+      hour: h,
+      temp: Math.round(wx.hourly.temperature_2m[idx]),
+      code: wx.hourly.weather_code[idx],
+      isForecast: false
+    }
+  }).filter(Boolean)
+
+  // Use noon as the representative 'current' reading for the day
+  const noonIdx = wx.hourly.time.findIndex(t => t.endsWith('T12:00'))
+  const ref = noonIdx !== -1 ? noonIdx : (hourly[0] ? wx.hourly.time.indexOf(`${date}T${hourly[0].time}`) : -1)
+  const current = ref !== -1
+    ? { temp: Math.round(wx.hourly.temperature_2m[ref]), code: wx.hourly.weather_code[ref] }
+    : { temp: null, code: null }
+
+  return { current, hourly, postcode }
 }
 
 export function buildWeatherStrip(weatherData, type) {
@@ -63,13 +107,11 @@ export function buildWeatherStrip(weatherData, type) {
   const cards = [weatherCard('Now', wmoEmoji(current.code), current.temp, false)]
 
   if (type === 'morning') {
-    // Show future 2-hourly slots from the next slot after now
     const nextSlotHour = currentHour % 2 === 0 ? currentHour + 2 : currentHour + (2 - currentHour % 2)
     hourly
       .filter(h => h.hour >= nextSlotHour)
       .forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, false)))
   } else {
-    // Evening: all slots — past is actual, future is forecast*
     hourly.forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)))
   }
 
@@ -92,6 +134,6 @@ function weatherCard(label, emoji, temp, isForecast) {
   return `<tr class="nhsuk-table__row"${style}>
     <td class="nhsuk-table__cell">${label}${marker}</td>
     <td class="nhsuk-table__cell">${emoji}</td>
-    <td class="nhsuk-table__cell">${temp}°C${marker}</td>
+    <td class="nhsuk-table__cell">${temp !== null ? `${temp}°C${marker}` : '—'}</td>
   </tr>`
 }
