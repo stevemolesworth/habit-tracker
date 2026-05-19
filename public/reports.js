@@ -201,15 +201,15 @@ function renderSleep(days, labels) {
 
 function renderFocus(days, labels) {
   mkChart('chart-focus', {
-    type: 'line',
+    type: 'bar',
     data: { labels, datasets: [
-      { ...LINE, label: 'Financial', data: days.map(d => d.focus_financial), borderColor: BLUE, backgroundColor: BLUE },
-      { ...LINE, label: 'Consulting', data: days.map(d => d.focus_consulting), borderColor: GREEN, backgroundColor: GREEN },
-      { ...LINE, label: 'Opiner', data: days.map(d => d.focus_opiner), borderColor: ORANGE, backgroundColor: ORANGE },
+      { label: 'Financial', data: days.map(d => d.focus_financial), backgroundColor: BLUE + 'cc',   borderRadius: 2 },
+      { label: 'Consulting', data: days.map(d => d.focus_consulting), backgroundColor: GREEN + 'cc',  borderRadius: 2 },
+      { label: 'Opiner',    data: days.map(d => d.focus_opiner),    backgroundColor: ORANGE + 'cc', borderRadius: 2 },
     ]},
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
+      scales: { x: { ...xAxis(labels), stacked: false }, y: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
       plugins: { legend: { display: true, position: 'top' }, tooltip: tooltipTitle(days) }
     }
   })
