@@ -255,9 +255,9 @@ function renderBoolRows(days) {
   suppNames.forEach(name => { html += boolRow(name, days, d => d.supplements?.[name] ?? null) })
   html += boolRow('Outside', days, d => d.outside_time)
   html += boolRow('Avoided social media', days, d => d.social_media)
-  html += boolRow('Avoided porn 🍑', days, d => d.p)
-  html += boolRow("Didn't masturbate 🍆💦", days, d => d.m)
-  html += boolRow('Had sex 🎆', days, d => d.s)
+  html += boolRow('Avoided p... 🍑', days, d => d.p)
+  html += boolRow("Didn't m... 🍆💦", days, d => d.m)
+  html += boolRow('Had s... 🎆', days, d => d.s)
 
   document.getElementById('bool-rows').innerHTML = html
 }
