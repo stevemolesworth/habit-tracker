@@ -1,5 +1,25 @@
 /* Custom overrides on top of NHS Design System */
 
+/* Loading spinner */
+.app-loader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+}
+.app-loader__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #f0f4f5;
+  border-top-color: #005eb8;
+  border-radius: 50%;
+  animation: app-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes app-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Global header */
 .app-global-header {
   background: #005eb8;

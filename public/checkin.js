@@ -341,7 +341,6 @@ function hideError() {
 
 // --- Init ---
 async function init() {
-  // Check for existing submission today
   try {
     existingRecord = await api.getTodayCheckin(type, today)
   } catch {
@@ -373,8 +372,9 @@ async function init() {
 
   await loadWeather()
 
-  // Set up dirty tracking after all population is complete
   setupDirtyTracking()
+  document.getElementById('page-loader').style.display = 'none'
+  document.getElementById('main-content-row').style.display = ''
 }
 
 init()
