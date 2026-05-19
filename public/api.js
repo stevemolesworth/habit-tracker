@@ -7,6 +7,7 @@ async function request(path, options = {}) {
     const err = await res.json().catch(() => ({ error: res.statusText }))
     throw new Error(err.error || res.statusText)
   }
+  if (res.status === 204) return null
   return res.json()
 }
 
@@ -14,6 +15,7 @@ export const api = {
   submitCheckin: (data) => request('/api/checkin', { method: 'POST', body: JSON.stringify(data) }),
   getCheckin: (id) => request(`/api/checkin/${id}`),
   updateCheckin: (id, data) => request(`/api/checkin/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteCheckin: (id) => request(`/api/checkin/${id}`, { method: 'DELETE' }),
   getCheckins: (month) => request(`/api/checkins${month ? `?month=${month}` : ''}`),
   getSupplements: () => request('/api/supplements'),
   addSupplement: (name) => request('/api/supplements', { method: 'POST', body: JSON.stringify({ name }) }),

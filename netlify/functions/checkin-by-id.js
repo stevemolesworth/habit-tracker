@@ -65,5 +65,18 @@ export default async function handler(req) {
     return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } })
   }
 
+  if (req.method === 'DELETE') {
+    const { error } = await supabase
+      .from('check_ins')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
+    }
+
+    return new Response(null, { status: 204 })
+  }
+
   return new Response('Method Not Allowed', { status: 405 })
 }

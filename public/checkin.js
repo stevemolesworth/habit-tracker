@@ -224,6 +224,31 @@ function relativeTime(isoStr) {
   return `${days} days ago`
 }
 
+// --- Delete ---
+document.getElementById('delete-btn').addEventListener('click', () => {
+  document.getElementById('delete-modal').style.display = 'flex'
+})
+
+document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('delete-modal').style.display = 'none'
+})
+
+document.getElementById('delete-confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('delete-confirm-btn')
+  btn.disabled = true
+  btn.textContent = 'Deleting…'
+  try {
+    await api.deleteCheckin(existingRecord.id)
+    isDirty = false
+    location.href = '/'
+  } catch (err) {
+    document.getElementById('delete-modal').style.display = 'none'
+    showError(`Could not delete: ${err.message}`)
+    btn.disabled = false
+    btn.textContent = 'Delete'
+  }
+})
+
 // --- Exercise toggle ---
 document.getElementById('exercised').addEventListener('change', (e) => {
   document.getElementById('exercise-details').style.display = e.target.checked ? '' : 'none'
@@ -320,6 +345,7 @@ async function init() {
     btn.disabled = true
     populateForm(existingRecord)
     showLastUpdated(existingRecord.submitted_at)
+    document.getElementById('delete-section').style.display = ''
   }
 
   // Load supplements (also re-populates from existing record)
