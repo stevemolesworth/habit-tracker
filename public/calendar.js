@@ -86,7 +86,10 @@ function showDayDetail(dateStr, entries) {
 
   title.textContent = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  content.innerHTML = entries.map(entry => {
+  const hasMorning = entries.some(e => e.check_in_type === 'morning')
+  const hasEvening = entries.some(e => e.check_in_type === 'evening')
+
+  const cards = entries.map(entry => {
     const typeLabel = entry.check_in_type === 'morning' ? 'Morning' : 'Evening'
     const badge = entry.check_in_type === 'morning'
       ? '<span class="app-badge app-badge--morning" style="font-size:0.75rem;padding:2px 6px">M</span>'
@@ -106,6 +109,13 @@ function showDayDetail(dateStr, entries) {
       </div>
     `
   }).join('')
+
+  const addButtons = [
+    !hasMorning ? `<a href="/?type=morning&date=${dateStr}" class="nhsuk-button nhsuk-button--secondary" style="margin-right:12px">Add morning check-in</a>` : '',
+    !hasEvening ? `<a href="/?type=evening&date=${dateStr}" class="nhsuk-button nhsuk-button--secondary">Add evening check-in</a>` : ''
+  ].filter(Boolean).join('')
+
+  content.innerHTML = cards + (addButtons ? `<div style="margin-top:8px">${addButtons}</div>` : '')
 
   panel.style.display = ''
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' })

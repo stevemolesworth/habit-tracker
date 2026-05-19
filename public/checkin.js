@@ -5,11 +5,15 @@ import { fetchWeather, buildWeatherStrip } from '/weather.js'
 const londonHour = parseInt(
   new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(new Date())
 )
-const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date())
+const todayLondon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date())
+
+// Allow a specific date to be passed (e.g. from calendar for past days)
+const params = new URLSearchParams(location.search)
+const today = params.get('date') || todayLondon
+const isPastDate = today !== todayLondon
 
 // Determine type: explicit ?type param → stored preference → time-based (17:00 cutoff)
-const params = new URLSearchParams(location.search)
-let type = params.get('type') || sessionStorage.getItem('checkin_type') || (londonHour < 17 ? 'morning' : 'evening')
+let type = params.get('type') || (!isPastDate && sessionStorage.getItem('checkin_type')) || (londonHour < 17 ? 'morning' : 'evening')
 if (params.get('type')) sessionStorage.setItem('checkin_type', type)
 
 const isMorning = type === 'morning'
