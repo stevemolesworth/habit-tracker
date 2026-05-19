@@ -330,6 +330,19 @@ async function loadReport() {
 
 // ── Init ──────────────────────────────────────────────────────
 
+function weekRange(offset = 0) {
+  const now = new Date()
+  const day = (now.getDay() + 6) % 7 // Monday = 0
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - day + offset * 7)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  return {
+    from: monday.toISOString().slice(0, 10),
+    to: sunday.toISOString().slice(0, 10)
+  }
+}
+
 function monthRange(offset = 0) {
   const now = new Date()
   const y = now.getFullYear()
@@ -343,10 +356,28 @@ function monthRange(offset = 0) {
 }
 
 function setActivePreset(id) {
-  ['preset-this-month', 'preset-last-month', 'preset-date-range'].forEach(bid => {
+  ['preset-this-week', 'preset-last-week', 'preset-this-month', 'preset-last-month', 'preset-date-range'].forEach(bid => {
     document.getElementById(bid).classList.toggle('nhsuk-button--active-preset', bid === id)
   })
 }
+
+document.getElementById('preset-this-week').addEventListener('click', () => {
+  const { from, to } = weekRange(0)
+  document.getElementById('date-range-inputs').style.display = 'none'
+  document.getElementById('date-from').value = from
+  document.getElementById('date-to').value = to
+  setActivePreset('preset-this-week')
+  loadReport()
+})
+
+document.getElementById('preset-last-week').addEventListener('click', () => {
+  const { from, to } = weekRange(-1)
+  document.getElementById('date-range-inputs').style.display = 'none'
+  document.getElementById('date-from').value = from
+  document.getElementById('date-to').value = to
+  setActivePreset('preset-last-week')
+  loadReport()
+})
 
 document.getElementById('preset-this-month').addEventListener('click', () => {
   const { from, to } = monthRange(0)
