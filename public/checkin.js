@@ -59,7 +59,7 @@ async function loadWeather() {
   strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>'
   try {
     currentWeatherData = await fetchWeather(postcode, today)
-    strip.innerHTML = buildWeatherStrip(currentWeatherData, isPastDate ? 'evening' : type)
+    strip.innerHTML = buildWeatherStrip(currentWeatherData, isPastDate ? 'evening' : type, !isPastDate)
     // If existing record, treat changed weather as a dirty signal
     if (existingRecord) {
       const postcodeChanged = currentWeatherData.postcode !== existingRecord.weather_postcode

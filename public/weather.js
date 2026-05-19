@@ -105,11 +105,12 @@ async function fetchHistoricalWeather(lat, lng, date, postcode) {
   return { current, hourly, postcode }
 }
 
-export function buildWeatherStrip(weatherData, type) {
+export function buildWeatherStrip(weatherData, type, showNow = true) {
   const { current, hourly } = weatherData
-  const currentHour = new Date().getHours()
 
-  const cards = [weatherCard('Now', wmoEmoji(current.code), current.temp, false)]
+  const cards = showNow
+    ? [weatherCard('Now', wmoEmoji(current.code), current.temp, false)]
+    : []
 
   hourly.forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)))
 
