@@ -72,6 +72,9 @@ function mergeDay(date, morning, evening) {
     exercised: evening?.exercised ?? morning?.exercised ?? null,
     exercise_types: evening?.exercise_types ?? morning?.exercise_types ?? null,
     alcohol: evening != null ? totalUnits(evening) : morning != null ? totalUnits(morning) : null,
+    alcohol_beer: evening != null ? Number(evening.alcohol_beer || 0) : morning != null ? Number(morning.alcohol_beer || 0) : null,
+    alcohol_wine: evening != null ? Number(evening.alcohol_wine || 0) : morning != null ? Number(morning.alcohol_wine || 0) : null,
+    alcohol_spirits: evening != null ? Number(evening.alcohol_spirits || 0) : morning != null ? Number(morning.alcohol_spirits || 0) : null,
     mindfulness_meditation: evening?.mindfulness_meditation ?? morning?.mindfulness_meditation ?? null,
     mindfulness_yoga: evening?.mindfulness_yoga ?? morning?.mindfulness_yoga ?? null,
     supplements: mergeSupplements(morning?.supplements, evening?.supplements),
@@ -215,18 +218,21 @@ function renderFocus(days, labels) {
 // ── Alcohol ───────────────────────────────────────────────────
 
 function renderAlcohol(days, labels) {
+  const val = (d, key) => d.alcohol === null ? null : d[key]
   mkChart('chart-alcohol', {
     type: 'bar',
-    data: { labels, datasets: [{
-      label: 'Units',
-      data: days.map(d => d.alcohol),
-      backgroundColor: days.map(d => d.alcohol === null ? 'transparent' : d.alcohol === 0 ? 'rgba(0,127,59,0.4)' : d.alcohol <= 2 ? 'rgba(232,133,12,0.65)' : 'rgba(213,40,27,0.65)'),
-      borderRadius: 2,
-    }]},
+    data: { labels, datasets: [
+      { label: 'Beer',    data: days.map(d => val(d, 'alcohol_beer')),    backgroundColor: 'rgba(212,160,23,0.85)',  borderRadius: 2 },
+      { label: 'Wine',    data: days.map(d => val(d, 'alcohol_wine')),    backgroundColor: 'rgba(148,37,66,0.85)',   borderRadius: 2 },
+      { label: 'Spirits', data: days.map(d => val(d, 'alcohol_spirits')), backgroundColor: 'rgba(0,94,184,0.8)',    borderRadius: 2 },
+    ]},
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: xAxis(labels), y: { min: 0, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
-      plugins: { legend: { display: false }, tooltip: tooltipTitle(days) }
+      scales: {
+        x: { ...xAxis(labels), stacked: true },
+        y: { min: 0, stacked: true, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } }
+      },
+      plugins: { legend: { display: true }, tooltip: tooltipTitle(days) }
     }
   })
 }
