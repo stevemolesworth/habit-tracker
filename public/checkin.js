@@ -104,7 +104,6 @@ function populateForm(record) {
       if (el) el.checked = true
     })
   }
-  setVal('session_count', record.session_count)
   setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
   setVal('alcohol_beer', record.alcohol_beer ?? 0)
   setVal('alcohol_wine', record.alcohol_wine ?? 0)
@@ -289,7 +288,6 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     focus_opiner: get('focus_opiner') ? Number(get('focus_opiner')) : null,
     exercised: bool('exercised'),
     exercise_types: exerciseTypes.length ? exerciseTypes : null,
-    session_count: get('session_count') ? Number(get('session_count')) : null,
     alcohol_spirits: Number(get('alcohol_spirits') || 0),
     alcohol_beer: Number(get('alcohol_beer') || 0),
     alcohol_wine: Number(get('alcohol_wine') || 0),
