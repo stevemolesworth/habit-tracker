@@ -77,63 +77,6 @@ document.getElementById('save-postcode-btn').addEventListener('click', async () 
   }
 })
 
-// ── Weights ──────────────────────────────────────────────────
-
-const weightKeys = ['mood', 'focus', 'sleep', 'exercise', 'mindfulness', 'alcohol', 'outside']
-
-function updateWeightDisplay() {
-  const values = weightKeys.map(k => Number(document.getElementById(`w-${k}`).value))
-  const total = values.reduce((a, b) => a + b, 0)
-  weightKeys.forEach((k, i) => {
-    document.getElementById(`wv-${k}`).textContent = `${values[i]}%`
-  })
-  document.getElementById('weights-total').textContent = total
-  document.getElementById('weights-total').style.color = total !== 100 ? '#d5281b' : 'inherit'
-}
-
-async function loadWeights() {
-  try {
-    const w = await api.getWeights()
-    document.getElementById('w-mood').value = Math.round(w.weight_mood * 100)
-    document.getElementById('w-focus').value = Math.round(w.weight_focus * 100)
-    document.getElementById('w-sleep').value = Math.round(w.weight_sleep * 100)
-    document.getElementById('w-exercise').value = Math.round(w.weight_exercise * 100)
-    document.getElementById('w-mindfulness').value = Math.round(w.weight_mindfulness * 100)
-    document.getElementById('w-alcohol').value = Math.round(w.weight_alcohol * 100)
-    document.getElementById('w-outside').value = Math.round(w.weight_outside * 100)
-    updateWeightDisplay()
-  } catch {
-    // silently use defaults already in HTML
-  }
-}
-
-weightKeys.forEach(k => {
-  document.getElementById(`w-${k}`).addEventListener('input', updateWeightDisplay)
-})
-
-document.getElementById('save-weights-btn').addEventListener('click', async () => {
-  const values = weightKeys.map(k => Number(document.getElementById(`w-${k}`).value))
-  const total = values.reduce((a, b) => a + b, 0)
-
-  if (total === 0) {
-    showFeedback('weights-feedback', 'Weights must sum to more than 0.', true)
-    return
-  }
-
-  // Normalise to sum = 1.0
-  const normalised = {}
-  weightKeys.forEach((k, i) => {
-    normalised[`weight_${k}`] = values[i] / total
-  })
-
-  try {
-    await api.updateWeights(normalised)
-    showFeedback('weights-feedback', 'Weights saved. Historical scores will recalculate automatically.')
-  } catch (err) {
-    showFeedback('weights-feedback', `Error: ${err.message}`, true)
-  }
-})
-
 // ── Helpers ───────────────────────────────────────────────────
 
 function showFeedback(id, msg, isError = false) {
@@ -148,4 +91,3 @@ function showFeedback(id, msg, isError = false) {
 
 loadPostcode()
 loadSupplements()
-loadWeights()

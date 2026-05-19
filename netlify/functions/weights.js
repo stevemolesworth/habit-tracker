@@ -20,14 +20,9 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
 
-    const numericFields = ['weight_mood', 'weight_focus', 'weight_sleep', 'weight_exercise', 'weight_mindfulness', 'weight_alcohol', 'weight_outside']
-    const stringFields = ['default_postcode']
     const update = {}
-    for (const key of numericFields) {
-      if (body[key] !== undefined) update[key] = Number(body[key])
-    }
-    for (const key of stringFields) {
-      if (body[key] !== undefined) update[key] = String(body[key]).replace(/\s+/g, '').toUpperCase()
+    if (body.default_postcode !== undefined) {
+      update.default_postcode = String(body.default_postcode).replace(/\s+/g, '').toUpperCase()
     }
     update.updated_at = new Date().toISOString()
 
