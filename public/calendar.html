@@ -8,12 +8,15 @@
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
-  <header class="nhsuk-header" role="banner">
+  <header class="app-global-header">
     <div class="nhsuk-width-container">
-      <div class="nhsuk-header__content">
-        <div class="nhsuk-header__logo">
-          <span class="nhsuk-header__link nhsuk-header__link--service-name">🐔 Chicken Check-In</span>
-        </div>
+      <div class="app-global-header__inner">
+        <a href="/" class="app-global-header__title">🐔 Chicken Check-In</a>
+        <nav class="app-global-header__nav" aria-label="Main navigation">
+          <a href="/">Check in</a>
+          <a href="/calendar.html">Calendar</a>
+          <a href="/reports.html">Reports</a>
+        </nav>
       </div>
     </div>
   </header>
@@ -22,12 +25,6 @@
     <main class="nhsuk-main-wrapper" id="maincontent">
       <div class="nhsuk-grid-row">
         <div class="nhsuk-grid-column-full">
-
-          <nav class="app-nav">
-            <a href="/">Check in</a>
-            <a href="/reports.html">Reports</a>
-            <a href="/settings.html">Settings</a>
-          </nav>
 
           <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
             <button class="nhsuk-button nhsuk-button--secondary" id="prev-month" style="margin:0">&#8249;</button>

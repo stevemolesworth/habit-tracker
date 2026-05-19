@@ -1,5 +1,53 @@
 /* Custom overrides on top of NHS Design System */
 
+/* Global header */
+.app-global-header {
+  background: #005eb8;
+  padding: 16px 0;
+}
+
+.app-global-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.app-global-header__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.app-global-header__nav {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.app-global-header__nav a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.app-global-header__nav a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .app-global-header__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 .app-section {
   margin-bottom: 32px;
   padding-bottom: 24px;
