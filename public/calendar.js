@@ -70,7 +70,9 @@ function renderGrid(checkins, year, month) {
         badges.insertAdjacentHTML('beforeend', '<span class="app-badge app-badge--evening">E</span>')
       }
       cell.appendChild(badges)
+    }
 
+    if (dateStr <= todayStr) {
       cell.addEventListener('click', () => showDayDetail(dateStr, entries))
       cell.style.cursor = 'pointer'
     }
