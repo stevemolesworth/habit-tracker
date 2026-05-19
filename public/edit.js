@@ -100,9 +100,7 @@ async function loadCheckin() {
     setInput('notes', checkin.notes)
 
     // Weather
-    const weatherSection = document.getElementById('weather-section')
     const weatherStrip = document.getElementById('weather-strip')
-    weatherSection.style.display = ''
     if (checkin.weather_snapshot?.hourly?.length) {
       weatherStrip.innerHTML = buildWeatherStrip(checkin.weather_snapshot, checkin.check_in_type)
     } else {
