@@ -13,7 +13,9 @@
   gap: 16px;
 }
 
-.app-global-header__title {
+.app-global-header__title,
+.app-global-header__title:link,
+.app-global-header__title:visited {
   font-size: 1.75rem;
   font-weight: 700;
   color: #fff;
