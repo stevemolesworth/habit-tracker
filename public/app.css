@@ -1,5 +1,10 @@
 /* Custom overrides on top of NHS Design System */
 
+/* Prevent NHS back-link CSS pseudo-element doubling up with the SVG icon */
+.nhsuk-back-link__link::before {
+  content: none;
+}
+
 /* Global header */
 .app-global-header {
   background: #005eb8;

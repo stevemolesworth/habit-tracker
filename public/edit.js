@@ -172,4 +172,27 @@ function hideError() {
   document.getElementById('error-banner').style.display = 'none'
 }
 
+document.getElementById('delete-btn').addEventListener('click', () => {
+  document.getElementById('delete-modal').style.display = 'flex'
+})
+
+document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('delete-modal').style.display = 'none'
+})
+
+document.getElementById('delete-confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('delete-confirm-btn')
+  btn.disabled = true
+  btn.textContent = 'Deleting…'
+  try {
+    await api.deleteCheckin(id)
+    location.href = '/calendar.html'
+  } catch (err) {
+    document.getElementById('delete-modal').style.display = 'none'
+    showError(`Could not delete: ${err.message}`)
+    btn.disabled = false
+    btn.textContent = 'Delete'
+  }
+})
+
 loadCheckin()

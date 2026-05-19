@@ -183,11 +183,27 @@
             </section>
 
             <button class="nhsuk-button" type="submit" id="submit-btn">Save changes</button>
+
+            <div style="margin-top:24px;padding-top:24px;border-top:1px solid #d8dde0">
+              <button class="nhsuk-button nhsuk-button--reverse" type="button" id="delete-btn">Delete this check-in</button>
+            </div>
           </form>
 
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:12px">Delete this check-in?</h2>
+      <p class="nhsuk-body">This will permanently remove all data recorded for this check-in. This cannot be undone.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button nhsuk-button--reverse" id="delete-confirm-btn" style="margin:0">Delete</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="delete-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/edit.js"></script>
