@@ -39,9 +39,15 @@
       <div class="nhsuk-grid-row">
         <div class="nhsuk-grid-column-two-thirds">
 
-          <div id="already-submitted-banner" class="nhsuk-inset-text" style="display:none">
-            <span class="nhsuk-u-visually-hidden">Information: </span>
-            <p class="nhsuk-body">Data for this check-in has already been submitted.</p>
+          <div id="already-submitted-banner" class="nhsuk-card nhsuk-card--warning" style="display:none">
+            <div class="nhsuk-card__content">
+              <h3 class="nhsuk-card__heading">
+                <span role="text">
+                  <span class="nhsuk-u-visually-hidden">Important: </span>Already submitted
+                </span>
+              </h3>
+              <p class="nhsuk-card__description">Data for this check-in has already been submitted. Any changes you make will update the existing record.</p>
+            </div>
           </div>
 
           <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" style="display:none">
