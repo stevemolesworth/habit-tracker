@@ -85,13 +85,13 @@ function renderMood(current, allCheckins) {
 
   const diff = currentMood - previous.global_mood
   if (diff > 0) {
-    deltaEl.textContent = `↑ Up ${diff} point${diff === 1 ? '' : 's'} on your previous mood rating`
+    deltaEl.textContent = `Up ${diff} point${diff === 1 ? '' : 's'} on your previous mood rating.`
     deltaEl.style.color = '#007f3b'
   } else if (diff < 0) {
-    deltaEl.textContent = `↓ Down ${Math.abs(diff)} point${Math.abs(diff) === 1 ? '' : 's'} on your previous mood rating`
+    deltaEl.textContent = `Down ${Math.abs(diff)} point${Math.abs(diff) === 1 ? '' : 's'} on your previous mood rating.`
     deltaEl.style.color = '#d5281b'
   } else {
-    deltaEl.textContent = '→ Same as your previous mood rating'
+    deltaEl.textContent = 'Same as your previous mood rating.'
   }
 }
 
