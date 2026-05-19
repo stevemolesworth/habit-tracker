@@ -106,14 +106,7 @@ export function buildWeatherStrip(weatherData, type) {
 
   const cards = [weatherCard('Now', wmoEmoji(current.code), current.temp, false)]
 
-  if (type === 'morning') {
-    const nextSlotHour = currentHour % 2 === 0 ? currentHour + 2 : currentHour + (2 - currentHour % 2)
-    hourly
-      .filter(h => h.hour >= nextSlotHour)
-      .forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, false)))
-  } else {
-    hourly.forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)))
-  }
+  hourly.forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)))
 
   const rows = cards.join('')
   return `<table class="nhsuk-table">
