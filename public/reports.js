@@ -71,6 +71,8 @@ function mergeDay(date, morning, evening) {
     focus_opiner: evening?.focus_opiner ?? null,
     exercised: evening?.exercised ?? morning?.exercised ?? null,
     exercise_types: evening?.exercise_types ?? morning?.exercise_types ?? null,
+    morning_id: morning?.id ?? null,
+    evening_id: evening?.id ?? null,
     alcohol: evening != null ? totalUnits(evening) : morning != null ? totalUnits(morning) : null,
     alcohol_beer: evening != null ? Number(evening.alcohol_beer || 0) : morning != null ? Number(morning.alcohol_beer || 0) : null,
     alcohol_wine: evening != null ? Number(evening.alcohol_wine || 0) : morning != null ? Number(morning.alcohol_wine || 0) : null,
@@ -119,6 +121,20 @@ function tooltipTitle(days) {
   return { callbacks: { title: items => fmtLong(days[items[0].dataIndex].date) } }
 }
 
+function dayHref(d) {
+  if (d.evening_id) return `/edit.html?id=${d.evening_id}`
+  if (d.morning_id) return `/edit.html?id=${d.morning_id}`
+  return null
+}
+
+function chartOnClick(days) {
+  return (evt, elements) => {
+    if (!elements.length) return
+    const href = dayHref(days[elements[0].index])
+    if (href) location.href = href
+  }
+}
+
 // ── Mood ──────────────────────────────────────────────────────
 
 function renderMood(days, labels) {
@@ -128,7 +144,8 @@ function renderMood(days, labels) {
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
-      plugins: { legend: { display: false }, tooltip: tooltipTitle(days) }
+      plugins: { legend: { display: false }, tooltip: tooltipTitle(days) },
+      onClick: chartOnClick(days)
     }
   })
 }
@@ -182,7 +199,8 @@ function renderSleep(days, labels) {
             return `${fmt(item.raw[0])} → ${fmt(item.raw[1])}`
           }
         }}
-      }
+      },
+      onClick: chartOnClick(days)
     }
   })
 
@@ -192,7 +210,8 @@ function renderSleep(days, labels) {
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: { x: xAxis(labels), y: { min: 0, suggestedMax: 10, ticks: { stepSize: 2 }, grid: { color: '#f0f4f5' } } },
-      plugins: { legend: { display: false }, tooltip: tooltipTitle(days) }
+      plugins: { legend: { display: false }, tooltip: tooltipTitle(days) },
+      onClick: chartOnClick(days)
     }
   })
 }
@@ -210,7 +229,8 @@ function renderFocus(days, labels) {
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: { x: { ...xAxis(labels), stacked: false }, y: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
-      plugins: { legend: { display: true, position: 'top' }, tooltip: tooltipTitle(days) }
+      plugins: { legend: { display: true, position: 'top' }, tooltip: tooltipTitle(days) },
+      onClick: chartOnClick(days)
     }
   })
 }
@@ -232,21 +252,23 @@ function renderAlcohol(days, labels) {
         x: { ...xAxis(labels), stacked: true },
         y: { min: 0, stacked: true, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } }
       },
-      plugins: { legend: { display: true }, tooltip: tooltipTitle(days) }
+      plugins: { legend: { display: true }, tooltip: tooltipTitle(days) },
+      onClick: chartOnClick(days)
     }
   })
 }
 
 // ── Boolean rows ──────────────────────────────────────────────
 
-function dot(value, invert, title) {
+function dot(value, invert, title, href) {
   const isYes = value !== null && value !== undefined && (invert ? !value : value)
   const cls = isYes ? 'app-bool-dot--true' : 'app-bool-dot--null'
+  if (href) return `<a href="${href}" class="app-bool-dot ${cls}" title="${title}"></a>`
   return `<span class="app-bool-dot ${cls}" title="${title}"></span>`
 }
 
 function boolRow(label, days, fn, invert = false) {
-  const dots = days.map(d => dot(fn(d), invert, fmtShort(d.date))).join('')
+  const dots = days.map(d => dot(fn(d), invert, fmtShort(d.date), dayHref(d))).join('')
   return `<div class="app-bool-row"><span class="app-bool-label">${label}</span><div class="app-bool-dots">${dots}</div></div>`
 }
 

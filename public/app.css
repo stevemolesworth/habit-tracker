@@ -237,6 +237,8 @@
 .app-bool-dot--true  { background: #007f3b; }
 .app-bool-dot--false { background: #d5281b; opacity: 0.45; }
 .app-bool-dot--null  { background: #f0f4f5; border: 1px solid #d8dde0; }
+a.app-bool-dot { cursor: pointer; text-decoration: none; display: block; }
+a.app-bool-dot:hover { opacity: 0.75; }
 
 /* Report — notes row */
 .app-notes-grid {
