@@ -29,8 +29,11 @@ let pendingNavContinue = null
 const dateStr = new Date().toLocaleDateString('en-GB', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London'
 })
-document.getElementById('page-heading').textContent =
-  `${isMorning ? 'Morning' : 'Evening'} check-in for today (${dateStr})`
+const dateCaption = isPastDate
+  ? new Date(today + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  : `Today (${dateStr})`
+document.getElementById('page-heading').innerHTML =
+  `${isMorning ? 'Morning' : 'Evening'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
 document.getElementById('toggle-morning').classList.toggle('active', isMorning)
 document.getElementById('toggle-evening').classList.toggle('active', !isMorning)
 

@@ -37,8 +37,9 @@ async function loadCheckin() {
 
     document.getElementById('loading-msg').style.display = 'none'
     document.getElementById('checkin-form').style.display = ''
-    document.getElementById('checkin-meta').textContent =
-      `${checkin.check_in_type === 'morning' ? 'Morning' : 'Evening'} • ${new Date(checkin.check_in_date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`
+    const dateFormatted = new Date(checkin.check_in_date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    document.getElementById('page-heading').innerHTML =
+      `${checkin.check_in_type === 'morning' ? 'Morning' : 'Evening'} check-in<span class="nhsuk-caption-l">${dateFormatted}</span>`
 
     // Sleep section
     const sleepSection = document.getElementById('sleep-section')
