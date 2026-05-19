@@ -24,31 +24,21 @@
         <div class="nhsuk-grid-column-two-thirds">
 
           <div class="nhsuk-panel nhsuk-panel--confirmation" style="margin-bottom:32px">
-            <h1 class="nhsuk-panel__title">Check-in saved</h1>
-            <div class="nhsuk-panel__body" id="panel-type">Morning check-in recorded</div>
+            <h1 class="nhsuk-panel__title" id="celebration-heading">Well done!</h1>
+            <div class="nhsuk-panel__body" id="status-message">Check-in recorded</div>
           </div>
 
-          <!-- Quote -->
-          <div class="nhsuk-card" style="margin-bottom:24px">
+          <div class="nhsuk-card" id="mood-card" style="display:none;margin-bottom:24px">
             <div class="nhsuk-card__content">
-              <p class="app-quote" id="quote-text">Loading…</p>
-              <p class="app-quote-author" id="quote-author"></p>
-            </div>
-          </div>
-
-          <!-- Score -->
-          <div class="nhsuk-card" id="score-card" style="display:none;margin-bottom:24px">
-            <div class="nhsuk-card__content">
-              <h2 class="nhsuk-heading-s">Your last score</h2>
-              <p class="app-score" id="score-value">—</p>
-              <p class="app-score-label" id="score-label"></p>
+              <h2 class="nhsuk-heading-s" style="margin-bottom:8px">Overall mood rating</h2>
+              <p class="app-score" id="mood-value" style="margin-bottom:4px">—</p>
+              <p class="app-score-label" id="mood-delta"></p>
             </div>
           </div>
 
           <nav class="app-nav" style="margin-top:24px">
-            <a href="/" class="nhsuk-button nhsuk-button--secondary">New check-in</a>
-            <a href="/calendar.html">Calendar</a>
-            <a href="/settings.html">Settings</a>
+            <a href="/" id="edit-link">Edit this check-in</a>
+            <a href="/reports.html">View reports</a>
           </nav>
 
         </div>
