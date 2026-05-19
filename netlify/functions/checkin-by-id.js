@@ -49,6 +49,7 @@ export default async function handler(req) {
     // Strip id from update payload if present
     delete body.id
     delete body.created_at
+    body.submitted_at = new Date().toISOString()
 
     const { data, error } = await supabase
       .from('check_ins')

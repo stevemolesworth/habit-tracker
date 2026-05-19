@@ -21,5 +21,6 @@ export const api = {
   getWeights: () => request('/api/weights'),
   updateWeights: (data) => request('/api/weights', { method: 'PUT', body: JSON.stringify(data) }),
   getRandomQuote: () => request('/api/quote-random'),
+  getTodayCheckin: (type, date) => request(`/api/today-checkin?type=${type}&date=${date}`),
   getReport: (from, to) => request(`/api/report?from=${from}&to=${to}`),
 }

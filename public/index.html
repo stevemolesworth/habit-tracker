@@ -43,6 +43,11 @@
       <div class="nhsuk-grid-row">
         <div class="nhsuk-grid-column-two-thirds">
 
+          <div id="already-submitted-banner" class="nhsuk-inset-text" style="display:none">
+            <span class="nhsuk-u-visually-hidden">Information: </span>
+            <p class="nhsuk-body">Data for this check-in has already been submitted.</p>
+          </div>
+
           <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" style="display:none">
             <h2 class="nhsuk-error-summary__title" id="error-summary-title">There was a problem</h2>
             <div class="nhsuk-error-summary__body">
@@ -249,6 +254,8 @@
             </section>
 
             <button class="nhsuk-button" type="submit" id="submit-btn">Submit check-in</button>
+
+            <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="display:none;margin-top:8px"></p>
           </form>
 
         </div>
@@ -269,6 +276,18 @@
 
       </div>
     </main>
+  </div>
+
+  <!-- Navigation guard modal -->
+  <div id="nav-guard-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:12px">You have unsaved changes</h2>
+      <p class="nhsuk-body">If you leave this page your changes will be lost.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button" id="nav-guard-cancel" style="margin:0">Cancel</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="nav-guard-continue" style="margin:0">Ignore changes and continue</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/checkin.js"></script>
