@@ -240,9 +240,8 @@ function renderAlcohol(days, labels) {
 // ── Boolean rows ──────────────────────────────────────────────
 
 function dot(value, invert, title) {
-  let cls
-  if (value === null || value === undefined) cls = 'app-bool-dot--null'
-  else cls = (invert ? !value : value) ? 'app-bool-dot--true' : 'app-bool-dot--false'
+  const isYes = value !== null && value !== undefined && (invert ? !value : value)
+  const cls = isYes ? 'app-bool-dot--true' : 'app-bool-dot--null'
   return `<span class="app-bool-dot ${cls}" title="${title}"></span>`
 }
 
@@ -266,37 +265,6 @@ function renderBoolRows(days) {
   html += boolRow('Had s... 🎆', days, d => d.s)
 
   document.getElementById('bool-rows').innerHTML = html
-}
-
-// ── Notes ─────────────────────────────────────────────────────
-
-function renderNotes(days) {
-  const cells = days.map(d => {
-    const m = d.morning_notes
-      ? `<button class="app-note-btn" data-date="${d.date}" data-type="morning" title="${fmtShort(d.date)} morning">🌅</button>`
-      : `<span class="app-note-empty"></span>`
-    const e = d.evening_notes
-      ? `<button class="app-note-btn" data-date="${d.date}" data-type="evening" title="${fmtShort(d.date)} evening">🌙</button>`
-      : `<span class="app-note-empty"></span>`
-    return `<div class="app-note-cell">${m}${e}</div>`
-  }).join('')
-
-  document.getElementById('notes-row').innerHTML = `<div class="app-notes-grid">${cells}</div>`
-
-  document.querySelectorAll('.app-note-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const day = days.find(d => d.date === btn.dataset.date)
-      const note = btn.dataset.type === 'morning' ? day.morning_notes : day.evening_notes
-      const label = btn.dataset.type === 'morning' ? '🌅 Morning' : '🌙 Evening'
-      openModal(`${fmtLong(btn.dataset.date)} — ${label}`, note)
-    })
-  })
-}
-
-function openModal(title, body) {
-  document.getElementById('notes-modal-title').textContent = title
-  document.getElementById('notes-modal-body').textContent = body
-  document.getElementById('notes-modal').style.display = 'flex'
 }
 
 // ── Load & render ─────────────────────────────────────────────
@@ -331,7 +299,6 @@ async function loadReport() {
     renderFocus(days, labels)
     renderAlcohol(days, labels)
     renderBoolRows(days)
-    renderNotes(days)
   } catch (err) {
     document.getElementById('report-loading').style.display = 'none'
     document.getElementById('report-error').style.display = ''
