@@ -87,6 +87,51 @@ function showFeedback(id, msg, isError = false) {
   setTimeout(() => { el.style.display = 'none' }, 4000)
 }
 
+// ── Delete range ─────────────────────────────────────────────
+
+function fmtDate(str) {
+  return new Date(str + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+document.getElementById('delete-range-btn').addEventListener('click', () => {
+  const from = document.getElementById('delete-from').value
+  const to = document.getElementById('delete-to').value
+  if (!from || !to) {
+    showFeedback('delete-range-feedback', 'Please select both a from and to date.', true)
+    return
+  }
+  if (from > to) {
+    showFeedback('delete-range-feedback', '"From" date must be on or before "To" date.', true)
+    return
+  }
+  document.getElementById('delete-range-summary').textContent =
+    `Delete all check-ins from ${fmtDate(from)} to ${fmtDate(to)}?`
+  document.getElementById('delete-range-modal').style.display = 'flex'
+})
+
+document.getElementById('delete-range-cancel-btn').addEventListener('click', () => {
+  document.getElementById('delete-range-modal').style.display = 'none'
+})
+
+document.getElementById('delete-range-confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('delete-range-confirm-btn')
+  btn.disabled = true
+  btn.textContent = 'Deleting…'
+  const from = document.getElementById('delete-from').value
+  const to = document.getElementById('delete-to').value
+  try {
+    const result = await api.deleteRange(from, to)
+    document.getElementById('delete-range-modal').style.display = 'none'
+    showFeedback('delete-range-feedback', `${result.deleted} check-in${result.deleted === 1 ? '' : 's'} deleted.`)
+  } catch (err) {
+    document.getElementById('delete-range-modal').style.display = 'none'
+    showFeedback('delete-range-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Delete'
+  }
+})
+
 // ── Init ──────────────────────────────────────────────────────
 
 loadPostcode()

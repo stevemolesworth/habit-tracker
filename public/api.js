@@ -25,4 +25,5 @@ export const api = {
   getRandomQuote: () => request('/api/quote-random'),
   getTodayCheckin: (type, date) => request(`/api/today-checkin?type=${type}&date=${date}`),
   getReport: (from, to) => request(`/api/report?from=${from}&to=${to}`),
+  deleteRange: (from, to) => request(`/api/delete-range?from=${from}&to=${to}`, { method: 'DELETE' }),
 }
