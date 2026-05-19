@@ -66,8 +66,8 @@ async function loadWeather() {
       const snapshotChanged = JSON.stringify(currentWeatherData.hourly) !== JSON.stringify(existingRecord.weather_snapshot?.hourly)
       if (postcodeChanged || snapshotChanged) markDirty()
     }
-  } catch (err) {
-    strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Could not load weather: ${err.message}</span>`
+  } catch {
+    strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${isPastDate ? 'Historic weather data not available' : 'Could not load weather'}</span>`
   }
 }
 
