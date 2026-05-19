@@ -73,15 +73,25 @@ export function buildWeatherStrip(weatherData, type) {
     hourly.forEach(h => cards.push(weatherCard(h.time, wmoEmoji(h.code), h.temp, h.isForecast)))
   }
 
-  return `<div style="display:inline-flex;gap:8px">${cards.join('')}</div>`
+  const rows = cards.join('')
+  return `<table class="nhsuk-table">
+    <thead class="nhsuk-table__head">
+      <tr class="nhsuk-table__row">
+        <th class="nhsuk-table__header" scope="col">Time</th>
+        <th class="nhsuk-table__header" scope="col">Condition</th>
+        <th class="nhsuk-table__header" scope="col">Temp</th>
+      </tr>
+    </thead>
+    <tbody class="nhsuk-table__body">${rows}</tbody>
+  </table>`
 }
 
 function weatherCard(label, emoji, temp, isForecast) {
-  const muted = isForecast ? 'color:#768692' : ''
+  const style = isForecast ? ' style="color:#768692"' : ''
   const marker = isForecast ? '*' : ''
-  return `<div style="display:inline-flex;flex-direction:column;align-items:center;min-width:52px;text-align:center;${muted}">
-    <span style="font-size:0.75rem">${label}${marker}</span>
-    <span style="font-size:1.25rem;line-height:1.4">${emoji}</span>
-    <span style="font-size:0.875rem">${temp}°C${marker}</span>
-  </div>`
+  return `<tr class="nhsuk-table__row"${style}>
+    <td class="nhsuk-table__cell">${label}${marker}</td>
+    <td class="nhsuk-table__cell">${emoji}</td>
+    <td class="nhsuk-table__cell">${temp}°C${marker}</td>
+  </tr>`
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Check in — Habit Tracker</title>
+  <title>Check in — 🐔 Chicken Check-In</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css">
   <link rel="stylesheet" href="/app.css">
 </head>
@@ -12,7 +12,7 @@
     <div class="nhsuk-width-container">
       <div class="nhsuk-header__content">
         <div class="nhsuk-header__logo">
-          <span class="nhsuk-header__link nhsuk-header__link--service-name">Habit Tracker</span>
+          <span class="nhsuk-header__link nhsuk-header__link--service-name">🐔 Chicken Check-In</span>
         </div>
       </div>
     </div>
@@ -25,12 +25,13 @@
 
           <nav class="app-nav">
             <a href="/calendar.html">Calendar</a>
+            <a href="/reports.html">Reports</a>
             <a href="/settings.html">Settings</a>
           </nav>
 
           <div class="app-type-toggle">
-            <a href="?type=morning" id="toggle-morning">Morning</a>
-            <a href="?type=evening" id="toggle-evening">Evening</a>
+            <a href="?type=morning" id="toggle-morning">☀️ Morning</a>
+            <a href="?type=evening" id="toggle-evening">🌙 Evening</a>
           </div>
 
           <h1 class="nhsuk-heading-xl" id="page-heading">Morning check-in</h1>
@@ -56,12 +57,12 @@
 
               <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
-                <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time">
+                <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time" value="21:00">
               </div>
 
               <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
-                <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time">
+                <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00">
               </div>
 
               <fieldset class="nhsuk-fieldset">
@@ -254,16 +255,15 @@
 
         <div class="nhsuk-grid-column-one-third">
           <div id="weather-widget">
-            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
-              <div class="nhsuk-form-group" style="margin:0;flex:1">
-                <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="weather-postcode">Postcode</label>
-                <input class="nhsuk-input nhsuk-input--width-5" id="weather-postcode" type="text" value="HP52JU">
-              </div>
-              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-refresh-btn" style="margin:0">Refresh</button>
-            </div>
+            <h2 class="app-section-title">Weather</h2>
             <div id="weather-strip">
               <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>
             </div>
+            <div class="nhsuk-form-group" style="margin-top:12px">
+              <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="weather-postcode">Postcode</label>
+              <input class="nhsuk-input nhsuk-input--width-5" id="weather-postcode" type="text" value="HP52JU">
+            </div>
+            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-refresh-btn" style="margin:0">Refresh</button>
           </div>
         </div>
 

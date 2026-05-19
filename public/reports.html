@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports — 🐔 Chicken Check-In</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="nhsuk-header" role="banner">
+    <div class="nhsuk-width-container">
+      <div class="nhsuk-header__content">
+        <div class="nhsuk-header__logo">
+          <span class="nhsuk-header__link nhsuk-header__link--service-name">🐔 Chicken Check-In</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="nhsuk-width-container">
+    <main class="nhsuk-main-wrapper" id="maincontent">
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-full">
+
+          <nav class="app-nav">
+            <a href="/">Check in</a>
+            <a href="/calendar.html">Calendar</a>
+            <a href="/reports.html">Reports</a>
+            <a href="/settings.html">Settings</a>
+          </nav>
+
+          <h1 class="nhsuk-heading-xl">Reports</h1>
+
+          <!-- Date range -->
+          <section class="app-section">
+            <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+              <div class="nhsuk-form-group" style="margin:0">
+                <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="date-from">From</label>
+                <input class="nhsuk-input nhsuk-input--width-10" id="date-from" type="date">
+              </div>
+              <div class="nhsuk-form-group" style="margin:0">
+                <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="date-to">To</label>
+                <input class="nhsuk-input nhsuk-input--width-10" id="date-to" type="date">
+              </div>
+              <button class="nhsuk-button" id="apply-btn" style="margin:0">Apply</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" data-preset="7">7 days</button>
+              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" data-preset="30">30 days</button>
+              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" data-preset="90">90 days</button>
+            </div>
+          </section>
+
+          <div id="report-loading" style="display:none">
+            <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading…</p>
+          </div>
+
+          <div id="report-error" class="nhsuk-error-summary" aria-labelledby="report-error-title" role="alert" style="display:none">
+            <h2 class="nhsuk-error-summary__title" id="report-error-title">There was a problem</h2>
+            <div class="nhsuk-error-summary__body"><p id="report-error-msg"></p></div>
+          </div>
+
+          <div id="report-empty" style="display:none">
+            <p class="nhsuk-body nhsuk-u-secondary-text-color">No check-ins found for this date range.</p>
+          </div>
+
+          <div id="report-content" style="display:none">
+
+            <!-- Mood -->
+            <section class="app-section">
+              <h2 class="app-section-title">Mood</h2>
+              <p class="nhsuk-hint">1 = Poor, 5 = Excellent. Evening reading used where available.</p>
+              <div style="height:200px"><canvas id="chart-mood"></canvas></div>
+            </section>
+
+            <!-- Sleep -->
+            <section class="app-section">
+              <h2 class="app-section-title">Sleep</h2>
+              <p class="nhsuk-hint">Bar colour: <span style="color:#007f3b">■</span> Good &nbsp;<span style="color:#e8850c">■</span> Average &nbsp;<span style="color:#d5281b">■</span> Bad &nbsp;<span style="color:#005eb8">■</span> No rating</p>
+              <div style="height:220px"><canvas id="chart-sleep-timeline"></canvas></div>
+              <p class="nhsuk-hint" style="margin-top:12px">Hours slept</p>
+              <div style="height:140px"><canvas id="chart-sleep-hours"></canvas></div>
+            </section>
+
+            <!-- Focus -->
+            <section class="app-section">
+              <h2 class="app-section-title">Focus</h2>
+              <p class="nhsuk-hint">1 = Poor, 5 = Excellent. Evening check-in only.</p>
+              <div style="height:200px"><canvas id="chart-focus"></canvas></div>
+            </section>
+
+            <!-- Alcohol -->
+            <section class="app-section">
+              <h2 class="app-section-title">Alcohol</h2>
+              <p class="nhsuk-hint">Total units per day (spirits + beer + wine).</p>
+              <div style="height:180px"><canvas id="chart-alcohol"></canvas></div>
+            </section>
+
+            <!-- Habits & behaviours -->
+            <section class="app-section">
+              <h2 class="app-section-title">Habits &amp; behaviours</h2>
+              <p class="nhsuk-hint"><span style="display:inline-block;width:12px;height:12px;background:#007f3b;border-radius:2px;vertical-align:middle"></span> Yes &nbsp;<span style="display:inline-block;width:12px;height:12px;background:#d5281b;opacity:0.5;border-radius:2px;vertical-align:middle"></span> No &nbsp;<span style="display:inline-block;width:12px;height:12px;background:#f0f4f5;border:1px solid #d8dde0;border-radius:2px;vertical-align:middle"></span> No data</p>
+              <div id="bool-rows"></div>
+            </section>
+
+            <!-- Notes -->
+            <section class="app-section">
+              <h2 class="app-section-title">Notes</h2>
+              <p class="nhsuk-hint">Click 🌅 or 🌙 to read a note.</p>
+              <div id="notes-row"></div>
+            </section>
+
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Notes modal -->
+  <div id="notes-modal" role="dialog" aria-modal="true" aria-labelledby="notes-modal-title" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:#fff;padding:32px;max-width:520px;width:90%;border-radius:4px;position:relative;max-height:80vh;overflow-y:auto">
+      <button id="notes-modal-close" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#4c6272;line-height:1" aria-label="Close">×</button>
+      <h2 class="nhsuk-heading-m" id="notes-modal-title"></h2>
+      <p id="notes-modal-body" class="nhsuk-body" style="white-space:pre-wrap;margin:0"></p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script type="module" src="/reports.js"></script>
+</body>
+</html>
