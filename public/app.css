@@ -139,7 +139,8 @@
 
 .app-calendar__day-number {
   display: block;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 400;
   margin-bottom: 2px;
 }
 
@@ -303,6 +304,6 @@ a.app-bool-dot:hover { opacity: 0.75; }
     padding: 2px;
   }
   .app-calendar__day-number {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
   }
 }
