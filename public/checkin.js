@@ -22,10 +22,11 @@ let bypassGuard = false
 let pendingNavContinue = null
 
 // --- Static DOM setup ---
-document.getElementById('page-heading').textContent = `${isMorning ? 'Morning' : 'Evening'} check-in`
-document.getElementById('checkin-date').textContent = new Date().toLocaleDateString('en-GB', {
+const dateStr = new Date().toLocaleDateString('en-GB', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London'
 })
+document.getElementById('page-heading').textContent =
+  `${isMorning ? 'Morning' : 'Evening'} check-in for today (${dateStr})`
 document.getElementById('toggle-morning').classList.toggle('active', isMorning)
 document.getElementById('toggle-evening').classList.toggle('active', !isMorning)
 
