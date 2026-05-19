@@ -124,7 +124,7 @@ function tooltipTitle(days) {
 function renderMood(days, labels) {
   mkChart('chart-mood', {
     type: 'line',
-    data: { labels, datasets: [{ ...LINE, label: 'Mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE }] },
+    data: { labels, datasets: [{ ...LINE, tension: 0.4, spanGaps: true, label: 'Mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
