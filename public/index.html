@@ -12,9 +12,11 @@
     <div id="app-splash" class="app-splash">
       <div class="app-splash__overlay" id="splash-loading">
         <h1 class="app-splash__text">🐔<br />Chicken Check-In</h1>
-        <p class="app-splash__text">Hold tight — data is being loaded</p>
+        <p class="app-splash__subtext">Hold tight — data is being loaded</p>
         <div class="app-splash__spinner"></div>
-        <a href="/login.html?logout=1" class="app-splash__skip" style="margin-top: 24px; color: rgba(255, 255, 255, 0.75)">Cancel and sign out</a>
+        <p class="nhsuk-body">
+          <a href="/login.html?logout=1" class="app-splash__skip" style="margin-top: 24px; color: rgba(255, 255, 255, 0.75)">Cancel and sign out</a>
+        </p>
       </div>
       <div class="app-splash__overlay" id="splash-welcome" style="display: none">
         <p class="app-splash__text">👋<br />It looks like you're new here!</p>
@@ -92,23 +94,23 @@
                 </div>
 
                 <div class="nhsuk-form-group">
-                <fieldset class="nhsuk-fieldset">
-                  <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
-                  <div class="nhsuk-radios nhsuk-radios--inline" id="sleep_quality">
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0" />
-                      <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
+                  <fieldset class="nhsuk-fieldset">
+                    <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
+                    <div class="nhsuk-radios nhsuk-radios--inline" id="sleep_quality">
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="sq-2" name="sleep_quality" type="radio" value="2" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="sq-2">Average</label>
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="sq-3" name="sleep_quality" type="radio" value="3" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="sq-3">Good</label>
+                      </div>
                     </div>
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="sq-2" name="sleep_quality" type="radio" value="2" />
-                      <label class="nhsuk-label nhsuk-radios__label" for="sq-2">Average</label>
-                    </div>
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="sq-3" name="sleep_quality" type="radio" value="3" />
-                      <label class="nhsuk-label nhsuk-radios__label" for="sq-3">Good</label>
-                    </div>
-                  </div>
-                </fieldset>
+                  </fieldset>
                 </div>
               </section>
 
@@ -117,47 +119,47 @@
                 <h2 class="nhsuk-heading-m">Mood</h2>
 
                 <div class="nhsuk-form-group">
-                <fieldset class="nhsuk-fieldset" aria-describedby="mood-hint">
-                  <legend class="nhsuk-fieldset__legend nhsuk-label">Overall mood</legend>
-                  <div class="nhsuk-hint" id="mood-hint">1 = Poor, 5 = Excellent</div>
-                  <div class="nhsuk-radios nhsuk-radios--inline">
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1" tabindex="0" /><label
-                        class="nhsuk-label nhsuk-radios__label"
-                        for="gm-1"
-                        >1</label
-                      >
+                  <fieldset class="nhsuk-fieldset" aria-describedby="mood-hint">
+                    <legend class="nhsuk-fieldset__legend nhsuk-label">Overall mood</legend>
+                    <div class="nhsuk-hint" id="mood-hint">1 = Poor, 5 = Excellent</div>
+                    <div class="nhsuk-radios nhsuk-radios--inline">
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1" tabindex="0" /><label
+                          class="nhsuk-label nhsuk-radios__label"
+                          for="gm-1"
+                          >1</label
+                        >
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-2" name="global_mood" type="radio" value="2" /><label
+                          class="nhsuk-label nhsuk-radios__label"
+                          for="gm-2"
+                          >2</label
+                        >
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-3" name="global_mood" type="radio" value="3" /><label
+                          class="nhsuk-label nhsuk-radios__label"
+                          for="gm-3"
+                          >3</label
+                        >
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-4" name="global_mood" type="radio" value="4" /><label
+                          class="nhsuk-label nhsuk-radios__label"
+                          for="gm-4"
+                          >4</label
+                        >
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-5" name="global_mood" type="radio" value="5" /><label
+                          class="nhsuk-label nhsuk-radios__label"
+                          for="gm-5"
+                          >5</label
+                        >
+                      </div>
                     </div>
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="gm-2" name="global_mood" type="radio" value="2" /><label
-                        class="nhsuk-label nhsuk-radios__label"
-                        for="gm-2"
-                        >2</label
-                      >
-                    </div>
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="gm-3" name="global_mood" type="radio" value="3" /><label
-                        class="nhsuk-label nhsuk-radios__label"
-                        for="gm-3"
-                        >3</label
-                      >
-                    </div>
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="gm-4" name="global_mood" type="radio" value="4" /><label
-                        class="nhsuk-label nhsuk-radios__label"
-                        for="gm-4"
-                        >4</label
-                      >
-                    </div>
-                    <div class="nhsuk-radios__item">
-                      <input class="nhsuk-radios__input" id="gm-5" name="global_mood" type="radio" value="5" /><label
-                        class="nhsuk-label nhsuk-radios__label"
-                        for="gm-5"
-                        >5</label
-                      >
-                    </div>
-                  </div>
-                </fieldset>
+                  </fieldset>
                 </div>
               </section>
 
@@ -184,19 +186,19 @@
                 </div>
 
                 <div class="nhsuk-form-group" id="exercise-details" style="display: none">
-                <fieldset class="nhsuk-fieldset">
-                  <legend class="nhsuk-fieldset__legend nhsuk-label">Type(s)</legend>
-                  <div class="nhsuk-checkboxes">
-                    <div class="nhsuk-checkboxes__item">
-                      <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0" />
-                      <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin, swimming)</label>
+                  <fieldset class="nhsuk-fieldset">
+                    <legend class="nhsuk-fieldset__legend nhsuk-label">Type(s)</legend>
+                    <div class="nhsuk-checkboxes">
+                      <div class="nhsuk-checkboxes__item">
+                        <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0" />
+                        <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin, swimming)</label>
+                      </div>
+                      <div class="nhsuk-checkboxes__item">
+                        <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" tabindex="0" />
+                        <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
+                      </div>
                     </div>
-                    <div class="nhsuk-checkboxes__item">
-                      <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" tabindex="0" />
-                      <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
-                    </div>
-                  </div>
-                </fieldset>
+                  </fieldset>
                 </div>
               </section>
 
