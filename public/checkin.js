@@ -25,6 +25,18 @@ let existingRecord = null
 let currentLocation = null  // { lat, lng, label }
 let currentWeatherData = null
 let isDirty = false
+const dirtyCategories = new Set()
+
+const FIELD_CATEGORY = {
+  bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
+  global_mood: 'Mood',
+  focus_financial: 'Focus', focus_consulting: 'Focus', focus_opiner: 'Focus',
+  exercised: 'Exercise', exercise_types: 'Exercise',
+  alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
+  supplement: 'Supplements',
+  behaviour: 'Behaviours',
+  notes: 'Notes'
+}
 let bypassGuard = false
 let pendingNavContinue = null
 
@@ -264,24 +276,27 @@ document.getElementById('bedtime').addEventListener('change', updateSleepDuratio
 document.getElementById('wake_time').addEventListener('change', updateSleepDuration)
 
 // --- Dirty tracking ---
-function markDirty() {
+function markDirty(fieldName) {
+  const cat = FIELD_CATEGORY[fieldName]
+  if (cat) dirtyCategories.add(cat)
   if (isDirty) return
   isDirty = true
   if (existingRecord) {
-    const btn = document.getElementById('submit-btn')
-    btn.disabled = false
+    document.getElementById('submit-btn').disabled = false
   }
 }
 
 function setupDirtyTracking() {
   const form = document.getElementById('checkin-form')
-  form.addEventListener('input', markDirty)
-  form.addEventListener('change', markDirty)
+  form.addEventListener('input', e => markDirty(e.target.name || e.target.id))
+  form.addEventListener('change', e => markDirty(e.target.name || e.target.id))
 }
 
 // --- Navigation guard ---
 function showNavGuard(onContinue) {
   pendingNavContinue = onContinue
+  const list = document.getElementById('nav-guard-changes')
+  list.innerHTML = [...dirtyCategories].map(c => `<li>${c}</li>`).join('')
   document.getElementById('nav-guard-modal').style.display = 'flex'
 }
 

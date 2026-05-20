@@ -283,7 +283,8 @@
   <div id="nav-guard-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
     <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
       <h2 class="nhsuk-heading-m" style="margin-bottom:12px">You have unsaved changes</h2>
-      <p class="nhsuk-body">If you leave this page your changes will be lost.</p>
+      <p class="nhsuk-body" style="margin-bottom:4px">If you leave this page your changes will be lost:</p>
+      <ul class="nhsuk-list nhsuk-list--bullet" id="nav-guard-changes" style="margin-bottom:0"></ul>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
         <button class="nhsuk-button" id="nav-guard-cancel" style="margin:0">Cancel</button>
         <button class="nhsuk-button nhsuk-button--secondary" id="nav-guard-continue" style="margin:0">Disregard and continue</button>
