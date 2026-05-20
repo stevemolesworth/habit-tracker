@@ -34,13 +34,15 @@
 
         <div class="nhsuk-grid-row">
           <div class="nhsuk-grid-column-two-thirds">
-
             <!-- Focuses -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Focuses</h2>
               <p class="nhsuk-body">
-                These appear as 1–5 rating fields on every end of day check-in. Deactivate a focus to hide it from new check-ins while preserving historical data.
+                Focuses are the broad areas of your life you want to improve or pay attention to — things like friends and family, work, home admin, financial
+                management, or staying calm.
               </p>
+              <p>At the end of each day, you'll be asked to rate how well you focused on each one, on a scale of 1 to 5.</p>
+              <p>Deactivating a focus hides it from future check-ins but keeps your historical data intact.</p>
 
               <ul class="nhsuk-list" id="focus-list">
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
@@ -48,10 +50,10 @@
 
               <div class="nhsuk-u-margin-top-3">
                 <div class="nhsuk-form-group">
-                  <label class="nhsuk-label" for="new-focus">Add focus</label>
+                  <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-focus">Add focus</label>
                   <input class="nhsuk-input nhsuk-input--width-20" id="new-focus" type="text" placeholder="e.g. Deep work" />
                 </div>
-                <button class="nhsuk-button" id="add-focus-btn">Add</button>
+                <button class="nhsuk-button" id="add-focus-btn">Add focus</button>
               </div>
               <p id="focus-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
@@ -59,7 +61,12 @@
             <!-- Behaviours -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Behaviours</h2>
-              <p class="nhsuk-body">These appear as checkboxes on every end of day check-in. Assign a weight to indicate how good or bad the behaviour is.</p>
+              <p class="nhsuk-body">
+                Behaviours are habits or actions you want to track — things you did or didn't do during the day. They can be positive (like reading or getting
+                outside) or negative (like eating chocolate or doom-scrolling).
+              </p>
+              <p>Each check-in, you simply tick the ones that applied to your day.</p>
+              <p>When creating a behaviour, give it a label and an impact score to reflect how good or bad it is for you.</p>
 
               <ul class="nhsuk-list" id="behaviour-list">
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
@@ -68,7 +75,7 @@
               <div class="nhsuk-u-margin-top-3">
                 <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap">
                   <div class="nhsuk-form-group" style="margin: 0">
-                    <label class="nhsuk-label" for="new-behaviour">Add behaviour</label>
+                    <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-behaviour nhsuk-u-visually-hidden">Add behaviour</label>
                     <input class="nhsuk-input nhsuk-input--width-20" id="new-behaviour" type="text" placeholder="e.g. Read a book" />
                   </div>
                   <div class="nhsuk-form-group" style="margin: 0; min-width: 320px">
@@ -80,7 +87,7 @@
                     </div>
                   </div>
                 </div>
-                <button class="nhsuk-button nhsuk-u-margin-top-3" id="add-behaviour-btn">Add</button>
+                <button class="nhsuk-button nhsuk-u-margin-top-3" id="add-behaviour-btn">Add behaviour</button>
               </div>
               <p id="behaviour-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
@@ -88,7 +95,8 @@
             <!-- Supplements -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Supplements</h2>
-              <p class="nhsuk-body">These appear as checkboxes on every check-in.</p>
+              <p class="nhsuk-body">Supplements are vitamins, minerals, or other health products you take regularly and want to keep track of.</p>
+              <p>Add the ones that are part of your routine, and each day you'll be asked to confirm whether you took them.</p>
 
               <ul class="nhsuk-list" id="supplement-list">
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
@@ -96,14 +104,13 @@
 
               <div class="nhsuk-u-margin-top-3">
                 <div class="nhsuk-form-group">
-                  <label class="nhsuk-label" for="new-supplement">Add supplement</label>
+                  <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-supplement">Add supplement</label>
                   <input class="nhsuk-input nhsuk-input--width-20" id="new-supplement" type="text" placeholder="e.g. Vitamin D" />
                 </div>
-                <button class="nhsuk-button" id="add-supplement-btn">Add</button>
+                <button class="nhsuk-button" id="add-supplement-btn">Add supplement</button>
               </div>
               <p id="supp-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
-
           </div>
 
           <div class="nhsuk-grid-column-one-third">
@@ -120,35 +127,71 @@
     </div>
 
     <!-- Supplement edit modal -->
-    <div id="supplement-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+    <div
+      id="supplement-edit-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 440px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
         <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit supplement</h2>
         <div class="nhsuk-form-group">
           <label class="nhsuk-label" for="edit-supplement-name">Name</label>
           <input class="nhsuk-input" id="edit-supplement-name" type="text" />
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-          <button class="nhsuk-button" id="supplement-edit-save-btn" style="margin:0">Save</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="supplement-edit-cancel-btn" style="margin:0">Cancel</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button" id="supplement-edit-save-btn" style="margin: 0">Save</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="supplement-edit-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>
     </div>
 
     <!-- Supplement delete confirm modal -->
-    <div id="supplement-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+    <div
+      id="supplement-delete-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 420px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
         <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove supplement?</h2>
         <p class="nhsuk-body" id="supplement-delete-summary"></p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-          <button class="nhsuk-button nhsuk-button--warning" id="supplement-delete-confirm-btn" style="margin:0">Remove</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="supplement-delete-cancel-btn" style="margin:0">Cancel</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="supplement-delete-confirm-btn" style="margin: 0">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="supplement-delete-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>
     </div>
 
     <!-- Behaviour edit modal -->
-    <div id="behaviour-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+    <div
+      id="behaviour-edit-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 440px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
         <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit behaviour</h2>
         <div class="nhsuk-form-group">
           <label class="nhsuk-label" for="edit-behaviour-name">Name</label>
@@ -156,57 +199,93 @@
         </div>
         <div class="nhsuk-form-group">
           <label class="nhsuk-label" for="edit-behaviour-weight">Weight: <span id="edit-behaviour-weight-label"></span></label>
-          <div style="display:flex;align-items:center;gap:8px">
+          <div style="display: flex; align-items: center; gap: 8px">
             <span>💩</span>
-            <input type="range" id="edit-behaviour-weight" min="-3" max="3" step="1" style="flex:1" />
+            <input type="range" id="edit-behaviour-weight" min="-3" max="3" step="1" style="flex: 1" />
             <span>👍</span>
           </div>
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-          <button class="nhsuk-button" id="behaviour-edit-save-btn" style="margin:0">Save</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-edit-cancel-btn" style="margin:0">Cancel</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button" id="behaviour-edit-save-btn" style="margin: 0">Save</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-edit-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>
     </div>
 
     <!-- Behaviour delete confirm modal -->
-    <div id="behaviour-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+    <div
+      id="behaviour-delete-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 420px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
         <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove behaviour?</h2>
         <p class="nhsuk-body" id="behaviour-delete-summary"></p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-          <button class="nhsuk-button nhsuk-button--warning" id="behaviour-delete-confirm-btn" style="margin:0">Remove</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-delete-cancel-btn" style="margin:0">Cancel</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="behaviour-delete-confirm-btn" style="margin: 0">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-delete-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>
     </div>
 
     <!-- Focus edit modal -->
-    <div id="focus-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+    <div
+      id="focus-edit-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 440px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
         <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit focus</h2>
         <div class="nhsuk-form-group">
           <label class="nhsuk-label" for="edit-focus-title">Title</label>
           <input class="nhsuk-input" id="edit-focus-title" type="text" />
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-          <button class="nhsuk-button" id="focus-edit-save-btn" style="margin:0">Save</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="focus-edit-cancel-btn" style="margin:0">Cancel</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button" id="focus-edit-save-btn" style="margin: 0">Save</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="focus-edit-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>
     </div>
 
     <!-- Focus delete confirm modal -->
-    <div id="focus-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+    <div
+      id="focus-delete-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 440px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
         <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove focus?</h2>
         <p class="nhsuk-body" id="focus-delete-summary"></p>
         <p class="nhsuk-body-s nhsuk-u-secondary-text-color">
           This will permanently remove the focus and delete its scores from all past check-ins. This cannot be undone.
         </p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-          <button class="nhsuk-button nhsuk-button--warning" id="focus-delete-confirm-btn" style="margin:0">Remove</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="focus-delete-cancel-btn" style="margin:0">Cancel</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="focus-delete-confirm-btn" style="margin: 0">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="focus-delete-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>
     </div>
