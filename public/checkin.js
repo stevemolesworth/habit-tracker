@@ -149,7 +149,6 @@ document.getElementById('weather-geo-btn').addEventListener('click', () => {
   })
 })
 
-document.getElementById('weather-refresh-btn').addEventListener('click', loadWeather)
 
 // --- Form population from existing record ---
 function populateForm(record) {
