@@ -20,8 +20,8 @@ async function loadBehaviours() {
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${b.name} <span class="nhsuk-u-secondary-text-color nhsuk-body-s">(${weightLabel(b.weight)})</span></span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editBehaviour('${b.id}', ${JSON.stringify(b.name)}, ${b.weight})">Edit</button>
-          <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteBehaviour('${b.id}', ${JSON.stringify(b.name)})">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})">Edit</button>
+          <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
         </div>
       </li>
     `).join('')
