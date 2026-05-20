@@ -17,9 +17,12 @@ async function loadBehaviours() {
       return
     }
     list.innerHTML = behaviours.map(b => `
-      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${b.name} <span class="nhsuk-u-secondary-text-color nhsuk-body-s">(${weightLabel(b.weight)})</span></span>
-        <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="deleteBehaviour('${b.id}')">Remove</button>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editBehaviour('${b.id}', ${JSON.stringify(b.name)}, ${b.weight})">Edit</button>
+          <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteBehaviour('${b.id}', ${JSON.stringify(b.name)})">Remove</button>
+        </div>
       </li>
     `).join('')
   } catch {
@@ -27,12 +30,80 @@ async function loadBehaviours() {
   }
 }
 
-window.deleteBehaviour = async function(id) {
+// ── Edit modal ────────────────────────────────────────────────
+
+let editingBehaviourId = null
+
+window.editBehaviour = function(id, name, weight) {
+  editingBehaviourId = id
+  document.getElementById('edit-behaviour-name').value = name
+  const slider = document.getElementById('edit-behaviour-weight')
+  slider.value = weight
+  document.getElementById('edit-behaviour-weight-label').textContent = weight > 0 ? `+${weight}` : `${weight}`
+  document.getElementById('behaviour-edit-modal').style.display = 'flex'
+}
+
+document.getElementById('edit-behaviour-weight').addEventListener('input', (e) => {
+  const v = Number(e.target.value)
+  document.getElementById('edit-behaviour-weight-label').textContent = v > 0 ? `+${v}` : `${v}`
+})
+
+document.getElementById('behaviour-edit-cancel-btn').addEventListener('click', () => {
+  document.getElementById('behaviour-edit-modal').style.display = 'none'
+  editingBehaviourId = null
+})
+
+document.getElementById('behaviour-edit-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('edit-behaviour-name').value.trim()
+  const weight = Number(document.getElementById('edit-behaviour-weight').value)
+  if (!name) return
+  const btn = document.getElementById('behaviour-edit-save-btn')
+  btn.disabled = true
+  btn.textContent = 'Saving…'
   try {
-    await api.deleteBehaviour(id)
+    await api.updateBehaviour(editingBehaviourId, name, weight)
+    document.getElementById('behaviour-edit-modal').style.display = 'none'
+    editingBehaviourId = null
+    showFeedback('behaviour-feedback', 'Behaviour updated.')
     loadBehaviours()
   } catch (err) {
     showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Save'
+  }
+})
+
+// ── Delete confirm modal ──────────────────────────────────────
+
+let deletingBehaviourId = null
+
+window.confirmDeleteBehaviour = function(id, name) {
+  deletingBehaviourId = id
+  document.getElementById('behaviour-delete-summary').textContent = `Remove "${name}" from your behaviours list?`
+  document.getElementById('behaviour-delete-modal').style.display = 'flex'
+}
+
+document.getElementById('behaviour-delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('behaviour-delete-modal').style.display = 'none'
+  deletingBehaviourId = null
+})
+
+document.getElementById('behaviour-delete-confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('behaviour-delete-confirm-btn')
+  btn.disabled = true
+  btn.textContent = 'Removing…'
+  try {
+    await api.deleteBehaviour(deletingBehaviourId)
+    document.getElementById('behaviour-delete-modal').style.display = 'none'
+    deletingBehaviourId = null
+    loadBehaviours()
+  } catch (err) {
+    document.getElementById('behaviour-delete-modal').style.display = 'none'
+    showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Remove'
   }
 }
 
@@ -62,6 +133,11 @@ document.getElementById('new-behaviour').addEventListener('keydown', (e) => {
     e.preventDefault()
     document.getElementById('add-behaviour-btn').click()
   }
+})
+
+document.getElementById('new-behaviour-weight').addEventListener('input', (e) => {
+  const v = Number(e.target.value)
+  document.getElementById('new-behaviour-weight-label').textContent = v > 0 ? `+${v}` : `${v}`
 })
 
 // ── Supplements ──────────────────────────────────────────────

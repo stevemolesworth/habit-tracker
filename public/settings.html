@@ -56,9 +56,13 @@
                   <label class="nhsuk-label" for="new-behaviour">Behaviour name</label>
                   <input class="nhsuk-input nhsuk-input--width-20" id="new-behaviour" type="text" placeholder="e.g. Read a book">
                 </div>
-                <div class="nhsuk-form-group" style="margin:0">
-                  <label class="nhsuk-label" for="new-behaviour-weight">Weight <span style="font-weight:400">💩 −3 to +3 👍</span></label>
-                  <input class="nhsuk-input nhsuk-input--width-3" id="new-behaviour-weight" type="number" min="-3" max="3" value="1">
+                <div class="nhsuk-form-group" style="margin:0;min-width:200px">
+                  <label class="nhsuk-label" for="new-behaviour-weight">Weight: <span id="new-behaviour-weight-label">+1</span></label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span>💩</span>
+                    <input type="range" id="new-behaviour-weight" min="-3" max="3" step="1" value="1" style="flex:1">
+                    <span>👍</span>
+                  </div>
                 </div>
               </div>
               <button class="nhsuk-button" id="add-behaviour-btn" style="margin-top:12px">Add</button>
@@ -127,6 +131,41 @@
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
         <button class="nhsuk-button nhsuk-button--reverse" id="delete-range-confirm-btn" style="margin:0">Delete</button>
         <button class="nhsuk-button nhsuk-button--secondary" id="delete-range-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Behaviour edit modal -->
+  <div id="behaviour-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:16px">Edit behaviour</h2>
+      <div class="nhsuk-form-group">
+        <label class="nhsuk-label" for="edit-behaviour-name">Name</label>
+        <input class="nhsuk-input" id="edit-behaviour-name" type="text">
+      </div>
+      <div class="nhsuk-form-group">
+        <label class="nhsuk-label" for="edit-behaviour-weight">Weight: <span id="edit-behaviour-weight-label"></span></label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span>💩</span>
+          <input type="range" id="edit-behaviour-weight" min="-3" max="3" step="1" style="flex:1">
+          <span>👍</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button" id="behaviour-edit-save-btn" style="margin:0">Save</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-edit-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Behaviour delete confirm modal -->
+  <div id="behaviour-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:8px">Remove behaviour?</h2>
+      <p class="nhsuk-body" id="behaviour-delete-summary"></p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button nhsuk-button--reverse" id="behaviour-delete-confirm-btn" style="margin:0">Remove</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-delete-cancel-btn" style="margin:0">Cancel</button>
       </div>
     </div>
   </div>

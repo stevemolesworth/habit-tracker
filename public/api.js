@@ -22,6 +22,7 @@ export const api = {
   deleteSupplement: (id) => request(`/api/supplements?id=${id}`, { method: 'DELETE' }),
   getBehaviours: () => request('/api/behaviours'),
   addBehaviour: (name, weight) => request('/api/behaviours', { method: 'POST', body: JSON.stringify({ name, weight }) }),
+  updateBehaviour: (id, name, weight) => request(`/api/behaviours?id=${id}`, { method: 'PUT', body: JSON.stringify({ name, weight }) }),
   deleteBehaviour: (id) => request(`/api/behaviours?id=${id}`, { method: 'DELETE' }),
   getWeights: () => request('/api/weights'),
   updateWeights: (data) => request('/api/weights', { method: 'PUT', body: JSON.stringify(data) }),
