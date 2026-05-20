@@ -96,7 +96,10 @@ const charts = {}
 function mkChart(id, config) {
   if (charts[id]) { charts[id].destroy(); delete charts[id] }
   const canvas = document.getElementById(id)
-  if (canvas) charts[id] = new Chart(canvas.getContext('2d'), config)  // eslint-disable-line no-undef
+  if (canvas) {
+    config.options = { ...config.options, animation: false }
+    charts[id] = new Chart(canvas.getContext('2d'), config)  // eslint-disable-line no-undef
+  }
 }
 
 function xAxis(labels) {
@@ -136,7 +139,7 @@ function renderMood(days, labels) {
     data: { labels, datasets: [{ ...LINE, tension: 0.4, spanGaps: true, label: 'Mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: xAxis(labels), y: { min: 0.5, max: 5.5, ticks: { stepSize: 1, callback: v => Number.isInteger(v) ? v : '' }, grid: { color: '#f0f4f5' } } },
+      scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1, callback: v => { if (v === 1) return '1 😢'; if (v === 5) return '5 😁'; return v } }, grid: { color: '#f0f4f5' } } },
       plugins: { legend: { display: false }, tooltip: tooltipTitle(days) },
       onClick: chartOnClick(days)
     }
@@ -224,7 +227,7 @@ function renderFocus(days, labels, focusList) {
     data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: { ...xAxis(labels), stacked: false }, y: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
+      scales: { x: { ...xAxis(labels), stacked: false }, y: { min: 1, max: 5, ticks: { stepSize: 1, callback: v => { if (v === 1) return '1 😢'; if (v === 5) return '5 😁'; return v } }, grid: { color: '#f0f4f5' } } },
       plugins: { legend: { display: true, position: 'top' }, tooltip: tooltipTitle(days) },
       onClick: chartOnClick(days)
     }
@@ -354,11 +357,30 @@ function monthRange(offset = 0) {
   }
 }
 
+function last7Range() {
+  const to = new Date()
+  const from = new Date(to)
+  from.setDate(to.getDate() - 6)
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10)
+  }
+}
+
 function setActivePreset(id) {
-  ['preset-this-week', 'preset-last-week', 'preset-this-month', 'preset-last-month', 'preset-date-range'].forEach(bid => {
+  ['preset-last-7', 'preset-this-week', 'preset-last-week', 'preset-this-month', 'preset-last-month', 'preset-date-range'].forEach(bid => {
     document.getElementById(bid).classList.toggle('nhsuk-button--active-preset', bid === id)
   })
 }
+
+document.getElementById('preset-last-7').addEventListener('click', () => {
+  const { from, to } = last7Range()
+  document.getElementById('date-range-inputs').style.display = 'none'
+  document.getElementById('date-from').value = from
+  document.getElementById('date-to').value = to
+  setActivePreset('preset-last-7')
+  loadReport()
+})
 
 document.getElementById('preset-this-week').addEventListener('click', () => {
   const { from, to } = weekRange(0)
@@ -403,11 +425,11 @@ document.getElementById('preset-date-range').addEventListener('click', () => {
 
 document.getElementById('apply-btn').addEventListener('click', loadReport)
 
-// Default to this month on load
+// Default to last 7 days on load
 authReady.then(() => {
-  const { from: initFrom, to: initTo } = monthRange(0)
+  const { from: initFrom, to: initTo } = last7Range()
   document.getElementById('date-from').value = initFrom
   document.getElementById('date-to').value = initTo
-  setActivePreset('preset-this-month')
+  setActivePreset('preset-last-7')
   loadReport()
 })

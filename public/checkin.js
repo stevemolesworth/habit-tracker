@@ -508,11 +508,9 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     weather_snapshot: currentWeatherData ? { current: currentWeatherData.current, hourly: currentWeatherData.hourly } : null
   }
 
-  if (isMorning) {
-    payload.bedtime = get('bedtime') || null
-    payload.wake_time = get('wake_time') || null
-    payload.sleep_quality = get('sleep_quality') ? Number(get('sleep_quality')) : null
-  }
+  payload.bedtime = get('bedtime') || null
+  payload.wake_time = get('wake_time') || null
+  payload.sleep_quality = get('sleep_quality') ? Number(get('sleep_quality')) : null
 
   try {
     let result
@@ -614,6 +612,21 @@ async function init() {
     populateForm(existingRecord)
     showLastUpdated(existingRecord.submitted_at)
     document.getElementById('delete-section').style.display = ''
+  }
+
+  // On evening, pre-fill sleep fields from morning if not already set on the evening record
+  if (!isMorning && !existingRecord?.sleep_quality) {
+    try {
+      const morningRecord = await api.getTodayCheckin('morning', today)
+      if (morningRecord) {
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val }
+        const setRadio = (name, val) => { if (!val) return; const el = document.querySelector(`[name="${name}"][value="${val}"]`); if (el) el.checked = true }
+        setVal('bedtime', morningRecord.bedtime?.slice(0, 5))
+        setVal('wake_time', morningRecord.wake_time?.slice(0, 5))
+        setRadio('sleep_quality', morningRecord.sleep_quality)
+        updateSleepDuration()
+      }
+    } catch { /* non-fatal */ }
   }
 
   const behaviours = await newUserCheckPromise

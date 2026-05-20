@@ -34,6 +34,7 @@
           <!-- Date range -->
           <section class="app-section">
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+              <button class="nhsuk-button nhsuk-button--secondary" id="preset-last-7" style="margin:0">Last 7 days</button>
               <button class="nhsuk-button nhsuk-button--secondary" id="preset-this-week" style="margin:0">This week</button>
               <button class="nhsuk-button nhsuk-button--secondary" id="preset-last-week" style="margin:0">Last week</button>
               <button class="nhsuk-button nhsuk-button--secondary" id="preset-this-month" style="margin:0">This month</button>
@@ -72,14 +73,13 @@
             <!-- Mood -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Mood</h2>
-              <p class="nhsuk-hint">1 = Poor, 5 = Excellent. Evening reading used where available.</p>
               <div style="height:200px"><canvas id="chart-mood"></canvas></div>
             </section>
 
             <!-- Sleep -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Sleep</h2>
-              <p class="nhsuk-hint">Bar colour: <span style="color:#007f3b">■</span> Good &nbsp;<span style="color:#e8850c">■</span> Average &nbsp;<span style="color:#d5281b">■</span> Bad &nbsp;<span style="color:#005eb8">■</span> No rating</p>
+              <p class="nhsuk-hint"><span style="color:#007f3b">■</span> Good &nbsp;<span style="color:#e8850c">■</span> Average &nbsp;<span style="color:#d5281b">■</span> Bad</p>
               <div style="height:220px"><canvas id="chart-sleep-timeline"></canvas></div>
               <p class="nhsuk-hint nhsuk-u-margin-top-3">Hours slept</p>
               <div style="height:140px"><canvas id="chart-sleep-hours"></canvas></div>
@@ -88,21 +88,19 @@
             <!-- Focus -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Focus</h2>
-              <p class="nhsuk-hint">1 = Poor, 5 = Excellent. End of day check-in only.</p>
               <div style="height:200px"><canvas id="chart-focus"></canvas></div>
             </section>
 
             <!-- Alcohol -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Alcohol</h2>
-              <p class="nhsuk-hint">Total units per day (spirits + beer + wine).</p>
+              <p class="nhsuk-hint">Total units per day.</p>
               <div style="height:180px"><canvas id="chart-alcohol"></canvas></div>
             </section>
 
             <!-- Habits & behaviours -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Habits &amp; behaviours</h2>
-              <p class="nhsuk-hint">👍 <span style="color:#007f3b;font-weight:500">Positive</span> &nbsp;&nbsp; 💩 <span style="color:#d5281b;font-weight:500">Negative</span></p>
               <div id="bool-rows"></div>
             </section>
 

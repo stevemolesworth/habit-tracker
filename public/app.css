@@ -149,6 +149,7 @@
 .nhsuk-button--active-preset {
   background-color: #003d78;
   box-shadow: 0 2px 0 #001f3d;
+  color: #ffffff;
 }
 
 @media (max-width: 480px) {

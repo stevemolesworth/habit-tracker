@@ -11,8 +11,8 @@
     <!-- Splash screen — hidden by checkin.js once init() completes -->
     <div id="app-splash" class="app-splash">
       <div class="app-splash__overlay" id="splash-loading">
-        <h1 class="app-splash__text">🐔<br />Chicken Check-In</h1>
-        <p class="app-splash__subtext">Hold tight — data is being loaded</p>
+        <h1 class="app-splash__text">Data is being loaded</h1>
+        <p class="app-splash__subtext">Hold tight.</p>
         <div class="app-splash__spinner"></div>
         <p class="nhsuk-body">
           <a href="/login.html?logout=1" class="app-splash__skip" style="margin-top: 24px; color: rgba(255, 255, 255, 0.75)">Cancel and sign out</a>
@@ -115,7 +115,9 @@
                 <p class="nhsuk-hint nhsuk-u-margin-bottom-3">1 = Poor, 5 = Excellent</p>
 
                 <div id="morning-mood-display" style="display: none" class="nhsuk-u-margin-bottom-4">
-                  <p class="nhsuk-body nhsuk-u-margin-bottom-0"><span class="nhsuk-u-secondary-text-color">Mood this morning:</span> <span id="morning-mood-value">—</span></p>
+                  <p class="nhsuk-body nhsuk-u-margin-bottom-0">
+                    <span class="nhsuk-u-secondary-text-color">Mood this morning:</span> <span id="morning-mood-value">—</span>
+                  </p>
                 </div>
 
                 <div class="nhsuk-form-group">
