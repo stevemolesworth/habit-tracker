@@ -105,7 +105,7 @@ document.getElementById('behaviour-delete-confirm-btn').addEventListener('click'
     btn.disabled = false
     btn.textContent = 'Remove'
   }
-}
+})
 
 document.getElementById('add-behaviour-btn').addEventListener('click', async () => {
   const nameInput = document.getElementById('new-behaviour')
