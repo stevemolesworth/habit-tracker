@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — 🐔 Chicken Check-In</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="app-global-header">
+    <div class="nhsuk-width-container">
+      <div class="app-global-header__inner">
+        <a href="/" class="app-global-header__title">🐔 Chicken Check-In</a>
+        <nav class="app-global-header__nav" aria-label="Main navigation">
+          <a href="/">Check in</a>
+          <a href="/calendar.html">Calendar</a>
+          <a href="/reports.html">Reports</a>
+          <a href="/settings.html" id="nav-settings-link">Settings</a>
+          <a href="/admin.html" id="admin-nav-link" style="display:none">Admin</a>
+          <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display:none">Sign out</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <div class="nhsuk-width-container">
+    <main class="nhsuk-main-wrapper" id="maincontent">
+
+      <div id="access-denied" style="display:none">
+        <h1 class="nhsuk-heading-xl">Access denied</h1>
+        <p class="nhsuk-body">You do not have permission to view this page.</p>
+        <a href="/" class="nhsuk-button">Go to check-in</a>
+      </div>
+
+      <div id="admin-content" style="display:none">
+        <h1 class="nhsuk-heading-xl">Admin</h1>
+
+        <!-- Summary -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:32px">
+          <div class="nhsuk-card" style="margin:0;flex:1;min-width:160px">
+            <div class="nhsuk-card__content" style="padding:16px">
+              <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:4px">Total users</p>
+              <p class="nhsuk-heading-l" style="margin:0" id="stat-users">—</p>
+            </div>
+          </div>
+          <div class="nhsuk-card" style="margin:0;flex:1;min-width:160px">
+            <div class="nhsuk-card__content" style="padding:16px">
+              <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:4px">Total check-ins</p>
+              <p class="nhsuk-heading-l" style="margin:0" id="stat-checkins">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- User table -->
+        <div style="overflow-x:auto">
+          <table class="nhsuk-table" id="user-table">
+            <thead class="nhsuk-table__head">
+              <tr class="nhsuk-table__row">
+                <th class="nhsuk-table__header" scope="col" data-col="first_name" style="cursor:pointer">First name ↕</th>
+                <th class="nhsuk-table__header" scope="col" data-col="email" style="cursor:pointer">Email ↕</th>
+                <th class="nhsuk-table__header" scope="col" data-col="created_at" style="cursor:pointer">Joined ↕</th>
+                <th class="nhsuk-table__header" scope="col" data-col="last_checkin_date" style="cursor:pointer">Last check-in ↕</th>
+                <th class="nhsuk-table__header" scope="col" data-col="behaviours_monitored" style="cursor:pointer">Behaviours ↕</th>
+              </tr>
+            </thead>
+            <tbody class="nhsuk-table__body" id="user-table-body">
+              <tr class="nhsuk-table__row">
+                <td class="nhsuk-table__cell" colspan="5">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- User detail card -->
+        <div id="user-detail-card" style="display:none;margin-top:24px">
+          <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <h2 class="nhsuk-heading-m" id="detail-name" style="margin-bottom:16px"></h2>
+                <button type="button" class="nhsuk-button nhsuk-button--secondary" id="detail-close-btn" style="margin:0;padding:4px 12px;font-size:0.875rem">Close</button>
+              </div>
+              <dl class="nhsuk-summary-list" id="detail-list"></dl>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>

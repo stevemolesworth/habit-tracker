@@ -1,4 +1,5 @@
 import { supabase } from './_shared/supabase.js'
+import { getAuthUser } from './_shared/auth.js'
 
 function calcHoursSlept(bedtime, wakeTime) {
   if (!bedtime || !wakeTime) return null
@@ -10,6 +11,9 @@ function calcHoursSlept(bedtime, wakeTime) {
 }
 
 export default async function handler(req) {
+  const user = await getAuthUser(req)
+  if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })
+
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 })
   }
@@ -43,6 +47,7 @@ export default async function handler(req) {
   const { data, error } = await supabase
     .from('check_ins')
     .insert([{
+      user_id: user.id,
       check_in_type, check_in_date, submitted_at,
       bedtime, wake_time, hours_slept, sleep_quality,
       global_mood, focus_financial, focus_consulting, focus_opiner,

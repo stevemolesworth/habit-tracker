@@ -1,6 +1,13 @@
+import { getToken } from '/auth.js'
+
 async function request(path, options = {}) {
+  const token = getToken()
   const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers
+    },
     ...options
   })
   if (!res.ok) {
@@ -31,4 +38,5 @@ export const api = {
   getTodayCheckin: (type, date) => request(`/api/today-checkin?type=${type}&date=${date}`),
   getReport: (from, to) => request(`/api/report?from=${from}&to=${to}`),
   deleteRange: (from, to) => request(`/api/delete-range?from=${from}&to=${to}`, { method: 'DELETE' }),
+  deleteAccount: () => request('/api/delete-account', { method: 'DELETE' }),
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in — 🐔 Chicken Check-In</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="app-global-header">
+    <div class="nhsuk-width-container">
+      <div class="app-global-header__inner">
+        <span class="app-global-header__title">🐔 Chicken Check-In</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="nhsuk-width-container">
+    <main class="nhsuk-main-wrapper" id="maincontent">
+      <div class="nhsuk-grid-row">
+        <div class="nhsuk-grid-column-one-half">
+
+          <div class="app-type-toggle" style="margin-bottom:24px">
+            <button type="button" id="tab-signin" class="active">Sign in</button>
+            <button type="button" id="tab-signup">Create account</button>
+          </div>
+
+          <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-title" role="alert" style="display:none">
+            <h2 class="nhsuk-error-summary__title" id="error-title">There was a problem</h2>
+            <div class="nhsuk-error-summary__body"><p id="error-message"></p></div>
+          </div>
+
+          <!-- Sign in form -->
+          <form id="signin-form" novalidate>
+            <h1 class="nhsuk-heading-l">Sign in</h1>
+            <div class="nhsuk-form-group">
+              <label class="nhsuk-label" for="signin-email">Email address</label>
+              <input class="nhsuk-input" id="signin-email" type="email" autocomplete="email">
+            </div>
+            <div class="nhsuk-form-group">
+              <label class="nhsuk-label" for="signin-password">Password</label>
+              <input class="nhsuk-input" id="signin-password" type="password" autocomplete="current-password">
+            </div>
+            <button class="nhsuk-button" type="submit" id="signin-btn">Sign in</button>
+          </form>
+
+          <!-- Create account form -->
+          <form id="signup-form" style="display:none" novalidate>
+            <h1 class="nhsuk-heading-l">Create account</h1>
+            <div class="nhsuk-form-group">
+              <label class="nhsuk-label" for="signup-firstname">First name</label>
+              <input class="nhsuk-input" id="signup-firstname" type="text" autocomplete="given-name">
+            </div>
+            <div class="nhsuk-form-group">
+              <label class="nhsuk-label" for="signup-email">Email address</label>
+              <input class="nhsuk-input" id="signup-email" type="email" autocomplete="email">
+            </div>
+            <div class="nhsuk-form-group">
+              <label class="nhsuk-label" for="signup-password">Password</label>
+              <p class="nhsuk-hint">At least 6 characters</p>
+              <input class="nhsuk-input" id="signup-password" type="password" autocomplete="new-password">
+            </div>
+            <div class="nhsuk-form-group">
+              <label class="nhsuk-label" for="signup-password2">Confirm password</label>
+              <input class="nhsuk-input" id="signup-password2" type="password" autocomplete="new-password">
+            </div>
+            <button class="nhsuk-button" type="submit" id="signup-btn">Create account</button>
+          </form>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/login.js"></script>
+</body>
+</html>

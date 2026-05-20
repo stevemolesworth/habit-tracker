@@ -1,12 +1,17 @@
 import { supabase } from './_shared/supabase.js'
+import { getAuthUser } from './_shared/auth.js'
 
 export default async function handler(req) {
+  const user = await getAuthUser(req)
+  if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })
+
   const url = new URL(req.url)
 
   if (req.method === 'GET') {
     const { data, error } = await supabase
       .from('behaviours')
       .select('*')
+      .eq('user_id', user.id)
       .eq('active', true)
       .order('created_at', { ascending: true })
 
@@ -32,7 +37,7 @@ export default async function handler(req) {
 
     const { data, error } = await supabase
       .from('behaviours')
-      .insert([{ name: name.trim(), weight: Number(weight) }])
+      .insert([{ user_id: user.id, name: name.trim(), weight: Number(weight) }])
       .select()
       .single()
 
@@ -65,6 +70,7 @@ export default async function handler(req) {
       .from('behaviours')
       .update({ name: name.trim(), weight: Number(weight) })
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -84,6 +90,7 @@ export default async function handler(req) {
       .from('behaviours')
       .update({ active: false })
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })

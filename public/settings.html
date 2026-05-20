@@ -16,7 +16,9 @@
           <a href="/">Check in</a>
           <a href="/calendar.html">Calendar</a>
           <a href="/reports.html">Reports</a>
-          <a href="/settings.html">Settings</a>
+          <a href="/settings.html" id="nav-settings-link">Settings</a>
+          <a href="/admin.html" id="admin-nav-link" style="display:none">Admin</a>
+          <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display:none">Sign out</button>
         </nav>
       </div>
     </div>
@@ -28,6 +30,34 @@
         <div class="nhsuk-grid-column-two-thirds">
 
           <h1 class="nhsuk-heading-xl">Settings</h1>
+
+          <!-- Account -->
+          <section class="app-section">
+            <h2 class="app-section-title">Account</h2>
+            <dl class="nhsuk-summary-list nhsuk-summary-list--no-border" style="margin-bottom:16px">
+              <div class="nhsuk-summary-list__row">
+                <dt class="nhsuk-summary-list__key">Name</dt>
+                <dd class="nhsuk-summary-list__value" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <span id="settings-account-name">—</span>
+                  <button type="button" class="nhsuk-button nhsuk-button--secondary" id="edit-name-btn" style="margin:0;padding:2px 10px;font-size:0.875rem">Edit</button>
+                </dd>
+              </div>
+              <div class="nhsuk-summary-list__row" id="edit-name-row" style="display:none">
+                <dt class="nhsuk-summary-list__key"></dt>
+                <dd class="nhsuk-summary-list__value" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <input class="nhsuk-input nhsuk-input--width-10" id="edit-name-input" type="text" autocomplete="given-name">
+                  <button type="button" class="nhsuk-button" id="save-name-btn" style="margin:0">Save</button>
+                  <button type="button" class="nhsuk-button nhsuk-button--secondary" id="cancel-name-btn" style="margin:0">Cancel</button>
+                  <span id="edit-name-feedback" class="nhsuk-body-s" style="display:none"></span>
+                </dd>
+              </div>
+              <div class="nhsuk-summary-list__row">
+                <dt class="nhsuk-summary-list__key">Email</dt>
+                <dd class="nhsuk-summary-list__value" id="settings-account-email">—</dd>
+              </div>
+            </dl>
+            <button type="button" class="nhsuk-button nhsuk-button--secondary" id="settings-signout-btn">Sign out</button>
+          </section>
 
           <!-- Behaviours -->
           <section class="app-section">
@@ -82,13 +112,14 @@
             <h2 class="app-section-title">Export data</h2>
             <p class="nhsuk-body">Download all your check-ins for analysis.</p>
             <div class="app-nav">
-              <a href="/api/export?format=csv" class="nhsuk-button nhsuk-button--secondary" download="habit-tracker-export.csv">Download CSV</a>
-              <a href="/api/export?format=json" class="nhsuk-button nhsuk-button--secondary" download="habit-tracker-export.json">Download JSON</a>
+              <button type="button" class="nhsuk-button nhsuk-button--secondary" id="export-csv-btn">Download CSV</button>
+              <button type="button" class="nhsuk-button nhsuk-button--secondary" id="export-json-btn">Download JSON</button>
             </div>
+            <p id="export-feedback" class="nhsuk-body-s" style="display:none"></p>
           </section>
 
           <!-- Delete range -->
-          <section class="app-section">
+          <section class="app-section" id="delete-data-section">
             <h2 class="app-section-title">Delete data</h2>
             <p class="nhsuk-body">Permanently delete all check-ins within a date range. This cannot be undone.</p>
             <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
@@ -103,6 +134,13 @@
               <button class="nhsuk-button nhsuk-button--reverse" id="delete-range-btn" style="margin:0">Delete check-ins</button>
             </div>
             <p id="delete-range-feedback" class="nhsuk-body-s" style="display:none"></p>
+          </section>
+
+          <!-- Delete account -->
+          <section class="app-section">
+            <h2 class="app-section-title">Delete account</h2>
+            <p class="nhsuk-body">This will permanently delete your account and all associated data. This cannot be undone.</p>
+            <button type="button" class="nhsuk-button nhsuk-button--reverse" id="delete-account-btn">Delete my account</button>
           </section>
 
         </div>
@@ -181,6 +219,23 @@
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
         <button class="nhsuk-button nhsuk-button--reverse" id="behaviour-delete-confirm-btn" style="margin:0">Remove</button>
         <button class="nhsuk-button nhsuk-button--secondary" id="behaviour-delete-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete account confirm modal -->
+  <div id="delete-account-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:8px">Delete your account?</h2>
+      <p class="nhsuk-body">This will permanently delete your account and all your check-ins, behaviours, and supplements.</p>
+      <div class="nhsuk-form-group" style="margin-bottom:8px">
+        <label class="nhsuk-label" for="delete-account-email-confirm">Enter your email address to confirm</label>
+        <input class="nhsuk-input" id="delete-account-email-confirm" type="email" autocomplete="off">
+      </div>
+      <p id="delete-account-error" class="nhsuk-body-s" style="color:#d5281b;display:none"></p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button nhsuk-button--reverse" id="delete-account-confirm-btn" style="margin:0">Delete account</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="delete-account-cancel-btn" style="margin:0">Cancel</button>
       </div>
     </div>
   </div>

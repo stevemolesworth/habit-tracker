@@ -62,6 +62,21 @@
   text-decoration: underline;
 }
 
+.app-nav-signout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.app-nav-signout:hover {
+  text-decoration: underline;
+}
+
 .nhsuk-button--active-preset {
   background-color: #003d78;
   box-shadow: 0 2px 0 #001f3d;

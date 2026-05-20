@@ -1,4 +1,5 @@
 import { api } from '/api.js'
+import { authReady } from '/auth.js'
 
 const today = new Date()
 let viewYear = today.getFullYear()
@@ -135,4 +136,4 @@ document.getElementById('next-month').addEventListener('click', () => {
   loadMonth()
 })
 
-loadMonth()
+authReady.then(() => loadMonth())

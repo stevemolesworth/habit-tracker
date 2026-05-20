@@ -1,11 +1,13 @@
 import { api } from '/api.js'
+import { authReady } from '/auth.js'
 import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weather.js'
 
-// London-aware date/time
+// Device-local date/time
+const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone
 const londonHour = parseInt(
-  new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(new Date())
+  new Intl.DateTimeFormat('en-GB', { timeZone: userTZ, hour: 'numeric', hour12: false }).format(new Date())
 )
-const todayLondon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date())
+const todayLondon = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date())
 
 // Allow a specific date to be passed (e.g. from calendar for past days)
 const params = new URLSearchParams(location.search)
@@ -457,6 +459,8 @@ function hideError() {
 
 // --- Init ---
 async function init() {
+  await authReady
+
   try {
     existingRecord = await api.getTodayCheckin(type, today)
   } catch {
