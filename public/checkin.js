@@ -256,16 +256,18 @@ async function loadFocuses() {
       return
     }
     container.innerHTML = active.map(f => `
-      <fieldset class="nhsuk-fieldset" style="margin-bottom:16px" data-focus-id="${f.id}">
-        <legend class="nhsuk-fieldset__legend nhsuk-label">${f.title}</legend>
-        <div class="nhsuk-radios nhsuk-radios--inline">
-          ${[1,2,3,4,5].map(n => `
-            <div class="nhsuk-radios__item">
-              <input class="nhsuk-radios__input" id="focus-${f.id}-${n}" name="focus_${f.id}" type="radio" value="${n}">
-              <label class="nhsuk-label nhsuk-radios__label" for="focus-${f.id}-${n}">${n}</label>
-            </div>`).join('')}
-        </div>
-      </fieldset>`).join('')
+      <div class="nhsuk-form-group" data-focus-id="${f.id}">
+        <fieldset class="nhsuk-fieldset">
+          <legend class="nhsuk-fieldset__legend nhsuk-label">${f.title}</legend>
+          <div class="nhsuk-radios nhsuk-radios--inline">
+            ${[1,2,3,4,5].map(n => `
+              <div class="nhsuk-radios__item">
+                <input class="nhsuk-radios__input" id="focus-${f.id}-${n}" name="focus_${f.id}" type="radio" value="${n}">
+                <label class="nhsuk-label nhsuk-radios__label" for="focus-${f.id}-${n}">${n}</label>
+              </div>`).join('')}
+          </div>
+        </fieldset>
+      </div>`).join('')
     if (existingRecord?.focuses) {
       for (const [id, score] of Object.entries(existingRecord.focuses)) {
         if (score) {

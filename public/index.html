@@ -88,9 +88,10 @@
                 <div class="nhsuk-form-group">
                   <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
                   <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00" />
-                  <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-top: 6px; display: none"></p>
+                  <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-1" style="display: none"></p>
                 </div>
 
+                <div class="nhsuk-form-group">
                 <fieldset class="nhsuk-fieldset">
                   <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
                   <div class="nhsuk-radios nhsuk-radios--inline" id="sleep_quality">
@@ -108,15 +109,17 @@
                     </div>
                   </div>
                 </fieldset>
+                </div>
               </section>
 
               <!-- Mood -->
               <section class="app-section" id="mood-section">
                 <h2 class="nhsuk-heading-m">Mood</h2>
-                <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
 
-                <fieldset class="nhsuk-fieldset">
+                <div class="nhsuk-form-group">
+                <fieldset class="nhsuk-fieldset" aria-describedby="mood-hint">
                   <legend class="nhsuk-fieldset__legend nhsuk-label">Overall mood</legend>
+                  <div class="nhsuk-hint" id="mood-hint">1 = Poor, 5 = Excellent</div>
                   <div class="nhsuk-radios nhsuk-radios--inline">
                     <div class="nhsuk-radios__item">
                       <input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1" tabindex="0" /><label
@@ -155,6 +158,7 @@
                     </div>
                   </div>
                 </fieldset>
+                </div>
               </section>
 
               <!-- Focus -->
@@ -171,13 +175,16 @@
                 <h2 class="nhsuk-heading-m">Exercise</h2>
 
                 <div class="nhsuk-form-group">
-                  <div class="nhsuk-checkboxes__item">
-                    <input class="nhsuk-checkboxes__input" id="exercised" name="exercised" type="checkbox" tabindex="0" />
-                    <label class="nhsuk-label nhsuk-checkboxes__label" for="exercised">Exercised today</label>
+                  <div class="nhsuk-checkboxes">
+                    <div class="nhsuk-checkboxes__item">
+                      <input class="nhsuk-checkboxes__input" id="exercised" name="exercised" type="checkbox" tabindex="0" />
+                      <label class="nhsuk-label nhsuk-checkboxes__label" for="exercised">Exercised today</label>
+                    </div>
                   </div>
                 </div>
 
-                <fieldset class="nhsuk-fieldset" id="exercise-details" style="display: none">
+                <div class="nhsuk-form-group" id="exercise-details" style="display: none">
+                <fieldset class="nhsuk-fieldset">
                   <legend class="nhsuk-fieldset__legend nhsuk-label">Type(s)</legend>
                   <div class="nhsuk-checkboxes">
                     <div class="nhsuk-checkboxes__item">
@@ -190,6 +197,7 @@
                     </div>
                   </div>
                 </fieldset>
+                </div>
               </section>
 
               <!-- Alcohol -->
