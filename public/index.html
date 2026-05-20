@@ -76,6 +76,7 @@
               <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
                 <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00">
+                <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-top:6px;display:none"></p>
               </div>
 
               <fieldset class="nhsuk-fieldset">
@@ -169,7 +170,7 @@
                 <div class="nhsuk-checkboxes">
                   <div class="nhsuk-checkboxes__item">
                     <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0">
-                    <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin)</label>
+                    <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin, swimming)</label>
                   </div>
                   <div class="nhsuk-checkboxes__item">
                     <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" tabindex="0">
@@ -198,21 +199,6 @@
               </div>
             </section>
 
-            <!-- Mindfulness -->
-            <section class="app-section" id="mindfulness-section">
-              <h2 class="app-section-title">Mindfulness</h2>
-              <div class="nhsuk-checkboxes">
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="mindfulness_meditation" name="mindfulness_meditation" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="mindfulness_meditation">Meditation</label>
-                </div>
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="mindfulness_yoga" name="mindfulness_yoga" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="mindfulness_yoga">Yoga</label>
-                </div>
-              </div>
-            </section>
-
             <!-- Supplements -->
             <section class="app-section">
               <h2 class="app-section-title">Supplements</h2>
@@ -224,27 +210,8 @@
             <!-- Behaviours -->
             <section class="app-section" id="behaviours-section">
               <h2 class="app-section-title">Behaviours</h2>
-              <div class="nhsuk-checkboxes">
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="outside_time" name="outside_time" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="outside_time">Got outside into nature</label>
-                </div>
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="social_media" name="social_media" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="social_media">Avoided social media</label>
-                </div>
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="behaviour_p" name="p" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="behaviour_p">Avoided p... 🍑</label>
-                </div>
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="behaviour_m" name="m" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="behaviour_m">Didn't m... 🍆💦</label>
-                </div>
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="behaviour_s" name="s" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="behaviour_s">Had s... 🎆</label>
-                </div>
+              <div class="nhsuk-checkboxes" id="behaviours-list">
+                <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading behaviours…</p>
               </div>
             </section>
 
@@ -271,14 +238,25 @@
         <div class="nhsuk-grid-column-one-third">
           <div id="weather-widget">
             <h2 class="app-section-title">Weather</h2>
+            <p id="weather-location-label" class="nhsuk-body-s nhsuk-u-secondary-text-color"
+               style="margin-bottom:6px;min-height:1.2em"></p>
+            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
+                    id="weather-toggle-location-btn" style="margin:0 0 8px">Add location</button>
+            <div id="weather-location-form" style="display:none;margin-bottom:8px">
+              <div style="display:flex;gap:6px;margin-bottom:6px">
+                <input class="nhsuk-input nhsuk-input--width-10" id="weather-location-input"
+                       type="text" placeholder="Postcode or city…">
+                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
+                        id="weather-search-btn" style="margin:0">Search</button>
+              </div>
+              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
+                      id="weather-geo-btn" style="margin:0">📍 Use my location</button>
+            </div>
             <div id="weather-strip">
               <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>
             </div>
-            <div class="nhsuk-form-group" style="margin-top:12px">
-              <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="weather-postcode">Postcode</label>
-              <input class="nhsuk-input nhsuk-input--width-5" id="weather-postcode" type="text" value="HP52JU">
-            </div>
-            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-refresh-btn" style="margin:0">Refresh</button>
+            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
+                    id="weather-refresh-btn" style="margin-top:8px">Refresh</button>
           </div>
         </div>
 

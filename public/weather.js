@@ -11,35 +11,71 @@ const WMO_EMOJI = {
 
 const SLOTS = [6, 8, 10, 12, 14, 16, 18, 20, 22]
 
+const UK_POSTCODE_RE = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}$/i
+
 export function wmoEmoji(code) {
   return WMO_EMOJI[code] ?? '🌡️'
 }
 
-export async function fetchWeather(postcode, date = null) {
-  const clean = postcode.replace(/\s+/g, '').toUpperCase()
+function nominatimLabel(address) {
+  const locality = address.city || address.town || address.village || address.county || ''
+  const country = address.country || ''
+  return [locality, country].filter(Boolean).join(', ')
+}
 
-  const geoRes = await fetch(`https://api.postcodes.io/postcodes/${clean}`)
-  if (!geoRes.ok) throw new Error('Invalid postcode')
-  const geo = await geoRes.json()
-  const { latitude: lat, longitude: lng } = geo.result
+export async function geocode(query) {
+  const q = query.trim()
+  if (!q) throw new Error('No location entered')
+
+  if (UK_POSTCODE_RE.test(q)) {
+    const clean = q.replace(/\s+/g, '').toUpperCase()
+    const res = await fetch(`https://api.postcodes.io/postcodes/${clean}`)
+    if (!res.ok) throw new Error('Invalid UK postcode')
+    const data = await res.json()
+    return { lat: data.result.latitude, lng: data.result.longitude, label: clean }
+  }
+
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1`,
+    { headers: { 'Accept-Language': 'en' } }
+  )
+  if (!res.ok) throw new Error('Could not reach geocoding service')
+  const results = await res.json()
+  if (!results.length) throw new Error(`Location not found: "${q}"`)
+  const r = results[0]
+  return { lat: parseFloat(r.lat), lng: parseFloat(r.lon), label: nominatimLabel(r.address) || q }
+}
+
+export async function reverseGeocode(lat, lng) {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+    { headers: { 'Accept-Language': 'en' } }
+  )
+  if (!res.ok) throw new Error('Could not reach geocoding service')
+  const data = await res.json()
+  return { label: nominatimLabel(data.address) || `${lat.toFixed(3)}, ${lng.toFixed(3)}` }
+}
+
+export async function fetchWeather(location, date = null) {
+  const { lat, lng, label } = location
 
   const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date())
   const targetDate = date || todayStr
   const isPast = targetDate < todayStr
 
   if (isPast) {
-    return fetchHistoricalWeather(lat, lng, targetDate, clean)
+    return fetchHistoricalWeather(lat, lng, targetDate, label)
   } else {
-    return fetchForecastWeather(lat, lng, clean)
+    return fetchForecastWeather(lat, lng, label)
   }
 }
 
-async function fetchForecastWeather(lat, lng, postcode) {
+async function fetchForecastWeather(lat, lng, label) {
   const url = `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
     `&current=temperature_2m,weather_code` +
     `&hourly=temperature_2m,weather_code` +
-    `&temperature_unit=celsius&forecast_days=1&timezone=Europe%2FLondon`
+    `&temperature_unit=celsius&forecast_days=1&timezone=auto`
 
   const wxRes = await fetch(url)
   if (!wxRes.ok) throw new Error('Could not fetch weather')
@@ -64,10 +100,10 @@ async function fetchForecastWeather(lat, lng, postcode) {
     code: wx.current.weather_code
   }
 
-  return { current, hourly, postcode }
+  return { current, hourly, lat, lng, label }
 }
 
-async function fetchHistoricalWeather(lat, lng, date, postcode) {
+async function fetchHistoricalWeather(lat, lng, date, label) {
   // Archive API has a 2–5 day lag; use forecast API for recent dates
   const daysAgo = Math.round((Date.now() - new Date(date + 'T12:00:00').getTime()) / 86400000)
   const base = daysAgo <= 7
@@ -77,7 +113,7 @@ async function fetchHistoricalWeather(lat, lng, date, postcode) {
     `?latitude=${lat}&longitude=${lng}` +
     `&start_date=${date}&end_date=${date}` +
     `&hourly=temperature_2m,weather_code` +
-    `&temperature_unit=celsius&timezone=Europe%2FLondon`
+    `&temperature_unit=celsius&timezone=auto`
 
   const wxRes = await fetch(url)
   if (!wxRes.ok) throw new Error('Could not fetch historical weather')
@@ -102,7 +138,7 @@ async function fetchHistoricalWeather(lat, lng, date, postcode) {
     ? { temp: Math.round(wx.hourly.temperature_2m[ref]), code: wx.hourly.weather_code[ref] }
     : { temp: null, code: null }
 
-  return { current, hourly, postcode }
+  return { current, hourly, lat, lng, label }
 }
 
 export function buildWeatherStrip(weatherData, type) {

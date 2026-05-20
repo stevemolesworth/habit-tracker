@@ -5,7 +5,7 @@ export default async function handler(req) {
 
   if (req.method === 'GET') {
     const { data, error } = await supabase
-      .from('supplements')
+      .from('behaviours')
       .select('*')
       .eq('active', true)
       .order('created_at', { ascending: true })
@@ -22,14 +22,17 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
 
-    const { name } = body
+    const { name, weight } = body
     if (!name?.trim()) {
       return new Response(JSON.stringify({ error: 'name is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
+    if (weight == null || !Number.isInteger(Number(weight)) || Number(weight) < -3 || Number(weight) > 3) {
+      return new Response(JSON.stringify({ error: 'weight must be an integer between -3 and 3' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+    }
 
     const { data, error } = await supabase
-      .from('supplements')
-      .insert([{ name: name.trim() }])
+      .from('behaviours')
+      .insert([{ name: name.trim(), weight: Number(weight) }])
       .select()
       .single()
 
@@ -50,14 +53,17 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
 
-    const { name } = body
+    const { name, weight } = body
     if (!name?.trim()) {
       return new Response(JSON.stringify({ error: 'name is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
+    if (weight == null || !Number.isInteger(Number(weight)) || Number(weight) < -3 || Number(weight) > 3) {
+      return new Response(JSON.stringify({ error: 'weight must be an integer between -3 and 3' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+    }
 
     const { data, error } = await supabase
-      .from('supplements')
-      .update({ name: name.trim() })
+      .from('behaviours')
+      .update({ name: name.trim(), weight: Number(weight) })
       .eq('id', id)
       .select()
       .single()
@@ -74,9 +80,8 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'id is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
 
-    // Soft delete — keep historical supplement data intact
     const { error } = await supabase
-      .from('supplements')
+      .from('behaviours')
       .update({ active: false })
       .eq('id', id)
 

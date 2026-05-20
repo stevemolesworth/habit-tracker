@@ -24,6 +24,9 @@ export default async function handler(req) {
     if (body.default_postcode !== undefined) {
       update.default_postcode = String(body.default_postcode).replace(/\s+/g, '').toUpperCase()
     }
+    if (body.default_location_lat !== undefined) update.default_location_lat = body.default_location_lat
+    if (body.default_location_lng !== undefined) update.default_location_lng = body.default_location_lng
+    if (body.default_location_label !== undefined) update.default_location_label = body.default_location_label
     update.updated_at = new Date().toISOString()
 
     const { data, error } = await supabase
