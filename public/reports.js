@@ -255,15 +255,20 @@ function renderAlcohol(days, labels) {
 
 // ── Boolean rows ──────────────────────────────────────────────
 
-function dot(value, invert, title, href) {
-  const isYes = value !== null && value !== undefined && (invert ? !value : value)
-  const cls = isYes ? 'app-bool-dot--true' : 'app-bool-dot--null'
-  if (href) return `<a href="${href}" class="app-bool-dot ${cls}" title="${title}"></a>`
-  return `<span class="app-bool-dot ${cls}" title="${title}"></span>`
+function habitCell(value, weight, title, href) {
+  const done = value !== null && value !== undefined && value !== false
+  if (done) {
+    const emoji = weight < 0 ? '💩' : '👍'
+    const cls = weight < 0 ? 'app-bool-dot--negative' : 'app-bool-dot--positive'
+    if (href) return `<a href="${href}" class="app-bool-dot ${cls}" title="${title}">${emoji}</a>`
+    return `<span class="app-bool-dot ${cls}" title="${title}">${emoji}</span>`
+  }
+  if (href) return `<a href="${href}" class="app-bool-dot app-bool-dot--null" title="${title}"></a>`
+  return `<span class="app-bool-dot app-bool-dot--null" title="${title}"></span>`
 }
 
-function boolRow(label, days, fn, invert = false) {
-  const dots = days.map(d => dot(fn(d), invert, fmtShort(d.date), dayHref(d))).join('')
+function boolRow(label, days, fn, weight = 1) {
+  const dots = days.map(d => habitCell(fn(d), weight, fmtShort(d.date), dayHref(d))).join('')
   return `<div class="app-bool-row"><span class="app-bool-label">${label}</span><div class="app-bool-dots">${dots}</div></div>`
 }
 
@@ -271,9 +276,9 @@ function renderBoolRows(days, behaviourDefs) {
   const suppNames = new Set()
   days.forEach(d => { if (d.supplements) Object.keys(d.supplements).forEach(k => suppNames.add(k)) })
 
-  let html = boolRow('Exercise', days, d => d.exercised)
-  suppNames.forEach(name => { html += boolRow(name, days, d => d.supplements?.[name] ?? null) })
-  behaviourDefs.forEach(b => { html += boolRow(b.name, days, d => d.behaviours?.[b.name] ?? null) })
+  let html = boolRow('Exercise', days, d => d.exercised, 1)
+  suppNames.forEach(name => { html += boolRow(name, days, d => d.supplements?.[name] ?? null, 1) })
+  behaviourDefs.forEach(b => { html += boolRow(b.name, days, d => d.behaviours?.[b.name] ?? null, b.weight) })
 
   document.getElementById('bool-rows').innerHTML = html
 }
