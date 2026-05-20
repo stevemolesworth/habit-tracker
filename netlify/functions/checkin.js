@@ -27,9 +27,8 @@ export default async function handler(req) {
     global_mood, focus_financial, focus_consulting, focus_opiner,
     exercised, exercise_types, session_count,
     alcohol_spirits, alcohol_beer, alcohol_wine,
-    mindfulness_meditation, mindfulness_yoga,
     supplements,
-    outside_time, social_media, p, m, s,
+    behaviours,
     notes,
     weather_postcode, weather_snapshot
   } = body
@@ -49,9 +48,8 @@ export default async function handler(req) {
       global_mood, focus_financial, focus_consulting, focus_opiner,
       exercised, exercise_types, session_count,
       alcohol_spirits, alcohol_beer, alcohol_wine,
-      mindfulness_meditation, mindfulness_yoga,
       supplements,
-      outside_time, social_media, p, m, s,
+      behaviours,
       notes,
       weather_postcode, weather_snapshot
     }])

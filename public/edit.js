@@ -28,9 +28,10 @@ function setInput(id, value) {
 
 async function loadCheckin() {
   try {
-    const [checkin, supplements] = await Promise.all([
+    const [checkin, supplements, behaviours] = await Promise.all([
       api.getCheckin(id),
-      api.getSupplements()
+      api.getSupplements(),
+      api.getBehaviours()
     ])
 
     checkinType = checkin.check_in_type
@@ -72,10 +73,6 @@ async function loadCheckin() {
     setInput('alcohol_beer', checkin.alcohol_beer ?? 0)
     setInput('alcohol_wine', checkin.alcohol_wine ?? 0)
 
-    // Mindfulness
-    setCheck('mindfulness_meditation', checkin.mindfulness_meditation)
-    setCheck('mindfulness_yoga', checkin.mindfulness_yoga)
-
     // Supplements
     const suppList = document.getElementById('supplements-list')
     if (supplements.length) {
@@ -90,11 +87,17 @@ async function loadCheckin() {
     }
 
     // Behaviours
-    setCheck('outside_time', checkin.outside_time)
-    setCheck('social_media', checkin.social_media)
-    setCheck('p', checkin.p)
-    setCheck('m', checkin.m)
-    setCheck('s', checkin.s)
+    const behList = document.getElementById('behaviours-list')
+    if (behaviours.length) {
+      behList.innerHTML = behaviours.map(b => `
+        <div class="nhsuk-checkboxes__item">
+          <input class="nhsuk-checkboxes__input" id="beh-${b.id}" name="behaviour" type="checkbox" value="${b.name}"${checkin.behaviours?.[b.name] ? ' checked' : ''}>
+          <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}</label>
+        </div>
+      `).join('')
+    } else {
+      behList.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No behaviours configured.</p>'
+    }
 
     // Notes
     setInput('notes', checkin.notes)
@@ -131,6 +134,8 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
   const exerciseTypes = [...form.querySelectorAll('[name="exercise_types"]:checked')].map(el => el.value)
   const supplementsObj = {}
   form.querySelectorAll('[name="supplement"]').forEach(el => { supplementsObj[el.value] = el.checked })
+  const behavioursObj = {}
+  form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
 
   const payload = {
     global_mood: get('global_mood') ? Number(get('global_mood')) : null,
@@ -142,14 +147,8 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     alcohol_spirits: Number(get('alcohol_spirits') || 0),
     alcohol_beer: Number(get('alcohol_beer') || 0),
     alcohol_wine: Number(get('alcohol_wine') || 0),
-    mindfulness_meditation: bool('mindfulness_meditation'),
-    mindfulness_yoga: bool('mindfulness_yoga'),
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
-    outside_time: bool('outside_time'),
-    social_media: bool('social_media'),
-    p: bool('p'),
-    m: bool('m'),
-    s: bool('s'),
+    behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
     notes: get('notes') || null
   }
 

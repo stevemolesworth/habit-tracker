@@ -77,14 +77,8 @@ function mergeDay(date, morning, evening) {
     alcohol_beer: evening != null ? Number(evening.alcohol_beer || 0) : morning != null ? Number(morning.alcohol_beer || 0) : null,
     alcohol_wine: evening != null ? Number(evening.alcohol_wine || 0) : morning != null ? Number(morning.alcohol_wine || 0) : null,
     alcohol_spirits: evening != null ? Number(evening.alcohol_spirits || 0) : morning != null ? Number(morning.alcohol_spirits || 0) : null,
-    mindfulness_meditation: evening?.mindfulness_meditation ?? morning?.mindfulness_meditation ?? null,
-    mindfulness_yoga: evening?.mindfulness_yoga ?? morning?.mindfulness_yoga ?? null,
     supplements: mergeSupplements(morning?.supplements, evening?.supplements),
-    outside_time: evening?.outside_time ?? morning?.outside_time ?? null,
-    social_media: evening?.social_media ?? morning?.social_media ?? null,
-    p: evening?.p ?? morning?.p ?? null,
-    m: evening?.m ?? morning?.m ?? null,
-    s: evening?.s ?? morning?.s ?? null,
+    behaviours: mergeSupplements(morning?.behaviours, evening?.behaviours),
     morning_notes: morning?.notes ?? null,
     evening_notes: evening?.notes ?? null,
   }
@@ -272,19 +266,13 @@ function boolRow(label, days, fn, invert = false) {
   return `<div class="app-bool-row"><span class="app-bool-label">${label}</span><div class="app-bool-dots">${dots}</div></div>`
 }
 
-function renderBoolRows(days) {
+function renderBoolRows(days, behaviourDefs) {
   const suppNames = new Set()
   days.forEach(d => { if (d.supplements) Object.keys(d.supplements).forEach(k => suppNames.add(k)) })
 
   let html = boolRow('Exercise', days, d => d.exercised)
-  html += boolRow('Meditation', days, d => d.mindfulness_meditation)
-  html += boolRow('Yoga', days, d => d.mindfulness_yoga)
   suppNames.forEach(name => { html += boolRow(name, days, d => d.supplements?.[name] ?? null) })
-  html += boolRow('Outside', days, d => d.outside_time)
-  html += boolRow('Avoided social media', days, d => d.social_media)
-  html += boolRow('Avoided p... 🍑', days, d => d.p)
-  html += boolRow("Didn't m... 🍆💦", days, d => d.m)
-  html += boolRow('Had s... 🎆', days, d => d.s)
+  behaviourDefs.forEach(b => { html += boolRow(b.name, days, d => d.behaviours?.[b.name] ?? null) })
 
   document.getElementById('bool-rows').innerHTML = html
 }
@@ -302,7 +290,10 @@ async function loadReport() {
   document.getElementById('report-error').style.display = 'none'
 
   try {
-    const checkins = await api.getReport(from, to)
+    const [checkins, behaviourDefs] = await Promise.all([
+      api.getReport(from, to),
+      api.getBehaviours()
+    ])
     document.getElementById('report-loading').style.display = 'none'
 
     if (!checkins.length) {
@@ -320,7 +311,7 @@ async function loadReport() {
     renderSleep(days, labels)
     renderFocus(days, labels)
     renderAlcohol(days, labels)
-    renderBoolRows(days)
+    renderBoolRows(days, behaviourDefs)
   } catch (err) {
     document.getElementById('report-loading').style.display = 'none'
     document.getElementById('report-error').style.display = ''

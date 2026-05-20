@@ -41,6 +41,31 @@
             <p id="postcode-feedback" class="nhsuk-body-s" style="margin-top:8px;display:none"></p>
           </section>
 
+          <!-- Behaviours -->
+          <section class="app-section">
+            <h2 class="app-section-title">Behaviours</h2>
+            <p class="nhsuk-body">These appear as checkboxes on every evening check-in. Assign a weight to indicate how good or bad the behaviour is.</p>
+
+            <ul class="nhsuk-list" id="behaviour-list">
+              <li class="nhsuk-u-secondary-text-color">Loading…</li>
+            </ul>
+
+            <div style="margin-top:12px">
+              <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+                <div class="nhsuk-form-group" style="margin:0">
+                  <label class="nhsuk-label" for="new-behaviour">Behaviour name</label>
+                  <input class="nhsuk-input nhsuk-input--width-20" id="new-behaviour" type="text" placeholder="e.g. Read a book">
+                </div>
+                <div class="nhsuk-form-group" style="margin:0">
+                  <label class="nhsuk-label" for="new-behaviour-weight">Weight <span style="font-weight:400">💩 −3 to +3 👍</span></label>
+                  <input class="nhsuk-input nhsuk-input--width-3" id="new-behaviour-weight" type="number" min="-3" max="3" value="1">
+                </div>
+              </div>
+              <button class="nhsuk-button" id="add-behaviour-btn" style="margin-top:12px">Add</button>
+            </div>
+            <p id="behaviour-feedback" class="nhsuk-body-s" style="margin-top:8px;display:none"></p>
+          </section>
+
           <!-- Supplements -->
           <section class="app-section">
             <h2 class="app-section-title">Supplements</h2>

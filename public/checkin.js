@@ -42,7 +42,6 @@ document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
 document.getElementById('focus-section').style.display = isMorning ? 'none' : ''
 document.getElementById('exercise-section').style.display = isMorning ? 'none' : ''
 document.getElementById('alcohol-section').style.display = isMorning ? 'none' : ''
-document.getElementById('mindfulness-section').style.display = isMorning ? 'none' : ''
 document.getElementById('behaviours-section').style.display = isMorning ? 'none' : ''
 document.getElementById('notes-label').textContent = isMorning
   ? 'What would make today good?'
@@ -107,17 +106,37 @@ function populateForm(record) {
   setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
   setVal('alcohol_beer', record.alcohol_beer ?? 0)
   setVal('alcohol_wine', record.alcohol_wine ?? 0)
-  setCheck('mindfulness_meditation', record.mindfulness_meditation)
-  setCheck('mindfulness_yoga', record.mindfulness_yoga)
-  setCheck('outside_time', record.outside_time)
-  setCheck('social_media', record.social_media)
-  setCheck('behaviour_p', record.p)
-  setCheck('behaviour_m', record.m)
-  setCheck('behaviour_s', record.s)
   setVal('notes', record.notes)
 
   if (record.weather_postcode) {
     document.getElementById('weather-postcode').value = record.weather_postcode
+  }
+}
+
+// --- Behaviours ---
+async function loadBehaviours() {
+  const list = document.getElementById('behaviours-list')
+  try {
+    const behaviours = await api.getBehaviours()
+    if (!behaviours.length) {
+      list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No behaviours configured. Add them in <a href="/settings.html">Settings</a>.</p>'
+      return
+    }
+    list.innerHTML = behaviours.map(b => `
+      <div class="nhsuk-checkboxes__item">
+        <input class="nhsuk-checkboxes__input" id="beh-${b.id}" name="behaviour" type="checkbox" value="${b.name}" tabindex="0">
+        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}</label>
+      </div>
+    `).join('')
+
+    if (existingRecord?.behaviours) {
+      Object.entries(existingRecord.behaviours).forEach(([name, checked]) => {
+        const el = document.querySelector(`[name="behaviour"][value="${name}"]`)
+        if (el) el.checked = checked
+      })
+    }
+  } catch {
+    list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load behaviours.</p>'
   }
 }
 
@@ -278,6 +297,8 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
   const exerciseTypes = [...form.querySelectorAll('[name="exercise_types"]:checked')].map(el => el.value)
   const supplementsObj = {}
   form.querySelectorAll('[name="supplement"]').forEach(el => { supplementsObj[el.value] = el.checked })
+  const behavioursObj = {}
+  form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
 
   const payload = {
     check_in_type: type,
@@ -291,14 +312,8 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     alcohol_spirits: Number(get('alcohol_spirits') || 0),
     alcohol_beer: Number(get('alcohol_beer') || 0),
     alcohol_wine: Number(get('alcohol_wine') || 0),
-    mindfulness_meditation: bool('mindfulness_meditation'),
-    mindfulness_yoga: bool('mindfulness_yoga'),
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
-    outside_time: bool('outside_time'),
-    social_media: bool('social_media'),
-    p: bool('p'),
-    m: bool('m'),
-    s: bool('s'),
+    behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
     notes: get('notes') || null,
     weather_postcode: currentWeatherData?.postcode || null,
     weather_snapshot: currentWeatherData ? { current: currentWeatherData.current, hourly: currentWeatherData.hourly } : null
@@ -355,8 +370,9 @@ async function init() {
     document.getElementById('delete-section').style.display = ''
   }
 
-  // Load supplements (also re-populates from existing record)
+  // Load supplements and behaviours (also re-populates from existing record)
   loadSupplements()
+  loadBehaviours()
 
   // Load weather: prefer stored postcode from existing record, else settings default
   try {

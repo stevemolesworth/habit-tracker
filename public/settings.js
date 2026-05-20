@@ -1,5 +1,69 @@
 import { api } from '/api.js'
 
+// ── Behaviours ────────────────────────────────────────────────
+
+function weightLabel(w) {
+  if (w === -3) return '-3 💩'
+  if (w === 3) return '+3 👍'
+  return w > 0 ? `+${w}` : `${w}`
+}
+
+async function loadBehaviours() {
+  const list = document.getElementById('behaviour-list')
+  try {
+    const behaviours = await api.getBehaviours()
+    if (!behaviours.length) {
+      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No behaviours yet.</li>'
+      return
+    }
+    list.innerHTML = behaviours.map(b => `
+      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+        <span>${b.name} <span class="nhsuk-u-secondary-text-color nhsuk-body-s">(${weightLabel(b.weight)})</span></span>
+        <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="deleteBehaviour('${b.id}')">Remove</button>
+      </li>
+    `).join('')
+  } catch {
+    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load behaviours.</li>'
+  }
+}
+
+window.deleteBehaviour = async function(id) {
+  try {
+    await api.deleteBehaviour(id)
+    loadBehaviours()
+  } catch (err) {
+    showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+  }
+}
+
+document.getElementById('add-behaviour-btn').addEventListener('click', async () => {
+  const nameInput = document.getElementById('new-behaviour')
+  const weightInput = document.getElementById('new-behaviour-weight')
+  const name = nameInput.value.trim()
+  const weight = Number(weightInput.value)
+  if (!name) return
+  if (!Number.isInteger(weight) || weight < -3 || weight > 3) {
+    showFeedback('behaviour-feedback', 'Weight must be a whole number between -3 and 3.', true)
+    return
+  }
+  try {
+    await api.addBehaviour(name, weight)
+    nameInput.value = ''
+    weightInput.value = '1'
+    showFeedback('behaviour-feedback', `"${name}" added.`)
+    loadBehaviours()
+  } catch (err) {
+    showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+  }
+})
+
+document.getElementById('new-behaviour').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    document.getElementById('add-behaviour-btn').click()
+  }
+})
+
 // ── Supplements ──────────────────────────────────────────────
 
 async function loadSupplements() {
@@ -135,4 +199,5 @@ document.getElementById('delete-range-confirm-btn').addEventListener('click', as
 // ── Init ──────────────────────────────────────────────────────
 
 loadPostcode()
+loadBehaviours()
 loadSupplements()
