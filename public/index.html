@@ -77,13 +77,15 @@
               <section class="app-section" id="sleep-section">
                 <h2 class="nhsuk-heading-m">Sleep</h2>
 
-                <div class="nhsuk-form-group">
+                <div class="nhsuk-form-group" id="bedtime-group">
                   <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
+                  <p class="nhsuk-error-message" id="bedtime-error" style="display: none"><span class="nhsuk-u-visually-hidden">Error:</span> Enter a bedtime</p>
                   <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time" value="21:00" />
                 </div>
 
-                <div class="nhsuk-form-group">
+                <div class="nhsuk-form-group" id="wake-time-group">
                   <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
+                  <p class="nhsuk-error-message" id="wake-time-error" style="display: none"><span class="nhsuk-u-visually-hidden">Error:</span> Enter a wake time</p>
                   <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00" />
                   <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-1" style="display: none"></p>
                 </div>

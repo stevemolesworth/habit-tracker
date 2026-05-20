@@ -342,8 +342,16 @@ function updateSleepDuration() {
   el.style.display = ''
 }
 
-document.getElementById('bedtime').addEventListener('change', updateSleepDuration)
-document.getElementById('wake_time').addEventListener('change', updateSleepDuration)
+document.getElementById('bedtime').addEventListener('change', () => {
+  document.getElementById('bedtime-group').classList.remove('nhsuk-form-group--error')
+  document.getElementById('bedtime-error').style.display = 'none'
+  updateSleepDuration()
+})
+document.getElementById('wake_time').addEventListener('change', () => {
+  document.getElementById('wake-time-group').classList.remove('nhsuk-form-group--error')
+  document.getElementById('wake-time-error').style.display = 'none'
+  updateSleepDuration()
+})
 
 // --- Dirty tracking ---
 function markDirty(fieldName) {
@@ -472,6 +480,35 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
   btn.disabled = true
   btn.textContent = existingRecord ? 'Saving…' : 'Submitting…'
   hideError()
+
+  // Sleep validation
+  const bedtimeVal = document.getElementById('bedtime').value
+  const wakeVal = document.getElementById('wake_time').value
+  const bedtimeGroup = document.getElementById('bedtime-group')
+  const wakeGroup = document.getElementById('wake-time-group')
+  const bedtimeErr = document.getElementById('bedtime-error')
+  const wakeErr = document.getElementById('wake-time-error')
+  bedtimeGroup.classList.remove('nhsuk-form-group--error')
+  wakeGroup.classList.remove('nhsuk-form-group--error')
+  bedtimeErr.style.display = 'none'
+  wakeErr.style.display = 'none'
+  let sleepValid = true
+  if (!bedtimeVal) {
+    bedtimeGroup.classList.add('nhsuk-form-group--error')
+    bedtimeErr.style.display = ''
+    sleepValid = false
+  }
+  if (!wakeVal) {
+    wakeGroup.classList.add('nhsuk-form-group--error')
+    wakeErr.style.display = ''
+    sleepValid = false
+  }
+  if (!sleepValid) {
+    btn.disabled = false
+    btn.textContent = existingRecord ? 'Save changes' : 'Submit check-in'
+    document.getElementById('bedtime-group').scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
 
   const form = e.target
   const get = (name) => form.elements[name]?.value || null
@@ -646,7 +683,7 @@ async function showForm() {
     loadMorningMood()
   }
 
-  // Load weather: existing record location takes precedence over settings default
+  // Load config (location + feature flags)
   if (!currentLocation) {
     try {
       const config = await api.getWeights()
@@ -658,6 +695,9 @@ async function showForm() {
         }
         document.getElementById('weather-location-input').value = config.default_location_label || ''
         setLocationLabel(currentLocation.label)
+      }
+      if (config?.track_alcohol === false) {
+        document.getElementById('alcohol-section').style.display = 'none'
       }
     } catch { /* leave without location */ }
   }

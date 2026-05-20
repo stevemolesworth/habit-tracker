@@ -426,7 +426,14 @@ document.getElementById('preset-date-range').addEventListener('click', () => {
 document.getElementById('apply-btn').addEventListener('click', loadReport)
 
 // Default to last 7 days on load
-authReady.then(() => {
+authReady.then(async () => {
+  try {
+    const config = await api.getWeights()
+    if (config?.track_alcohol === false) {
+      document.getElementById('alcohol-section').style.display = 'none'
+    }
+  } catch { /* non-fatal */ }
+
   const { from: initFrom, to: initTo } = last7Range()
   document.getElementById('date-from').value = initFrom
   document.getElementById('date-to').value = initTo

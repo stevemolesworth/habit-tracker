@@ -31,6 +31,7 @@ export default async function handler(req) {
     if (body.default_location_lat !== undefined) update.default_location_lat = body.default_location_lat
     if (body.default_location_lng !== undefined) update.default_location_lng = body.default_location_lng
     if (body.default_location_label !== undefined) update.default_location_label = body.default_location_label
+    if (body.track_alcohol !== undefined) update.track_alcohol = Boolean(body.track_alcohol)
 
     const { data, error } = await supabase
       .from('weights')

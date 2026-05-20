@@ -380,7 +380,31 @@ function showFeedback(id, msg, isError = false) {
 
 // ── Init ──────────────────────────────────────────────────────
 
+// ── Track alcohol toggle ──────────────────────────────────────
+
+async function loadTrackAlcohol() {
+  try {
+    const config = await api.getWeights()
+    const enabled = config?.track_alcohol !== false // default true
+    document.getElementById('track-alcohol').checked = enabled
+  } catch { /* leave default checked */ }
+}
+
+document.getElementById('track-alcohol').addEventListener('change', async (e) => {
+  const feedback = document.getElementById('track-alcohol-feedback')
+  try {
+    await api.updateWeights({ track_alcohol: e.target.checked })
+    feedback.textContent = 'Saved.'
+    feedback.style.display = ''
+    setTimeout(() => { feedback.style.display = 'none' }, 2000)
+  } catch {
+    feedback.textContent = 'Could not save — please try again.'
+    feedback.style.display = ''
+  }
+})
+
 authReady.then(() => {
+  loadTrackAlcohol()
   loadFocuses()
   loadBehaviours()
   loadSupplements()
