@@ -62,12 +62,11 @@ document.getElementById('page-heading').innerHTML =
   `${isMorning ? 'Morning' : 'End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
 
 // Show/hide sections
-document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
 document.getElementById('focus-section').style.display = isMorning ? 'none' : ''
 document.getElementById('exercise-section').style.display = isMorning ? 'none' : ''
 document.getElementById('alcohol-section').style.display = isMorning ? 'none' : ''
-document.getElementById('supplements-section').style.display = isMorning ? 'none' : ''
 document.getElementById('behaviours-section').style.display = isMorning ? 'none' : ''
+document.getElementById('mood-legend').textContent = isMorning ? 'Overall mood' : 'Mood now'
 document.getElementById('notes-label').textContent = isMorning
   ? 'What would make today good?'
   : "What made today good? Anything you'd like to achieve tomorrow?"
@@ -86,7 +85,8 @@ function setLocationLabel(label) {
   }
 }
 
-document.getElementById('weather-toggle-location-btn').addEventListener('click', () => {
+document.getElementById('weather-toggle-location-btn').addEventListener('click', (e) => {
+  e.preventDefault()
   const form = document.getElementById('weather-location-form')
   form.style.display = form.style.display === 'none' ? '' : 'none'
 })
@@ -214,6 +214,21 @@ function populateForm(record) {
   } else if (record.weather_postcode) {
     document.getElementById('weather-location-input').value = record.weather_postcode
   }
+}
+
+// --- Morning mood (shown on evening check-in) ---
+async function loadMorningMood() {
+  try {
+    const record = await api.getTodayCheckin('morning', today)
+    const display = document.getElementById('morning-mood-display')
+    const value = document.getElementById('morning-mood-value')
+    if (record?.global_mood) {
+      value.textContent = record.global_mood
+    } else {
+      value.textContent = 'Not recorded'
+    }
+    display.style.display = ''
+  } catch { /* silently skip */ }
 }
 
 // --- Behaviours ---
@@ -611,11 +626,11 @@ async function init() {
 }
 
 async function showForm() {
-  // Load supplements, behaviours, and focuses (evening only)
+  loadSupplements()
   if (!isMorning) {
-    loadSupplements()
     loadBehaviours()
     loadFocuses()
+    loadMorningMood()
   }
 
   // Load weather: existing record location takes precedence over settings default
