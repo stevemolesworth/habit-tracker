@@ -19,6 +19,7 @@ export const api = {
   getCheckins: (month) => request(`/api/checkins${month ? `?month=${month}` : ''}`),
   getSupplements: () => request('/api/supplements'),
   addSupplement: (name) => request('/api/supplements', { method: 'POST', body: JSON.stringify({ name }) }),
+  updateSupplement: (id, name) => request(`/api/supplements?id=${id}`, { method: 'PUT', body: JSON.stringify({ name }) }),
   deleteSupplement: (id) => request(`/api/supplements?id=${id}`, { method: 'DELETE' }),
   getBehaviours: () => request('/api/behaviours'),
   addBehaviour: (name, weight) => request('/api/behaviours', { method: 'POST', body: JSON.stringify({ name, weight }) }),

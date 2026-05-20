@@ -151,9 +151,12 @@ async function loadSupplements() {
       return
     }
     list.innerHTML = supplements.map(s => `
-      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
+      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${s.name}</span>
-        <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" data-id="${s.id}" onclick="deleteSupplement('${s.id}')">Remove</button>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Edit</button>
+          <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Remove</button>
+        </div>
       </li>
     `).join('')
   } catch {
@@ -161,14 +164,69 @@ async function loadSupplements() {
   }
 }
 
-window.deleteSupplement = async function(id) {
+let editingSupplementId = null
+
+window.editSupplement = function(id, name) {
+  editingSupplementId = id
+  document.getElementById('edit-supplement-name').value = name
+  document.getElementById('supplement-edit-modal').style.display = 'flex'
+}
+
+document.getElementById('supplement-edit-cancel-btn').addEventListener('click', () => {
+  document.getElementById('supplement-edit-modal').style.display = 'none'
+  editingSupplementId = null
+})
+
+document.getElementById('supplement-edit-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('edit-supplement-name').value.trim()
+  if (!name) return
+  const btn = document.getElementById('supplement-edit-save-btn')
+  btn.disabled = true
+  btn.textContent = 'Saving…'
   try {
-    await api.deleteSupplement(id)
+    await api.updateSupplement(editingSupplementId, name)
+    document.getElementById('supplement-edit-modal').style.display = 'none'
+    editingSupplementId = null
+    showFeedback('supp-feedback', 'Supplement updated.')
     loadSupplements()
   } catch (err) {
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Save'
   }
+})
+
+let deletingSupplementId = null
+
+window.confirmDeleteSupplement = function(id, name) {
+  deletingSupplementId = id
+  document.getElementById('supplement-delete-summary').textContent = `Remove "${name}" from your supplements list?`
+  document.getElementById('supplement-delete-modal').style.display = 'flex'
 }
+
+document.getElementById('supplement-delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('supplement-delete-modal').style.display = 'none'
+  deletingSupplementId = null
+})
+
+document.getElementById('supplement-delete-confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('supplement-delete-confirm-btn')
+  btn.disabled = true
+  btn.textContent = 'Removing…'
+  try {
+    await api.deleteSupplement(deletingSupplementId)
+    document.getElementById('supplement-delete-modal').style.display = 'none'
+    deletingSupplementId = null
+    loadSupplements()
+  } catch (err) {
+    document.getElementById('supplement-delete-modal').style.display = 'none'
+    showFeedback('supp-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Remove'
+  }
+})
 
 document.getElementById('add-supplement-btn').addEventListener('click', async () => {
   const input = document.getElementById('new-supplement')

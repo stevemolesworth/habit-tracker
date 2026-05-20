@@ -135,6 +135,33 @@
     </div>
   </div>
 
+  <!-- Supplement edit modal -->
+  <div id="supplement-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:16px">Edit supplement</h2>
+      <div class="nhsuk-form-group">
+        <label class="nhsuk-label" for="edit-supplement-name">Name</label>
+        <input class="nhsuk-input" id="edit-supplement-name" type="text">
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button" id="supplement-edit-save-btn" style="margin:0">Save</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="supplement-edit-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplement delete confirm modal -->
+  <div id="supplement-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:8px">Remove supplement?</h2>
+      <p class="nhsuk-body" id="supplement-delete-summary"></p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+        <button class="nhsuk-button nhsuk-button--reverse" id="supplement-delete-confirm-btn" style="margin:0">Remove</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="supplement-delete-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Behaviour edit modal -->
   <div id="behaviour-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
     <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
