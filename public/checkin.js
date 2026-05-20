@@ -57,6 +57,7 @@ document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
 document.getElementById('focus-section').style.display = isMorning ? 'none' : ''
 document.getElementById('exercise-section').style.display = isMorning ? 'none' : ''
 document.getElementById('alcohol-section').style.display = isMorning ? 'none' : ''
+document.getElementById('supplements-section').style.display = isMorning ? 'none' : ''
 document.getElementById('behaviours-section').style.display = isMorning ? 'none' : ''
 document.getElementById('notes-label').textContent = isMorning
   ? 'What would make today good?'
@@ -475,6 +476,17 @@ function hideError() {
 async function init() {
   await authReady
 
+  // Auto-switch to evening if morning is already done today (and no explicit ?type= override)
+  if (!params.get('type') && !isPastDate) {
+    try {
+      const morningDone = await api.getTodayCheckin('morning', today)
+      if (morningDone && type !== 'evening') {
+        location.replace('/?type=evening')
+        return
+      }
+    } catch { /* non-fatal */ }
+  }
+
   try {
     existingRecord = await api.getTodayCheckin(type, today)
   } catch {
@@ -491,9 +503,11 @@ async function init() {
     document.getElementById('delete-section').style.display = ''
   }
 
-  // Load supplements and behaviours (also re-populates from existing record)
-  loadSupplements()
-  loadBehaviours()
+  // Load supplements and behaviours (evening only)
+  if (!isMorning) {
+    loadSupplements()
+    loadBehaviours()
+  }
 
   // Load weather: existing record location takes precedence over settings default
   if (!currentLocation) {
