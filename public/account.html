@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage account — 🐔 Chicken Check-In</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="app-global-header">
+      <div class="nhsuk-width-container">
+        <div class="app-global-header__inner">
+          <a href="/" class="app-global-header__title">🐔 Chicken Check-In</a>
+          <nav class="app-global-header__nav" aria-label="Main navigation">
+            <a href="/calendar.html">Calendar</a>
+            <a href="/reports.html">Reports</a>
+            <a href="/settings.html" id="nav-settings-link">Settings</a>
+            <a href="/admin.html" id="admin-nav-link" style="display: none">Admin</a>
+            <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display: none">Sign out</button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <div class="nhsuk-width-container">
+      <main class="nhsuk-main-wrapper" id="maincontent">
+
+        <nav class="nhsuk-back-link" aria-label="Back to previous page">
+          <a class="nhsuk-back-link__link" href="/settings.html">
+            <svg class="nhsuk-icon nhsuk-icon__chevron-left" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" height="24" width="24">
+              <path d="M8.5 12c0-.3.1-.5.3-.7l5-5c.4-.4 1-.4 1.4 0s.4 1 0 1.4L10.9 12l4.3 4.3c.4.4.4 1 0 1.4s-1 .4-1.4 0l-5-5c-.2-.2-.3-.4-.3-.7z"></path>
+            </svg>
+            Back to Settings
+          </a>
+        </nav>
+
+        <div class="nhsuk-grid-row">
+          <div class="nhsuk-grid-column-full">
+            <h1 class="nhsuk-heading-xl">Manage account</h1>
+          </div>
+        </div>
+
+        <div class="nhsuk-grid-row">
+          <div class="nhsuk-grid-column-two-thirds">
+
+            <!-- Account -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Account</h2>
+              <dl class="nhsuk-summary-list nhsuk-summary-list--no-border nhsuk-u-margin-bottom-4">
+                <div class="nhsuk-summary-list__row">
+                  <dt class="nhsuk-summary-list__key">Name</dt>
+                  <dd class="nhsuk-summary-list__value" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+                    <span id="settings-account-name">—</span>
+                    <a href="#" id="edit-name-btn" class="nhsuk-link">Edit</a>
+                  </dd>
+                </div>
+                <div class="nhsuk-summary-list__row" id="edit-name-row" style="display: none">
+                  <dt class="nhsuk-summary-list__key"></dt>
+                  <dd class="nhsuk-summary-list__value" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+                    <input class="nhsuk-input nhsuk-input--width-10" id="edit-name-input" type="text" autocomplete="given-name" />
+                    <button type="button" class="nhsuk-button" id="save-name-btn" style="margin: 0">Save</button>
+                    <button type="button" class="nhsuk-button nhsuk-button--secondary" id="cancel-name-btn" style="margin: 0">Cancel</button>
+                    <span id="edit-name-feedback" class="nhsuk-body-s" style="display: none"></span>
+                  </dd>
+                </div>
+                <div class="nhsuk-summary-list__row">
+                  <dt class="nhsuk-summary-list__key">Email</dt>
+                  <dd class="nhsuk-summary-list__value" id="settings-account-email">—</dd>
+                </div>
+              </dl>
+            </section>
+
+            <!-- Export -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Export data</h2>
+              <p class="nhsuk-body">Download all your check-ins for analysis.</p>
+              <div class="nhsuk-u-margin-bottom-4" style="display:flex;gap:16px;flex-wrap:wrap">
+                <button type="button" class="nhsuk-button nhsuk-button--secondary" style="margin:0" id="export-csv-btn">Download CSV</button>
+                <button type="button" class="nhsuk-button nhsuk-button--secondary" style="margin:0" id="export-json-btn">Download JSON</button>
+              </div>
+              <p id="export-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
+            </section>
+
+            <!-- Delete range -->
+            <section class="app-section" id="delete-data-section">
+              <h2 class="nhsuk-heading-m">Delete data</h2>
+              <p class="nhsuk-body">Permanently delete all check-ins within a date range. This cannot be undone.</p>
+              <div class="nhsuk-u-margin-bottom-3" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end">
+                <div class="nhsuk-form-group" style="margin: 0">
+                  <label class="nhsuk-label" for="delete-from">From</label>
+                  <input class="nhsuk-input nhsuk-input--width-10" id="delete-from" type="date" />
+                </div>
+                <div class="nhsuk-form-group" style="margin: 0">
+                  <label class="nhsuk-label" for="delete-to">To</label>
+                  <input class="nhsuk-input nhsuk-input--width-10" id="delete-to" type="date" />
+                </div>
+                <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" id="delete-range-btn" style="margin: 0">Delete check-ins</button>
+              </div>
+              <p id="delete-range-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
+            </section>
+
+            <!-- Delete account -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Delete account</h2>
+              <p class="nhsuk-body">This will permanently delete your account and all associated data. This cannot be undone.</p>
+              <button type="button" class="nhsuk-button nhsuk-button--warning nhsuk-button--small" id="delete-account-btn">Delete my account</button>
+            </section>
+
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Delete range confirm modal -->
+    <div id="delete-range-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Delete check-ins?</h2>
+        <p class="nhsuk-body" id="delete-range-summary"></p>
+        <p class="nhsuk-body-s nhsuk-u-secondary-text-color">This will permanently remove all check-ins in this range. This cannot be undone.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="delete-range-confirm-btn" style="margin:0">Delete</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="delete-range-cancel-btn" style="margin:0">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete account confirm modal -->
+    <div id="delete-account-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Delete your account?</h2>
+        <p class="nhsuk-body">This will permanently delete your account and all your check-ins, behaviours, and supplements.</p>
+        <div class="nhsuk-form-group" style="margin-bottom:8px">
+          <label class="nhsuk-label" for="delete-account-email-confirm">Enter your email address to confirm</label>
+          <input class="nhsuk-input" id="delete-account-email-confirm" type="email" autocomplete="off" />
+        </div>
+        <p id="delete-account-error" class="nhsuk-body-s" style="color:#d5281b;display:none"></p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="delete-account-confirm-btn" style="margin:0">Delete account</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="delete-account-cancel-btn" style="margin:0">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="nhsuk-footer" role="contentinfo">
+      <div class="nhsuk-width-container">
+        <h2 class="nhsuk-u-visually-hidden">Support links</h2>
+        <ul class="nhsuk-footer__list">
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/about.html">About</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/settings.html">Settings</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/calendar.html">Calendar</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/reports.html">Reports</a></li>
+        </ul>
+        <p class="nhsuk-footer__copyright">&copy; Chicken Check-In 2026</p>
+      </div>
+    </footer>
+
+    <script type="module" src="/account.js"></script>
+  </body>
+</html>
