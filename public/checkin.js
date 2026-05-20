@@ -476,15 +476,23 @@ function hideError() {
 async function init() {
   await authReady
 
-  // Auto-switch to evening if morning is already done today (and no explicit ?type= override)
+  // Auto-switch logic (no explicit ?type= override, today only)
   if (!params.get('type') && !isPastDate) {
-    try {
-      const morningDone = await api.getTodayCheckin('morning', today)
-      if (morningDone && type !== 'evening') {
-        location.replace('/?type=evening')
-        return
-      }
-    } catch { /* non-fatal */ }
+    // After 17:00: always show evening
+    if (londonHour >= 17 && type !== 'evening') {
+      location.replace('/?type=evening')
+      return
+    }
+    // Before 17:00: show evening if morning already submitted
+    if (londonHour < 17) {
+      try {
+        const morningDone = await api.getTodayCheckin('morning', today)
+        if (morningDone && type !== 'evening') {
+          location.replace('/?type=evening')
+          return
+        }
+      } catch { /* non-fatal */ }
+    }
   }
 
   try {
