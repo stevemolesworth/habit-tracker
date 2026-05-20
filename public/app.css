@@ -169,13 +169,6 @@
   border-bottom: none;
 }
 
-.app-section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #212b32;
-  margin-bottom: 16px;
-}
-
 /* Inline radio group for scale ratings */
 .nhsuk-radios--inline .nhsuk-radios__item {
   display: inline-block;
@@ -256,69 +249,6 @@
   color: #4c6272;
   margin-top: 2px;
   line-height: 1.2;
-}
-
-/* Score display */
-.app-score {
-  display: inline-block;
-  font-size: 3rem;
-  font-weight: 700;
-  color: #005eb8;
-  line-height: 1;
-}
-
-.app-score-label {
-  font-size: 0.875rem;
-  color: #4c6272;
-  margin-top: 4px;
-}
-
-/* Nav links */
-.app-nav {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.app-nav a {
-  color: #005eb8;
-  text-decoration: underline;
-  font-size: 1rem;
-}
-
-/* Morning/evening toggle */
-.app-type-toggle {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.app-type-toggle a {
-  padding: 8px 20px;
-  border: 2px solid #005eb8;
-  border-radius: 4px;
-  color: #005eb8;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.app-type-toggle a.active {
-  background: #005eb8;
-  color: #fff;
-}
-
-/* Confirmation quote card */
-.app-quote {
-  font-size: 1.25rem;
-  font-style: italic;
-  color: #212b32;
-  margin-bottom: 8px;
-}
-
-.app-quote-author {
-  font-size: 0.875rem;
-  color: #4c6272;
 }
 
 /* Report — boolean rows */

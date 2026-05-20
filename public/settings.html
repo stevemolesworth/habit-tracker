@@ -35,8 +35,8 @@
           <div class="nhsuk-grid-column-two-thirds">
             <!-- Account -->
             <section class="app-section">
-              <h2 class="app-section-title">Account</h2>
-              <dl class="nhsuk-summary-list nhsuk-summary-list--no-border" style="margin-bottom: 16px">
+              <h2 class="nhsuk-heading-m">Account</h2>
+              <dl class="nhsuk-summary-list nhsuk-summary-list--no-border nhsuk-u-margin-bottom-4">
                 <div class="nhsuk-summary-list__row">
                   <dt class="nhsuk-summary-list__key">Name</dt>
                   <dd class="nhsuk-summary-list__value" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
@@ -62,7 +62,7 @@
 
             <!-- Focuses -->
             <section class="app-section">
-              <h2 class="app-section-title">Focuses</h2>
+              <h2 class="nhsuk-heading-m">Focuses</h2>
               <p class="nhsuk-body">
                 These appear as 1–5 rating fields on every end of day check-in. Deactivate a focus to hide it from new check-ins while preserving historical data.
               </p>
@@ -71,26 +71,26 @@
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
               </ul>
 
-              <div style="margin-top: 12px">
+              <div class="nhsuk-u-margin-top-3">
                 <div class="nhsuk-form-group">
                   <label class="nhsuk-label" for="new-focus">Add focus</label>
                   <input class="nhsuk-input nhsuk-input--width-20" id="new-focus" type="text" placeholder="e.g. Deep work" />
                 </div>
                 <button class="nhsuk-button" id="add-focus-btn">Add</button>
               </div>
-              <p id="focus-feedback" class="nhsuk-body-s" style="margin-top: 8px; display: none"></p>
+              <p id="focus-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
 
             <!-- Behaviours -->
             <section class="app-section">
-              <h2 class="app-section-title">Behaviours</h2>
+              <h2 class="nhsuk-heading-m">Behaviours</h2>
               <p class="nhsuk-body">These appear as checkboxes on every end of day check-in. Assign a weight to indicate how good or bad the behaviour is.</p>
 
               <ul class="nhsuk-list" id="behaviour-list">
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
               </ul>
 
-              <div style="margin-top: 12px">
+              <div class="nhsuk-u-margin-top-3">
                 <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap">
                   <div class="nhsuk-form-group" style="margin: 0">
                     <label class="nhsuk-label" for="new-behaviour">Add behaviour</label>
@@ -107,42 +107,42 @@
                 </div>
                 <button class="nhsuk-button" id="add-behaviour-btn" style="margin-top: 12px">Add</button>
               </div>
-              <p id="behaviour-feedback" class="nhsuk-body-s" style="margin-top: 8px; display: none"></p>
+              <p id="behaviour-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
 
             <!-- Supplements -->
             <section class="app-section">
-              <h2 class="app-section-title">Supplements</h2>
+              <h2 class="nhsuk-heading-m">Supplements</h2>
               <p class="nhsuk-body">These appear as checkboxes on every check-in.</p>
 
               <ul class="nhsuk-list" id="supplement-list">
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
               </ul>
 
-              <div style="margin-top: 12px">
+              <div class="nhsuk-u-margin-top-3">
                 <div class="nhsuk-form-group">
                   <label class="nhsuk-label" for="new-supplement">Add supplement</label>
                   <input class="nhsuk-input nhsuk-input--width-20" id="new-supplement" type="text" placeholder="e.g. Vitamin D" />
                 </div>
                 <button class="nhsuk-button" id="add-supplement-btn">Add</button>
               </div>
-              <p id="supp-feedback" class="nhsuk-body-s" style="margin-top: 8px; display: none"></p>
+              <p id="supp-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
 
             <!-- Export -->
             <section class="app-section">
-              <h2 class="app-section-title">Export data</h2>
+              <h2 class="nhsuk-heading-m">Export data</h2>
               <p class="nhsuk-body">Download all your check-ins for analysis.</p>
-              <div class="app-nav">
-                <button type="button" class="nhsuk-button nhsuk-button--secondary" id="export-csv-btn">Download CSV</button>
-                <button type="button" class="nhsuk-button nhsuk-button--secondary" id="export-json-btn">Download JSON</button>
+              <div class="nhsuk-u-margin-bottom-4" style="display:flex;gap:16px;flex-wrap:wrap">
+                <button type="button" class="nhsuk-button nhsuk-button--secondary" style="margin:0" id="export-csv-btn">Download CSV</button>
+                <button type="button" class="nhsuk-button nhsuk-button--secondary" style="margin:0" id="export-json-btn">Download JSON</button>
               </div>
               <p id="export-feedback" class="nhsuk-body-s" style="display: none"></p>
             </section>
 
             <!-- Delete range -->
             <section class="app-section" id="delete-data-section">
-              <h2 class="app-section-title">Delete data</h2>
+              <h2 class="nhsuk-heading-m">Delete data</h2>
               <p class="nhsuk-body">Permanently delete all check-ins within a date range. This cannot be undone.</p>
               <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px">
                 <div class="nhsuk-form-group" style="margin: 0">
@@ -160,7 +160,7 @@
 
             <!-- Delete account -->
             <section class="app-section">
-              <h2 class="app-section-title">Delete account</h2>
+              <h2 class="nhsuk-heading-m">Delete account</h2>
               <p class="nhsuk-body">This will permanently delete your account and all associated data. This cannot be undone.</p>
               <button type="button" class="nhsuk-button nhsuk-button--warning nhsuk-button--small" id="delete-account-btn">Delete my account</button>
             </section>

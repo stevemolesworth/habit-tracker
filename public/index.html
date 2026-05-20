@@ -78,7 +78,7 @@
             <form id="checkin-form" novalidate>
               <!-- Sleep section (morning only) -->
               <section class="app-section" id="sleep-section">
-                <h2 class="app-section-title">Sleep</h2>
+                <h2 class="nhsuk-heading-m">Sleep</h2>
 
                 <div class="nhsuk-form-group">
                   <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
@@ -112,7 +112,7 @@
 
               <!-- Mood -->
               <section class="app-section" id="mood-section">
-                <h2 class="app-section-title">Mood</h2>
+                <h2 class="nhsuk-heading-m">Mood</h2>
                 <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
 
                 <fieldset class="nhsuk-fieldset">
@@ -159,7 +159,7 @@
 
               <!-- Focus -->
               <section class="app-section" id="focus-section">
-                <h2 class="app-section-title">Focus</h2>
+                <h2 class="nhsuk-heading-m">Focus</h2>
                 <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
                 <div id="focuses-list">
                   <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading focuses…</p>
@@ -168,7 +168,7 @@
 
               <!-- Exercise -->
               <section class="app-section" id="exercise-section">
-                <h2 class="app-section-title">Exercise</h2>
+                <h2 class="nhsuk-heading-m">Exercise</h2>
 
                 <div class="nhsuk-form-group">
                   <div class="nhsuk-checkboxes__item">
@@ -194,7 +194,7 @@
 
               <!-- Alcohol -->
               <section class="app-section" id="alcohol-section">
-                <h2 class="app-section-title">Alcohol (units)</h2>
+                <h2 class="nhsuk-heading-m">Alcohol (units)</h2>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px">
                   <div class="nhsuk-form-group">
                     <label class="nhsuk-label" for="alcohol_spirits">Spirits</label>
@@ -213,7 +213,7 @@
 
               <!-- Supplements -->
               <section class="app-section" id="supplements-section">
-                <h2 class="app-section-title">Supplements</h2>
+                <h2 class="nhsuk-heading-m">Supplements</h2>
                 <div class="nhsuk-checkboxes" id="supplements-list">
                   <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading supplements…</p>
                 </div>
@@ -221,7 +221,7 @@
 
               <!-- Behaviours -->
               <section class="app-section" id="behaviours-section">
-                <h2 class="app-section-title">Behaviours</h2>
+                <h2 class="nhsuk-heading-m">Behaviours</h2>
                 <div class="nhsuk-checkboxes" id="behaviours-list">
                   <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading behaviours…</p>
                 </div>
@@ -229,7 +229,7 @@
 
               <!-- Notes -->
               <section class="app-section">
-                <h2 class="app-section-title">Notes</h2>
+                <h2 class="nhsuk-heading-m">Notes</h2>
                 <div class="nhsuk-form-group">
                   <label class="nhsuk-label" for="notes" id="notes-label">Optional notes</label>
                   <textarea class="nhsuk-textarea" id="notes" name="notes" rows="4"></textarea>
@@ -238,9 +238,9 @@
 
               <button class="nhsuk-button" type="submit" id="submit-btn">Submit check-in</button>
 
-              <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="display: none; margin-top: 8px"></p>
+              <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-2" style="display: none"></p>
 
-              <div id="checkin-nav" style="margin-top: 16px"></div>
+              <div id="checkin-nav" class="nhsuk-u-margin-top-3"></div>
 
               <div id="delete-section" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid #d8dde0">
                 <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" type="button" id="delete-btn">Delete this check-in</button>
@@ -253,8 +253,8 @@
               <div id="weather-strip">
                 <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>
               </div>
-              <div style="margin-top: 8px">
-                <p id="weather-location-label" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom: 6px; min-height: 1.2em"></p>
+              <div class="nhsuk-u-margin-top-2">
+                <p id="weather-location-label" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-bottom-1" style="min-height: 1.2em"></p>
                 <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-toggle-location-btn" style="margin: 0 0 8px">
                   Add location
                 </button>
