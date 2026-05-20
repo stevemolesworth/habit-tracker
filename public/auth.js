@@ -40,8 +40,7 @@ function wireNav() {
     if (adminLink) adminLink.style.display = ''
   }
 
-  const settingsLink = document.getElementById('nav-settings-link')
-  if (settingsLink && _profile?.first_name) settingsLink.textContent = _profile.first_name
+  // settings link stays as "Settings" — no personalisation
 
   const logoutBtn = document.getElementById('nav-logout-btn')
   if (logoutBtn) {

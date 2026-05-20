@@ -38,7 +38,7 @@ async function init() {
     renderMood(current, allCheckins)
   } catch {
     document.getElementById('status-message').textContent =
-      type === 'morning' ? 'Morning check-in recorded' : 'Evening check-in recorded'
+      type === 'morning' ? 'Morning check-in recorded' : 'End of day check-in recorded'
   }
 }
 

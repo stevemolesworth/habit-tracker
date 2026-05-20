@@ -71,7 +71,7 @@ async function loadBehaviours() {
         <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
         <div style="display:flex;gap:6px;flex-shrink:0">
           <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})">Edit</button>
-          <button class="nhsuk-button nhsuk-button--reverse nhsuk-button--small" style="margin:0" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
+          <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" style="margin:0" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
         </div>
       </li>
     `).join('')
@@ -209,7 +209,7 @@ async function loadFocuses() {
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Edit</button>
             <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="toggleFocus('${f.id}', ${f.is_active})">${toggleLabel}</button>
-            <button class="nhsuk-button nhsuk-button--reverse nhsuk-button--small" style="margin:0" onclick="confirmDeleteFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Remove</button>
+            <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" style="margin:0" onclick="confirmDeleteFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Remove</button>
           </div>
         </li>`
     }).join('')
@@ -327,7 +327,7 @@ async function loadSupplements() {
         <span>${s.name}</span>
         <div style="display:flex;gap:6px;flex-shrink:0">
           <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Edit</button>
-          <button class="nhsuk-button nhsuk-button--reverse nhsuk-button--small" style="margin:0" onclick="confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Remove</button>
+          <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" style="margin:0" onclick="confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Remove</button>
         </div>
       </li>
     `).join('')

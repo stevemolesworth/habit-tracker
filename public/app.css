@@ -1,5 +1,6 @@
 /* Custom overrides on top of NHS Design System */
 
+
 /* Splash screen */
 .app-splash {
   position: fixed;
@@ -47,21 +48,6 @@
   margin-top: 8px;
 }
 
-.app-splash__btn {
-  display: inline-block;
-  background: #fff;
-  color: #005eb8;
-  font-weight: 700;
-  font-size: 1rem;
-  padding: 12px 28px;
-  border-radius: 4px;
-  text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.app-splash__btn:hover {
-  background: #f0f4f5;
-}
 
 .app-splash__skip {
   color: rgba(255,255,255,0.75);

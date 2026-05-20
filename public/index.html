@@ -14,15 +14,16 @@
         <h1 class="app-splash__text">🐔<br />Chicken Check-In</h1>
         <p class="app-splash__text">Hold tight — data is being loaded</p>
         <div class="app-splash__spinner"></div>
+        <a href="/login.html?logout=1" class="app-splash__skip" style="margin-top: 24px; color: rgba(255, 255, 255, 0.75)">Cancel and sign out</a>
       </div>
       <div class="app-splash__overlay" id="splash-welcome" style="display: none">
-        <p class="app-splash__text">👋 It looks like you're new here!</p>
-        <p class="app-splash__subtext">Before your first check-in, let's get you set up.</p>
+        <p class="app-splash__text">👋<br />It looks like you're new here!</p>
+        <p class="app-splash__subtext"><strong>Before your first check-in, let's get you set up.</strong></p>
         <div class="app-splash__actions">
-          <a href="/about.html" class="app-splash__btn">About CCI</a>
-          <a href="/settings.html" class="app-splash__btn">Set up what to track</a>
+          <a href="/settings.html" class="nhsuk-button">Set up what to track</a>
+          <a href="/about.html" class="nhsuk-button nhsuk-button--secondary-solid">Learn more</a>
         </div>
-        <a href="#" id="splash-skip-btn" class="app-splash__skip">Skip — take me to my check-in →</a>
+        <a href="#" id="splash-skip-btn" class="app-splash__skip">Skip — take me to my check-in</a>
       </div>
     </div>
 
@@ -45,11 +46,6 @@
       <main class="nhsuk-main-wrapper" id="maincontent">
         <div class="nhsuk-grid-row">
           <div class="nhsuk-grid-column-full">
-            <div class="app-type-toggle">
-              <a href="?type=morning" id="toggle-morning">☀️ Morning</a>
-              <a href="?type=evening" id="toggle-evening">🌙 Evening</a>
-            </div>
-
             <h1 class="nhsuk-heading-xl" id="page-heading"></h1>
           </div>
         </div>
@@ -64,9 +60,11 @@
             <div id="already-submitted-banner" class="nhsuk-card nhsuk-card--warning" style="display: none">
               <div class="nhsuk-card__content">
                 <h3 class="nhsuk-card__heading">
-                  <span role="text"> <span class="nhsuk-u-visually-hidden">Important: </span>Already submitted </span>
+                  <span role="text"> <span class="nhsuk-u-visually-hidden">Important: </span>We've got some data from you </span>
                 </h3>
-                <p class="nhsuk-card__description">Data for this check-in has already been submitted. Any changes you make will update the existing record.</p>
+                <p class="nhsuk-card__description">
+                  You've already submitted this check-in — but that's fine. Feel free to update or add anything you like. We'll save the latest version.
+                </p>
               </div>
             </div>
 
@@ -242,6 +240,8 @@
 
               <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="display: none; margin-top: 8px"></p>
 
+              <div id="checkin-nav" style="margin-top: 16px"></div>
+
               <div id="delete-section" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid #d8dde0">
                 <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" type="button" id="delete-btn">Delete this check-in</button>
               </div>
@@ -290,7 +290,7 @@
         <h2 class="nhsuk-heading-m" style="margin-bottom: 12px">Delete this check-in?</h2>
         <p class="nhsuk-body">This will permanently remove all data recorded for this check-in. This cannot be undone.</p>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
-          <button class="nhsuk-button nhsuk-button--reverse" id="delete-confirm-btn" style="margin: 0">Delete</button>
+          <button class="nhsuk-button nhsuk-button--warning" id="delete-confirm-btn" style="margin: 0">Delete</button>
           <button class="nhsuk-button nhsuk-button--secondary" id="delete-cancel-btn" style="margin: 0">Cancel</button>
         </div>
       </div>

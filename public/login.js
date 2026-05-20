@@ -10,7 +10,11 @@ async function init() {
   const { supabaseUrl, supabaseAnonKey } = await fetch('/api/auth-config').then(r => r.json())
   supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-  // Redirect if already signed in
+  if (new URLSearchParams(location.search).get('logout') === '1') {
+    await supabase.auth.signOut().catch(() => {})
+    history.replaceState(null, '', '/login.html')
+  }
+
   const { data: { session } } = await supabase.auth.getSession()
   if (session) { location.href = '/'; return }
 }

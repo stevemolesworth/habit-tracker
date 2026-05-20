@@ -115,7 +115,7 @@ function showDayDetail(dateStr, entries) {
   const hasEvening = entries.some(e => e.check_in_type === 'evening')
 
   const cards = entries.map(entry => {
-    const typeLabel = entry.check_in_type === 'morning' ? 'Morning' : 'Evening'
+    const typeLabel = entry.check_in_type === 'morning' ? 'Morning' : 'End of day'
     const badge = entry.check_in_type === 'morning'
       ? '<span class="app-badge app-badge--morning" style="font-size:0.75rem;padding:2px 6px">M</span>'
       : '<span class="app-badge app-badge--evening" style="font-size:0.75rem;padding:2px 6px">E</span>'
@@ -137,7 +137,7 @@ function showDayDetail(dateStr, entries) {
 
   const addButtons = [
     !hasMorning ? `<a href="/?type=morning&date=${dateStr}" class="nhsuk-button nhsuk-button--secondary" style="margin-right:12px">Add morning check-in</a>` : '',
-    !hasEvening ? `<a href="/?type=evening&date=${dateStr}" class="nhsuk-button nhsuk-button--secondary">Add evening check-in</a>` : ''
+    !hasEvening ? `<a href="/?type=evening&date=${dateStr}" class="nhsuk-button nhsuk-button--secondary">Add end of day check-in</a>` : ''
   ].filter(Boolean).join('')
 
   content.innerHTML = cards + (addButtons ? `<div style="margin-top:8px">${addButtons}</div>` : '')

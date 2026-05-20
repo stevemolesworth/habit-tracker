@@ -59,9 +59,7 @@ const dateCaption = isPastDate
   ? new Date(today + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   : `Today (${dateStr})`
 document.getElementById('page-heading').innerHTML =
-  `${isMorning ? 'Morning' : 'Evening'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
-document.getElementById('toggle-morning').classList.toggle('active', isMorning)
-document.getElementById('toggle-evening').classList.toggle('active', !isMorning)
+  `${isMorning ? 'Morning' : 'End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
 
 // Show/hide sections
 document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
@@ -163,10 +161,15 @@ document.getElementById('weather-geo-btn').addEventListener('click', () => {
     setLocationLabel(currentLocation.label)
     markDirty('weather')
     await loadWeather()
-  }, () => {
+  }, (err) => {
+    const msg = err.code === 1
+      ? 'Location blocked — check your browser\'s site permissions and try again.'
+      : err.code === 2
+        ? 'Location unavailable. Try entering a postcode instead.'
+        : 'Location request timed out. Try again or enter a postcode.'
     document.getElementById('weather-strip').innerHTML =
-      '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Location access denied</span>'
-  })
+      `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${msg}</span>`
+  }, { timeout: 10000 })
 })
 
 
@@ -364,6 +367,7 @@ document.getElementById('nav-guard-continue').addEventListener('click', () => {
 
 // Intercept all nav link clicks
 document.querySelectorAll('a[href]').forEach(link => {
+  if (link.closest('#app-splash')) return
   link.addEventListener('click', (e) => {
     if (!isDirty) return
     e.preventDefault()
@@ -529,16 +533,30 @@ function hideError() {
 
 // --- New-user splash ---
 function showNewUserSplash() {
+  isDirty = false
+  dirtyCategories.clear()
   document.getElementById('splash-loading').style.display = 'none'
   document.getElementById('splash-welcome').style.display = 'flex'
 }
 
-document.getElementById('splash-skip-btn').addEventListener('click', (e) => {
+document.getElementById('splash-skip-btn')?.addEventListener('click', (e) => {
   e.preventDefault()
-  hideSplash()
+  showForm()
 })
 
+
 // --- Init ---
+function renderCheckinNav() {
+  const el = document.getElementById('checkin-nav')
+  if (!el) return
+  const dateParam = today !== todayLocal ? `&date=${today}` : ''
+  if (isMorning) {
+    el.innerHTML = `<a href="/?type=evening${dateParam}" class="nhsuk-link" style="font-size:0.875rem">End of day check-in →</a>`
+  } else {
+    el.innerHTML = `<a href="/?type=morning${dateParam}" class="nhsuk-link" style="font-size:0.875rem">← Morning check-in</a>`
+  }
+}
+
 async function init() {
   await authReady
 
@@ -563,6 +581,8 @@ async function init() {
     }
   }
 
+  renderCheckinNav()
+
   try {
     existingRecord = await api.getTodayCheckin(type, today)
   } catch {
@@ -579,6 +599,16 @@ async function init() {
     document.getElementById('delete-section').style.display = ''
   }
 
+  const behaviours = await newUserCheckPromise
+  if (behaviours.length === 0) {
+    showNewUserSplash()
+    return
+  }
+
+  await showForm()
+}
+
+async function showForm() {
   // Load supplements, behaviours, and focuses (evening only)
   if (!isMorning) {
     loadSupplements()
@@ -607,13 +637,7 @@ async function init() {
   setupDirtyTracking()
   document.getElementById('page-loader').style.display = 'none'
   document.getElementById('main-content-row').style.display = ''
-
-  const behaviours = await newUserCheckPromise
-  if (behaviours.length === 0) {
-    showNewUserSplash()
-  } else {
-    hideSplash()
-  }
+  hideSplash()
 }
 
 init()
