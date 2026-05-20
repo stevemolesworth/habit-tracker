@@ -53,6 +53,12 @@ function wireNav() {
     settingsSignoutBtn.addEventListener('click', () => signOut())
   }
 
+  const navAccountLink = document.getElementById('nav-account-link')
+  if (navAccountLink && _profile?.first_name) {
+    navAccountLink.textContent = _profile.first_name
+    navAccountLink.style.display = ''
+  }
+
   const settingsName = document.getElementById('settings-account-name')
   if (settingsName && _profile) settingsName.textContent = _profile.first_name
 
