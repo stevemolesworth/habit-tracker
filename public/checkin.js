@@ -84,6 +84,14 @@ document.getElementById('weather-toggle-location-btn').addEventListener('click',
 
 async function loadWeather() {
   const strip = document.getElementById('weather-strip')
+
+  // Past check-ins: always show the snapshot captured at submission time
+  if (isPastDate && existingRecord?.weather_snapshot?.hourly?.length) {
+    currentWeatherData = existingRecord.weather_snapshot
+    strip.innerHTML = buildWeatherStrip(existingRecord.weather_snapshot, type)
+    return
+  }
+
   if (!currentLocation) {
     strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">No location set</span>'
     return
@@ -91,7 +99,7 @@ async function loadWeather() {
   strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>'
   try {
     currentWeatherData = await fetchWeather(currentLocation, today)
-    strip.innerHTML = buildWeatherStrip(currentWeatherData, isPastDate ? 'evening' : type)
+    strip.innerHTML = buildWeatherStrip(currentWeatherData, type)
     if (existingRecord) {
       const locationChanged = currentLocation.lat !== existingRecord.weather_lat || currentLocation.lng !== existingRecord.weather_lng
       const snapshotChanged = JSON.stringify(currentWeatherData.hourly) !== JSON.stringify(existingRecord.weather_snapshot?.hourly)

@@ -117,8 +117,8 @@ function tooltipTitle(days) {
 }
 
 function dayHref(d) {
-  if (d.evening_id) return `/edit.html?id=${d.evening_id}`
-  if (d.morning_id) return `/edit.html?id=${d.morning_id}`
+  if (d.evening_id) return `/?type=evening&date=${d.date}`
+  if (d.morning_id) return `/?type=morning&date=${d.date}`
   return null
 }
 

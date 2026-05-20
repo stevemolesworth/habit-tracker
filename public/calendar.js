@@ -103,7 +103,7 @@ function showDayDetail(dateStr, entries) {
         <div class="nhsuk-card__content">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
             <h3 class="nhsuk-heading-s" style="margin:0">${badge} ${typeLabel}</h3>
-            <a href="/edit.html?id=${entry.id}" class="nhsuk-link">Edit</a>
+            <a href="/?type=${entry.check_in_type}&date=${entry.check_in_date}" class="nhsuk-link">Edit</a>
           </div>
           ${entry.global_mood ? `<p class="nhsuk-body-s" style="margin:0">Mood: ${entry.global_mood}/5</p>` : ''}
           ${entry.exercised ? `<p class="nhsuk-body-s" style="margin:0">Exercised ✓</p>` : ''}
