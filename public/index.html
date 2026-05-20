@@ -1,295 +1,339 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Check in — 🐔 Chicken Check-In</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css">
-  <link rel="stylesheet" href="/app.css">
-</head>
-<body>
-  <header class="app-global-header">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check in — 🐔 Chicken Check-In</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <!-- Splash screen — hidden by checkin.js once init() completes -->
+    <div id="app-splash" class="app-splash">
+      <div class="app-splash__overlay" id="splash-loading">
+        <h1 class="app-splash__text">🐔<br />Chicken Check-In</h1>
+        <p class="app-splash__text">Hold tight — data is being loaded</p>
+        <div class="app-splash__spinner"></div>
+      </div>
+      <div class="app-splash__overlay" id="splash-welcome" style="display: none">
+        <p class="app-splash__text">👋 It looks like you're new here!</p>
+        <p class="app-splash__subtext">Before your first check-in, let's get you set up.</p>
+        <div class="app-splash__actions">
+          <a href="/about.html" class="app-splash__btn">About CCI</a>
+          <a href="/settings.html" class="app-splash__btn">Set up what to track</a>
+        </div>
+        <a href="#" id="splash-skip-btn" class="app-splash__skip">Skip — take me to my check-in →</a>
+      </div>
+    </div>
+
+    <header class="app-global-header">
+      <div class="nhsuk-width-container">
+        <div class="app-global-header__inner">
+          <a href="/" class="app-global-header__title">🐔 Chicken Check-In</a>
+          <nav class="app-global-header__nav" aria-label="Main navigation">
+            <a href="/calendar.html">Calendar</a>
+            <a href="/reports.html">Reports</a>
+            <a href="/settings.html" id="nav-settings-link">Settings</a>
+            <a href="/admin.html" id="admin-nav-link" style="display: none">Admin</a>
+            <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display: none">Sign out</button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
     <div class="nhsuk-width-container">
-      <div class="app-global-header__inner">
-        <a href="/" class="app-global-header__title">🐔 Chicken Check-In</a>
-        <nav class="app-global-header__nav" aria-label="Main navigation">
-          <a href="/">Check in</a>
-          <a href="/calendar.html">Calendar</a>
-          <a href="/reports.html">Reports</a>
-          <a href="/settings.html" id="nav-settings-link">Settings</a>
-          <a href="/admin.html" id="admin-nav-link" style="display:none">Admin</a>
-          <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display:none">Sign out</button>
-        </nav>
-      </div>
-    </div>
-  </header>
+      <main class="nhsuk-main-wrapper" id="maincontent">
+        <div class="nhsuk-grid-row">
+          <div class="nhsuk-grid-column-full">
+            <div class="app-type-toggle">
+              <a href="?type=morning" id="toggle-morning">☀️ Morning</a>
+              <a href="?type=evening" id="toggle-evening">🌙 Evening</a>
+            </div>
 
-  <div class="nhsuk-width-container">
-    <main class="nhsuk-main-wrapper" id="maincontent">
-      <div class="nhsuk-grid-row">
-        <div class="nhsuk-grid-column-full">
-
-          <div class="app-type-toggle">
-            <a href="?type=morning" id="toggle-morning">☀️ Morning</a>
-            <a href="?type=evening" id="toggle-evening">🌙 Evening</a>
+            <h1 class="nhsuk-heading-xl" id="page-heading"></h1>
           </div>
-
-          <h1 class="nhsuk-heading-xl" id="page-heading"></h1>
-
         </div>
-      </div>
 
-      <div id="page-loader" class="app-loader">
-        <div class="app-loader__spinner"></div>
-        <span class="nhsuk-body nhsuk-u-secondary-text-color">Loading your check-in…</span>
-      </div>
+        <div id="page-loader" class="app-loader">
+          <div class="app-loader__spinner"></div>
+          <span class="nhsuk-body nhsuk-u-secondary-text-color">Loading your check-in…</span>
+        </div>
 
-      <div id="main-content-row" class="nhsuk-grid-row" style="display:none">
-        <div class="nhsuk-grid-column-two-thirds">
-
-          <div id="already-submitted-banner" class="nhsuk-card nhsuk-card--warning" style="display:none">
-            <div class="nhsuk-card__content">
-              <h3 class="nhsuk-card__heading">
-                <span role="text">
-                  <span class="nhsuk-u-visually-hidden">Important: </span>Already submitted
-                </span>
-              </h3>
-              <p class="nhsuk-card__description">Data for this check-in has already been submitted. Any changes you make will update the existing record.</p>
+        <div id="main-content-row" class="nhsuk-grid-row" style="display: none">
+          <div class="nhsuk-grid-column-two-thirds">
+            <div id="already-submitted-banner" class="nhsuk-card nhsuk-card--warning" style="display: none">
+              <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">
+                  <span role="text"> <span class="nhsuk-u-visually-hidden">Important: </span>Already submitted </span>
+                </h3>
+                <p class="nhsuk-card__description">Data for this check-in has already been submitted. Any changes you make will update the existing record.</p>
+              </div>
             </div>
-          </div>
 
-          <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" style="display:none">
-            <h2 class="nhsuk-error-summary__title" id="error-summary-title">There was a problem</h2>
-            <div class="nhsuk-error-summary__body">
-              <p id="error-message"></p>
+            <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" style="display: none">
+              <h2 class="nhsuk-error-summary__title" id="error-summary-title">There was a problem</h2>
+              <div class="nhsuk-error-summary__body">
+                <p id="error-message"></p>
+              </div>
             </div>
-          </div>
 
-          <form id="checkin-form" novalidate>
-            <!-- Sleep section (morning only) -->
-            <section class="app-section" id="sleep-section">
-              <h2 class="app-section-title">Sleep</h2>
+            <form id="checkin-form" novalidate>
+              <!-- Sleep section (morning only) -->
+              <section class="app-section" id="sleep-section">
+                <h2 class="app-section-title">Sleep</h2>
 
-              <div class="nhsuk-form-group">
-                <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
-                <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time" value="21:00">
-              </div>
+                <div class="nhsuk-form-group">
+                  <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
+                  <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time" value="21:00" />
+                </div>
 
-              <div class="nhsuk-form-group">
-                <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
-                <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00">
-                <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-top:6px;display:none"></p>
-              </div>
+                <div class="nhsuk-form-group">
+                  <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
+                  <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00" />
+                  <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-top: 6px; display: none"></p>
+                </div>
 
-              <fieldset class="nhsuk-fieldset">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
-                <div class="nhsuk-radios nhsuk-radios--inline" id="sleep_quality">
-                  <div class="nhsuk-radios__item">
-                    <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0">
-                    <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
+                <fieldset class="nhsuk-fieldset">
+                  <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
+                  <div class="nhsuk-radios nhsuk-radios--inline" id="sleep_quality">
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0" />
+                      <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="sq-2" name="sleep_quality" type="radio" value="2" />
+                      <label class="nhsuk-label nhsuk-radios__label" for="sq-2">Average</label>
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="sq-3" name="sleep_quality" type="radio" value="3" />
+                      <label class="nhsuk-label nhsuk-radios__label" for="sq-3">Good</label>
+                    </div>
                   </div>
-                  <div class="nhsuk-radios__item">
-                    <input class="nhsuk-radios__input" id="sq-2" name="sleep_quality" type="radio" value="2">
-                    <label class="nhsuk-label nhsuk-radios__label" for="sq-2">Average</label>
+                </fieldset>
+              </section>
+
+              <!-- Mood -->
+              <section class="app-section" id="mood-section">
+                <h2 class="app-section-title">Mood</h2>
+                <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
+
+                <fieldset class="nhsuk-fieldset">
+                  <legend class="nhsuk-fieldset__legend nhsuk-label">Overall mood</legend>
+                  <div class="nhsuk-radios nhsuk-radios--inline">
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1" tabindex="0" /><label
+                        class="nhsuk-label nhsuk-radios__label"
+                        for="gm-1"
+                        >1</label
+                      >
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="gm-2" name="global_mood" type="radio" value="2" /><label
+                        class="nhsuk-label nhsuk-radios__label"
+                        for="gm-2"
+                        >2</label
+                      >
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="gm-3" name="global_mood" type="radio" value="3" /><label
+                        class="nhsuk-label nhsuk-radios__label"
+                        for="gm-3"
+                        >3</label
+                      >
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="gm-4" name="global_mood" type="radio" value="4" /><label
+                        class="nhsuk-label nhsuk-radios__label"
+                        for="gm-4"
+                        >4</label
+                      >
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="gm-5" name="global_mood" type="radio" value="5" /><label
+                        class="nhsuk-label nhsuk-radios__label"
+                        for="gm-5"
+                        >5</label
+                      >
+                    </div>
                   </div>
-                  <div class="nhsuk-radios__item">
-                    <input class="nhsuk-radios__input" id="sq-3" name="sleep_quality" type="radio" value="3">
-                    <label class="nhsuk-label nhsuk-radios__label" for="sq-3">Good</label>
-                  </div>
+                </fieldset>
+              </section>
+
+              <!-- Focus -->
+              <section class="app-section" id="focus-section">
+                <h2 class="app-section-title">Focus</h2>
+                <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
+                <div id="focuses-list">
+                  <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading focuses…</p>
                 </div>
-              </fieldset>
-            </section>
+              </section>
 
-            <!-- Mood -->
-            <section class="app-section" id="mood-section">
-              <h2 class="app-section-title">Mood</h2>
-              <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
+              <!-- Exercise -->
+              <section class="app-section" id="exercise-section">
+                <h2 class="app-section-title">Exercise</h2>
 
-              <fieldset class="nhsuk-fieldset">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Overall mood</legend>
-                <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-1" name="global_mood" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="gm-1">1</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-2" name="global_mood" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="gm-2">2</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-3" name="global_mood" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="gm-3">3</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-4" name="global_mood" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="gm-4">4</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="gm-5" name="global_mood" type="radio" value="5"><label class="nhsuk-label nhsuk-radios__label" for="gm-5">5</label></div>
-                </div>
-              </fieldset>
-            </section>
-
-            <!-- Focus -->
-            <section class="app-section" id="focus-section">
-              <h2 class="app-section-title">Focus</h2>
-              <p class="nhsuk-hint">1 = Poor, 5 = Excellent</p>
-
-              <fieldset class="nhsuk-fieldset">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Financial admin</legend>
-                <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-1" name="focus_financial" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="ff-1">1</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-2" name="focus_financial" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="ff-2">2</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-3" name="focus_financial" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="ff-3">3</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-4" name="focus_financial" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="ff-4">4</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="ff-5" name="focus_financial" type="radio" value="5"><label class="nhsuk-label nhsuk-radios__label" for="ff-5">5</label></div>
-                </div>
-              </fieldset>
-
-              <fieldset class="nhsuk-fieldset" style="margin-top:16px">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Consulting</legend>
-                <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-1" name="focus_consulting" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="fc-1">1</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-2" name="focus_consulting" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="fc-2">2</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-3" name="focus_consulting" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="fc-3">3</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-4" name="focus_consulting" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="fc-4">4</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fc-5" name="focus_consulting" type="radio" value="5"><label class="nhsuk-label nhsuk-radios__label" for="fc-5">5</label></div>
-                </div>
-              </fieldset>
-
-              <fieldset class="nhsuk-fieldset" style="margin-top:16px">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Opiner</legend>
-                <div class="nhsuk-radios nhsuk-radios--inline">
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-1" name="focus_opiner" type="radio" value="1" tabindex="0"><label class="nhsuk-label nhsuk-radios__label" for="fo-1">1</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-2" name="focus_opiner" type="radio" value="2"><label class="nhsuk-label nhsuk-radios__label" for="fo-2">2</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-3" name="focus_opiner" type="radio" value="3"><label class="nhsuk-label nhsuk-radios__label" for="fo-3">3</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-4" name="focus_opiner" type="radio" value="4"><label class="nhsuk-label nhsuk-radios__label" for="fo-4">4</label></div>
-                  <div class="nhsuk-radios__item"><input class="nhsuk-radios__input" id="fo-5" name="focus_opiner" type="radio" value="5"><label class="nhsuk-label nhsuk-radios__label" for="fo-5">5</label></div>
-                </div>
-              </fieldset>
-            </section>
-
-            <!-- Exercise -->
-            <section class="app-section" id="exercise-section">
-              <h2 class="app-section-title">Exercise</h2>
-
-              <div class="nhsuk-form-group">
-                <div class="nhsuk-checkboxes__item">
-                  <input class="nhsuk-checkboxes__input" id="exercised" name="exercised" type="checkbox" tabindex="0">
-                  <label class="nhsuk-label nhsuk-checkboxes__label" for="exercised">Exercised today</label>
-                </div>
-              </div>
-
-              <fieldset class="nhsuk-fieldset" id="exercise-details" style="display:none">
-                <legend class="nhsuk-fieldset__legend nhsuk-label">Type(s)</legend>
-                <div class="nhsuk-checkboxes">
+                <div class="nhsuk-form-group">
                   <div class="nhsuk-checkboxes__item">
-                    <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0">
-                    <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin, swimming)</label>
-                  </div>
-                  <div class="nhsuk-checkboxes__item">
-                    <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" tabindex="0">
-                    <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
+                    <input class="nhsuk-checkboxes__input" id="exercised" name="exercised" type="checkbox" tabindex="0" />
+                    <label class="nhsuk-label nhsuk-checkboxes__label" for="exercised">Exercised today</label>
                   </div>
                 </div>
-              </fieldset>
-            </section>
 
-            <!-- Alcohol -->
-            <section class="app-section" id="alcohol-section">
-              <h2 class="app-section-title">Alcohol (units)</h2>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                <fieldset class="nhsuk-fieldset" id="exercise-details" style="display: none">
+                  <legend class="nhsuk-fieldset__legend nhsuk-label">Type(s)</legend>
+                  <div class="nhsuk-checkboxes">
+                    <div class="nhsuk-checkboxes__item">
+                      <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0" />
+                      <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic (running, cycling, spin, swimming)</label>
+                    </div>
+                    <div class="nhsuk-checkboxes__item">
+                      <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" tabindex="0" />
+                      <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
+                    </div>
+                  </div>
+                </fieldset>
+              </section>
+
+              <!-- Alcohol -->
+              <section class="app-section" id="alcohol-section">
+                <h2 class="app-section-title">Alcohol (units)</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px">
+                  <div class="nhsuk-form-group">
+                    <label class="nhsuk-label" for="alcohol_spirits">Spirits</label>
+                    <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_spirits" name="alcohol_spirits" type="number" min="0" step="0.5" value="0" />
+                  </div>
+                  <div class="nhsuk-form-group">
+                    <label class="nhsuk-label" for="alcohol_beer">Beer</label>
+                    <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_beer" name="alcohol_beer" type="number" min="0" step="0.5" value="0" />
+                  </div>
+                  <div class="nhsuk-form-group">
+                    <label class="nhsuk-label" for="alcohol_wine">Wine</label>
+                    <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_wine" name="alcohol_wine" type="number" min="0" step="0.5" value="0" />
+                  </div>
+                </div>
+              </section>
+
+              <!-- Supplements -->
+              <section class="app-section" id="supplements-section">
+                <h2 class="app-section-title">Supplements</h2>
+                <div class="nhsuk-checkboxes" id="supplements-list">
+                  <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading supplements…</p>
+                </div>
+              </section>
+
+              <!-- Behaviours -->
+              <section class="app-section" id="behaviours-section">
+                <h2 class="app-section-title">Behaviours</h2>
+                <div class="nhsuk-checkboxes" id="behaviours-list">
+                  <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading behaviours…</p>
+                </div>
+              </section>
+
+              <!-- Notes -->
+              <section class="app-section">
+                <h2 class="app-section-title">Notes</h2>
                 <div class="nhsuk-form-group">
-                  <label class="nhsuk-label" for="alcohol_spirits">Spirits</label>
-                  <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_spirits" name="alcohol_spirits" type="number" min="0" step="0.5" value="0">
+                  <label class="nhsuk-label" for="notes" id="notes-label">Optional notes</label>
+                  <textarea class="nhsuk-textarea" id="notes" name="notes" rows="4"></textarea>
                 </div>
-                <div class="nhsuk-form-group">
-                  <label class="nhsuk-label" for="alcohol_beer">Beer</label>
-                  <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_beer" name="alcohol_beer" type="number" min="0" step="0.5" value="0">
+              </section>
+
+              <button class="nhsuk-button" type="submit" id="submit-btn">Submit check-in</button>
+
+              <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="display: none; margin-top: 8px"></p>
+
+              <div id="delete-section" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid #d8dde0">
+                <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" type="button" id="delete-btn">Delete this check-in</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="nhsuk-grid-column-one-third">
+            <div id="weather-widget">
+              <div id="weather-strip">
+                <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>
+              </div>
+              <div style="margin-top: 8px">
+                <p id="weather-location-label" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom: 6px; min-height: 1.2em"></p>
+                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-toggle-location-btn" style="margin: 0 0 8px">
+                  Add location
+                </button>
+                <div id="weather-location-form" style="display: none; margin-bottom: 8px">
+                  <div style="display: flex; gap: 6px; margin-bottom: 6px">
+                    <input class="nhsuk-input nhsuk-input--width-10" id="weather-location-input" type="text" placeholder="Postcode or city…" />
+                    <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-search-btn" style="margin: 0">Search</button>
+                  </div>
+                  <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="weather-geo-btn" style="margin: 0">📍 Use my location</button>
                 </div>
-                <div class="nhsuk-form-group">
-                  <label class="nhsuk-label" for="alcohol_wine">Wine</label>
-                  <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_wine" name="alcohol_wine" type="number" min="0" step="0.5" value="0">
-                </div>
-              </div>
-            </section>
-
-            <!-- Supplements -->
-            <section class="app-section" id="supplements-section">
-              <h2 class="app-section-title">Supplements</h2>
-              <div class="nhsuk-checkboxes" id="supplements-list">
-                <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading supplements…</p>
-              </div>
-            </section>
-
-            <!-- Behaviours -->
-            <section class="app-section" id="behaviours-section">
-              <h2 class="app-section-title">Behaviours</h2>
-              <div class="nhsuk-checkboxes" id="behaviours-list">
-                <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading behaviours…</p>
-              </div>
-            </section>
-
-            <!-- Notes -->
-            <section class="app-section">
-              <h2 class="app-section-title">Notes</h2>
-              <div class="nhsuk-form-group">
-                <label class="nhsuk-label" for="notes" id="notes-label">Optional notes</label>
-                <textarea class="nhsuk-textarea" id="notes" name="notes" rows="4"></textarea>
-              </div>
-            </section>
-
-            <button class="nhsuk-button" type="submit" id="submit-btn">Submit check-in</button>
-
-            <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="display:none;margin-top:8px"></p>
-
-            <div id="delete-section" style="display:none;margin-top:24px;padding-top:24px;border-top:1px solid #d8dde0">
-              <button class="nhsuk-button nhsuk-button--reverse" type="button" id="delete-btn">Delete this check-in</button>
-            </div>
-          </form>
-
-        </div>
-
-        <div class="nhsuk-grid-column-one-third">
-          <div id="weather-widget">
-            <div id="weather-strip">
-              <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>
-            </div>
-            <div style="margin-top:8px">
-              <p id="weather-location-label" class="nhsuk-body-s nhsuk-u-secondary-text-color"
-                 style="margin-bottom:6px;min-height:1.2em"></p>
-              <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
-                      id="weather-toggle-location-btn" style="margin:0 0 8px">Add location</button>
-              <div id="weather-location-form" style="display:none;margin-bottom:8px">
-                <div style="display:flex;gap:6px;margin-bottom:6px">
-                  <input class="nhsuk-input nhsuk-input--width-10" id="weather-location-input"
-                         type="text" placeholder="Postcode or city…">
-                  <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
-                          id="weather-search-btn" style="margin:0">Search</button>
-                </div>
-                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
-                        id="weather-geo-btn" style="margin:0">📍 Use my location</button>
               </div>
             </div>
           </div>
         </div>
+      </main>
+    </div>
 
-      </div>
-    </main>
-  </div>
-
-  <!-- Delete confirm modal -->
-  <div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
-      <h2 class="nhsuk-heading-m" style="margin-bottom:12px">Delete this check-in?</h2>
-      <p class="nhsuk-body">This will permanently remove all data recorded for this check-in. This cannot be undone.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-        <button class="nhsuk-button nhsuk-button--reverse" id="delete-confirm-btn" style="margin:0">Delete</button>
-        <button class="nhsuk-button nhsuk-button--secondary" id="delete-cancel-btn" style="margin:0">Cancel</button>
+    <!-- Delete confirm modal -->
+    <div
+      id="delete-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 420px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
+        <h2 class="nhsuk-heading-m" style="margin-bottom: 12px">Delete this check-in?</h2>
+        <p class="nhsuk-body">This will permanently remove all data recorded for this check-in. This cannot be undone.</p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button nhsuk-button--reverse" id="delete-confirm-btn" style="margin: 0">Delete</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="delete-cancel-btn" style="margin: 0">Cancel</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Navigation guard modal -->
-  <div id="nav-guard-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
-    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
-      <h2 class="nhsuk-heading-m" style="margin-bottom:12px">You have unsaved changes</h2>
-      <p class="nhsuk-body" style="margin-bottom:4px">If you leave this page your changes will be lost:</p>
-      <ul class="nhsuk-list nhsuk-list--bullet" id="nav-guard-changes" style="margin-bottom:0"></ul>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-        <button class="nhsuk-button" id="nav-guard-cancel" style="margin:0">Cancel</button>
-        <button class="nhsuk-button nhsuk-button--secondary" id="nav-guard-continue" style="margin:0">Disregard and continue</button>
+    <!-- Navigation guard modal -->
+    <div
+      id="nav-guard-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 420px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
+        <h2 class="nhsuk-heading-m" style="margin-bottom: 12px">You have unsaved changes</h2>
+        <p class="nhsuk-body" style="margin-bottom: 4px">If you leave this page your the following changes will be lost:</p>
+        <ul class="nhsuk-list nhsuk-list--bullet" id="nav-guard-changes" style="margin-bottom: 0"></ul>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button" id="nav-guard-cancel" style="margin: 0">Cancel</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="nav-guard-continue" style="margin: 0">Disregard and continue</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="/checkin.js"></script>
-</body>
+    <footer class="nhsuk-footer" role="contentinfo">
+      <div class="nhsuk-width-container">
+        <h2 class="nhsuk-u-visually-hidden">Support links</h2>
+        <ul class="nhsuk-footer__list">
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/about.html">About</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/settings.html">Settings</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/calendar.html">Calendar</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/reports.html">Reports</a></li>
+        </ul>
+        <p class="nhsuk-footer__copyright">&copy; Chicken Check-In 2026</p>
+      </div>
+    </footer>
+
+    <script type="module" src="/checkin.js"></script>
+  </body>
 </html>

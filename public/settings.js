@@ -3,7 +3,8 @@ import { authReady, getProfile, getToken, signOut } from '/auth.js'
 
 // ── Name edit ─────────────────────────────────────────────────
 
-document.getElementById('edit-name-btn').addEventListener('click', () => {
+document.getElementById('edit-name-btn').addEventListener('click', (e) => {
+  e.preventDefault()
   const current = document.getElementById('settings-account-name').textContent
   document.getElementById('edit-name-input').value = current === '—' ? '' : current
   document.getElementById('edit-name-row').style.display = ''
@@ -69,8 +70,8 @@ async function loadBehaviours() {
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})">Edit</button>
-          <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})">Edit</button>
+          <button class="nhsuk-button nhsuk-button--reverse nhsuk-button--small" style="margin:0" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
         </div>
       </li>
     `).join('')
@@ -187,6 +188,130 @@ document.getElementById('new-behaviour-weight').addEventListener('input', (e) =>
   document.getElementById('new-behaviour-weight-label').textContent = weightLabel(Number(e.target.value))
 })
 
+// ── Focuses ───────────────────────────────────────────────────
+
+async function loadFocuses() {
+  const list = document.getElementById('focus-list')
+  try {
+    const focuses = await api.getFocuses()
+    if (!focuses.length) {
+      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No focuses yet.</li>'
+      return
+    }
+    list.innerHTML = focuses.map(f => {
+      const badge = f.is_active
+        ? ''
+        : ' <span style="font-size:0.75rem;background:#768692;color:#fff;padding:1px 6px;border-radius:2px;vertical-align:middle">Inactive</span>'
+      const toggleLabel = f.is_active ? 'Deactivate' : 'Activate'
+      return `
+        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+          <span>${f.title}${badge}</span>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Edit</button>
+            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="toggleFocus('${f.id}', ${f.is_active})">${toggleLabel}</button>
+            <button class="nhsuk-button nhsuk-button--reverse nhsuk-button--small" style="margin:0" onclick="confirmDeleteFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Remove</button>
+          </div>
+        </li>`
+    }).join('')
+  } catch {
+    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load focuses.</li>'
+  }
+}
+
+let editingFocusId = null
+
+window.editFocus = function(id, title) {
+  editingFocusId = id
+  document.getElementById('edit-focus-title').value = title
+  document.getElementById('focus-edit-modal').style.display = 'flex'
+}
+
+document.getElementById('focus-edit-cancel-btn').addEventListener('click', () => {
+  document.getElementById('focus-edit-modal').style.display = 'none'
+  editingFocusId = null
+})
+
+document.getElementById('focus-edit-save-btn').addEventListener('click', async () => {
+  const title = document.getElementById('edit-focus-title').value.trim()
+  if (!title) return
+  const btn = document.getElementById('focus-edit-save-btn')
+  btn.disabled = true
+  btn.textContent = 'Saving…'
+  try {
+    await api.updateFocus(editingFocusId, { title })
+    document.getElementById('focus-edit-modal').style.display = 'none'
+    editingFocusId = null
+    showFeedback('focus-feedback', 'Focus updated.')
+    loadFocuses()
+  } catch (err) {
+    showFeedback('focus-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Save'
+  }
+})
+
+window.toggleFocus = async function(id, currentlyActive) {
+  try {
+    await api.updateFocus(id, { is_active: !currentlyActive })
+    loadFocuses()
+  } catch (err) {
+    showFeedback('focus-feedback', `Error: ${err.message}`, true)
+  }
+}
+
+let deletingFocusId = null
+
+window.confirmDeleteFocus = function(id, title) {
+  deletingFocusId = id
+  document.getElementById('focus-delete-summary').textContent = `Remove "${title}" from your focuses list?`
+  document.getElementById('focus-delete-modal').style.display = 'flex'
+}
+
+document.getElementById('focus-delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('focus-delete-modal').style.display = 'none'
+  deletingFocusId = null
+})
+
+document.getElementById('focus-delete-confirm-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('focus-delete-confirm-btn')
+  btn.disabled = true
+  btn.textContent = 'Removing…'
+  try {
+    await api.deleteFocus(deletingFocusId)
+    document.getElementById('focus-delete-modal').style.display = 'none'
+    deletingFocusId = null
+    loadFocuses()
+  } catch (err) {
+    document.getElementById('focus-delete-modal').style.display = 'none'
+    showFeedback('focus-feedback', `Error: ${err.message}`, true)
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Remove'
+  }
+})
+
+document.getElementById('add-focus-btn').addEventListener('click', async () => {
+  const input = document.getElementById('new-focus')
+  const title = input.value.trim()
+  if (!title) return
+  try {
+    await api.addFocus(title)
+    input.value = ''
+    showFeedback('focus-feedback', `"${title}" added.`)
+    loadFocuses()
+  } catch (err) {
+    showFeedback('focus-feedback', `Error: ${err.message}`, true)
+  }
+})
+
+document.getElementById('new-focus').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    document.getElementById('add-focus-btn').click()
+  }
+})
+
 // ── Supplements ──────────────────────────────────────────────
 
 async function loadSupplements() {
@@ -201,8 +326,8 @@ async function loadSupplements() {
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${s.name}</span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Edit</button>
-          <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Edit</button>
+          <button class="nhsuk-button nhsuk-button--reverse nhsuk-button--small" style="margin:0" onclick="confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Remove</button>
         </div>
       </li>
     `).join('')
@@ -425,6 +550,7 @@ document.getElementById('delete-account-confirm-btn').addEventListener('click', 
 // ── Init ──────────────────────────────────────────────────────
 
 authReady.then(() => {
+  loadFocuses()
   loadBehaviours()
   loadSupplements()
 })

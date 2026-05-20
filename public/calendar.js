@@ -1,5 +1,6 @@
 import { api } from '/api.js'
 import { authReady } from '/auth.js'
+import { wmoEmoji } from '/weather.js'
 
 const today = new Date()
 let viewYear = today.getFullYear()
@@ -62,15 +63,36 @@ function renderGrid(checkins, year, month) {
     cell.appendChild(num)
 
     if (entries.length) {
+      const morning = entries.find(e => e.check_in_type === 'morning')
+      const evening = entries.find(e => e.check_in_type === 'evening')
+
       const badges = document.createElement('div')
       badges.className = 'app-calendar__badges'
-      if (entries.find(e => e.check_in_type === 'morning')) {
-        badges.insertAdjacentHTML('beforeend', '<span class="app-badge app-badge--morning">M</span>')
+      if (morning) {
+        const score = morning.global_mood ? morning.global_mood : ''
+        badges.insertAdjacentHTML('beforeend', `<span class="app-badge app-badge--morning">M${score}</span>`)
       }
-      if (entries.find(e => e.check_in_type === 'evening')) {
-        badges.insertAdjacentHTML('beforeend', '<span class="app-badge app-badge--evening">E</span>')
+      if (evening) {
+        const score = evening.global_mood ? evening.global_mood : ''
+        badges.insertAdjacentHTML('beforeend', `<span class="app-badge app-badge--evening">E${score}</span>`)
       }
       cell.appendChild(badges)
+
+      const wx = (evening || morning)?.weather_snapshot
+      if (wx) {
+        const temps = wx.hourly?.map(h => h.temp).filter(t => t != null) ?? []
+        const avgTemp = temps.length ? Math.round(temps.reduce((a, b) => a + b, 0) / temps.length) : wx.current?.temp
+        const codes = wx.hourly?.map(h => h.code).filter(c => c != null) ?? []
+        const code = codes.length
+          ? codes.sort((a, b) => codes.filter(c => c === b).length - codes.filter(c => c === a).length)[0]
+          : wx.current?.code
+        if (avgTemp != null || code != null) {
+          const wxEl = document.createElement('div')
+          wxEl.className = 'app-calendar__weather'
+          wxEl.textContent = [code != null ? wmoEmoji(code) : '', avgTemp != null ? `${avgTemp}°` : ''].join(' ').trim()
+          cell.appendChild(wxEl)
+        }
+      }
     }
 
     if (dateStr <= todayStr) {
@@ -105,7 +127,7 @@ function showDayDetail(dateStr, entries) {
             <h3 class="nhsuk-heading-s" style="margin:0">${badge} ${typeLabel}</h3>
             <a href="/?type=${entry.check_in_type}&date=${entry.check_in_date}" class="nhsuk-link">Edit</a>
           </div>
-          ${entry.global_mood ? `<p class="nhsuk-body-s" style="margin:0">Mood: ${entry.global_mood}/5</p>` : ''}
+          ${entry.global_mood ? `<p class="nhsuk-body-s" style="margin:0">Mood: ${entry.global_mood}</p>` : ''}
           ${entry.exercised ? `<p class="nhsuk-body-s" style="margin:0">Exercised ✓</p>` : ''}
           ${entry.notes ? `<p class="nhsuk-body-s" style="margin:4px 0 0;color:#4c6272">"${entry.notes}"</p>` : ''}
         </div>

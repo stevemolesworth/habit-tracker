@@ -67,9 +67,7 @@ function mergeDay(date, morning, evening) {
     wake_time: morning?.wake_time ?? null,
     hours_slept: morning?.hours_slept ?? null,
     sleep_quality: morning?.sleep_quality ?? null,
-    focus_financial: evening?.focus_financial ?? null,
-    focus_consulting: evening?.focus_consulting ?? null,
-    focus_opiner: evening?.focus_opiner ?? null,
+    focuses: evening?.focuses ?? {},
     exercised: evening?.exercised ?? morning?.exercised ?? null,
     exercise_types: evening?.exercise_types ?? morning?.exercise_types ?? null,
     morning_id: morning?.id ?? null,
@@ -213,14 +211,17 @@ function renderSleep(days, labels) {
 
 // ── Focus ─────────────────────────────────────────────────────
 
-function renderFocus(days, labels) {
+function renderFocus(days, labels, focusList) {
+  const palette = [BLUE + 'cc', GREEN + 'cc', ORANGE + 'cc', PURPLE + 'cc', RED + 'cc']
+  const datasets = focusList.map((f, i) => ({
+    label: f.title,
+    data: days.map(d => d.focuses?.[f.id] ?? null),
+    backgroundColor: palette[i % palette.length],
+    borderRadius: 2,
+  }))
   mkChart('chart-focus', {
     type: 'bar',
-    data: { labels, datasets: [
-      { label: 'Financial', data: days.map(d => d.focus_financial), backgroundColor: BLUE + 'cc',   borderRadius: 2 },
-      { label: 'Consulting', data: days.map(d => d.focus_consulting), backgroundColor: GREEN + 'cc',  borderRadius: 2 },
-      { label: 'Opiner',    data: days.map(d => d.focus_opiner),    backgroundColor: ORANGE + 'cc', borderRadius: 2 },
-    ]},
+    data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: { x: { ...xAxis(labels), stacked: false }, y: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f0f4f5' } } },
@@ -296,9 +297,10 @@ async function loadReport() {
   document.getElementById('report-error').style.display = 'none'
 
   try {
-    const [checkins, behaviourDefs] = await Promise.all([
+    const [checkins, behaviourDefs, focusList] = await Promise.all([
       api.getReport(from, to),
-      api.getBehaviours()
+      api.getBehaviours(),
+      api.getFocuses()
     ])
     document.getElementById('report-loading').style.display = 'none'
 
@@ -315,7 +317,7 @@ async function loadReport() {
     document.getElementById('report-content').style.display = ''
     renderMood(days, labels)
     renderSleep(days, labels)
-    renderFocus(days, labels)
+    renderFocus(days, labels, focusList)
     renderAlcohol(days, labels)
     renderBoolRows(days, behaviourDefs)
   } catch (err) {

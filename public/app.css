@@ -1,5 +1,88 @@
 /* Custom overrides on top of NHS Design System */
 
+/* Splash screen */
+.app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-size: cover;
+  background-position: center;
+  background-color: #005eb8;
+}
+
+.app-splash__overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  gap: 24px;
+}
+
+.app-splash__text {
+  color: #fff;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  padding: 0 24px;
+  line-height: 1.3;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.app-splash__subtext {
+  color: rgba(255,255,255,0.85);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  text-align: center;
+  margin: 0;
+  padding: 0 24px;
+}
+
+.app-splash__actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.app-splash__btn {
+  display: inline-block;
+  background: #fff;
+  color: #005eb8;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 12px 28px;
+  border-radius: 4px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.app-splash__btn:hover {
+  background: #f0f4f5;
+}
+
+.app-splash__skip {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  margin-top: 8px;
+}
+
+.app-splash__skip:hover {
+  color: #fff;
+}
+
+.app-splash__spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: app-spin 0.75s linear infinite;
+}
+
 /* Loading spinner */
 .app-loader {
   display: flex;
@@ -149,37 +232,45 @@
 }
 
 .app-calendar__day--today {
-  background: #005eb8;
-  color: #fff;
+  background: #fff;
+  color: #212b32;
+  border: 2px solid #005eb8;
 }
 
 .app-calendar__day--today:hover {
-  background: #003d78;
+  background: #f0f4f5;
 }
 
 .app-calendar__day-number {
   display: block;
   font-size: 1rem;
-  font-weight: 400;
-  margin-bottom: 2px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .app-calendar__badges {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   flex-wrap: wrap;
 }
 
 .app-badge {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 1px 4px;
+  padding: 2px 5px;
   border-radius: 2px;
   color: #fff;
 }
 
 .app-badge--morning { background: #007f3b; }
 .app-badge--evening { background: #330072; }
+
+.app-calendar__weather {
+  font-size: 0.75rem;
+  color: #4c6272;
+  margin-top: 2px;
+  line-height: 1.2;
+}
 
 /* Score display */
 .app-score {

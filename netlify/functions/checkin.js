@@ -28,7 +28,7 @@ export default async function handler(req) {
   const {
     check_in_type, check_in_date,
     bedtime, wake_time, sleep_quality,
-    global_mood, focus_financial, focus_consulting, focus_opiner,
+    global_mood, focuses,
     exercised, exercise_types, session_count,
     alcohol_spirits, alcohol_beer, alcohol_wine,
     supplements,
@@ -50,7 +50,7 @@ export default async function handler(req) {
       user_id: user.id,
       check_in_type, check_in_date, submitted_at,
       bedtime, wake_time, hours_slept, sleep_quality,
-      global_mood, focus_financial, focus_consulting, focus_opiner,
+      global_mood, focuses: focuses || {},
       exercised, exercise_types, session_count,
       alcohol_spirits, alcohol_beer, alcohol_wine,
       supplements,

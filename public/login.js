@@ -1,5 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
+const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
+document.getElementById('login-page').style.backgroundImage =
+  `url('${splashImages[Math.floor(Math.random() * splashImages.length)]}')`
+
 let supabase = null
 
 async function init() {
@@ -20,14 +24,16 @@ function hideError() {
 }
 
 // Tab toggle
-document.getElementById('tab-signin').addEventListener('click', () => {
+document.getElementById('tab-signin').addEventListener('click', (e) => {
+  e.preventDefault()
   document.getElementById('signin-form').style.display = ''
   document.getElementById('signup-form').style.display = 'none'
   document.getElementById('tab-signin').classList.add('active')
   document.getElementById('tab-signup').classList.remove('active')
   hideError()
 })
-document.getElementById('tab-signup').addEventListener('click', () => {
+document.getElementById('tab-signup').addEventListener('click', (e) => {
+  e.preventDefault()
   document.getElementById('signup-form').style.display = ''
   document.getElementById('signin-form').style.display = 'none'
   document.getElementById('tab-signup').classList.add('active')

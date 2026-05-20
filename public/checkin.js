@@ -2,6 +2,17 @@ import { api } from '/api.js'
 import { authReady } from '/auth.js'
 import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weather.js'
 
+// Splash background — random chicken image, minimum 2s display
+const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
+document.getElementById('app-splash').style.backgroundImage =
+  `url('${splashImages[Math.floor(Math.random() * splashImages.length)]}')`
+const splashStart = Date.now()
+function hideSplash() {
+  const elapsed = Date.now() - splashStart
+  const remaining = Math.max(0, 2000 - elapsed)
+  setTimeout(() => { document.getElementById('app-splash').style.display = 'none' }, remaining)
+}
+
 // Device-local date/time
 const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone
 const localHour = parseInt(
@@ -30,12 +41,12 @@ const dirtyCategories = new Set()
 const FIELD_CATEGORY = {
   bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
   global_mood: 'Mood',
-  focus_financial: 'Focus', focus_consulting: 'Focus', focus_opiner: 'Focus',
   exercised: 'Exercise', exercise_types: 'Exercise',
   alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
   behaviour: 'Behaviours',
-  notes: 'Notes'
+  notes: 'Notes',
+  weather: 'Weather'
 }
 let bypassGuard = false
 let pendingNavContinue = null
@@ -103,7 +114,7 @@ async function loadWeather() {
     if (existingRecord) {
       const locationChanged = currentLocation.lat !== existingRecord.weather_lat || currentLocation.lng !== existingRecord.weather_lng
       const snapshotChanged = JSON.stringify(currentWeatherData.hourly) !== JSON.stringify(existingRecord.weather_snapshot?.hourly)
-      if (locationChanged || snapshotChanged) markDirty()
+      if (locationChanged || snapshotChanged) markDirty('weather')
     }
   } catch {
     strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${isPastDate ? 'Historic weather data not available' : 'Could not load weather'}</span>`
@@ -118,7 +129,7 @@ document.getElementById('weather-search-btn').addEventListener('click', async ()
   try {
     currentLocation = await geocode(q)
     setLocationLabel(currentLocation.label)
-    markDirty()
+    markDirty('weather')
     await loadWeather()
   } catch (err) {
     strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${err.message}</span>`
@@ -150,7 +161,7 @@ document.getElementById('weather-geo-btn').addEventListener('click', () => {
       currentLocation = { lat, lng, label: `${lat.toFixed(3)}, ${lng.toFixed(3)}` }
     }
     setLocationLabel(currentLocation.label)
-    markDirty()
+    markDirty('weather')
     await loadWeather()
   }, () => {
     document.getElementById('weather-strip').innerHTML =
@@ -180,9 +191,6 @@ function populateForm(record) {
   updateSleepDuration()
   setRadio('sleep_quality', record.sleep_quality)
   setRadio('global_mood', record.global_mood)
-  setRadio('focus_financial', record.focus_financial)
-  setRadio('focus_consulting', record.focus_consulting)
-  setRadio('focus_opiner', record.focus_opiner)
   setCheck('exercised', record.exercised)
   if (record.exercised) document.getElementById('exercise-details').style.display = ''
   if (record.exercise_types?.length) {
@@ -231,6 +239,40 @@ async function loadBehaviours() {
     }
   } catch {
     list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load behaviours.</p>'
+  }
+}
+
+// --- Focuses ---
+async function loadFocuses() {
+  const container = document.getElementById('focuses-list')
+  try {
+    const focuses = await api.getFocuses()
+    const active = focuses.filter(f => f.is_active)
+    if (!active.length) {
+      container.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No focuses configured. Add them in <a href="/settings.html">Settings</a>.</p>'
+      return
+    }
+    container.innerHTML = active.map(f => `
+      <fieldset class="nhsuk-fieldset" style="margin-bottom:16px" data-focus-id="${f.id}">
+        <legend class="nhsuk-fieldset__legend nhsuk-label">${f.title}</legend>
+        <div class="nhsuk-radios nhsuk-radios--inline">
+          ${[1,2,3,4,5].map(n => `
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="focus-${f.id}-${n}" name="focus_${f.id}" type="radio" value="${n}">
+              <label class="nhsuk-label nhsuk-radios__label" for="focus-${f.id}-${n}">${n}</label>
+            </div>`).join('')}
+        </div>
+      </fieldset>`).join('')
+    if (existingRecord?.focuses) {
+      for (const [id, score] of Object.entries(existingRecord.focuses)) {
+        if (score) {
+          const input = container.querySelector(`[name="focus_${id}"][value="${score}"]`)
+          if (input) input.checked = true
+        }
+      }
+    }
+  } catch {
+    container.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load focuses.</p>'
   }
 }
 
@@ -285,6 +327,7 @@ document.getElementById('wake_time').addEventListener('change', updateSleepDurat
 
 // --- Dirty tracking ---
 function markDirty(fieldName) {
+  if (fieldName?.startsWith('focus_')) dirtyCategories.add('Focus')
   const cat = FIELD_CATEGORY[fieldName]
   if (cat) dirtyCategories.add(cat)
   if (isDirty) return
@@ -418,14 +461,18 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
   form.querySelectorAll('[name="supplement"]').forEach(el => { supplementsObj[el.value] = el.checked })
   const behavioursObj = {}
   form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
+  const focusesObj = {}
+  document.querySelectorAll('#focuses-list [data-focus-id]').forEach(fieldset => {
+    const id = fieldset.dataset.focusId
+    const checked = fieldset.querySelector(`[name="focus_${id}"]:checked`)
+    focusesObj[id] = checked ? Number(checked.value) : null
+  })
 
   const payload = {
     check_in_type: type,
     check_in_date: today,
     global_mood: get('global_mood') ? Number(get('global_mood')) : null,
-    focus_financial: get('focus_financial') ? Number(get('focus_financial')) : null,
-    focus_consulting: get('focus_consulting') ? Number(get('focus_consulting')) : null,
-    focus_opiner: get('focus_opiner') ? Number(get('focus_opiner')) : null,
+    focuses: focusesObj,
     exercised: bool('exercised'),
     exercise_types: exerciseTypes.length ? exerciseTypes : null,
     alcohol_spirits: Number(get('alcohol_spirits') || 0),
@@ -480,9 +527,22 @@ function hideError() {
   document.getElementById('error-banner').style.display = 'none'
 }
 
+// --- New-user splash ---
+function showNewUserSplash() {
+  document.getElementById('splash-loading').style.display = 'none'
+  document.getElementById('splash-welcome').style.display = 'flex'
+}
+
+document.getElementById('splash-skip-btn').addEventListener('click', (e) => {
+  e.preventDefault()
+  hideSplash()
+})
+
 // --- Init ---
 async function init() {
   await authReady
+
+  const newUserCheckPromise = api.getBehaviours().catch(() => [])
 
   // Auto-switch logic (no explicit ?type= override, today only)
   if (!params.get('type') && !isPastDate) {
@@ -519,10 +579,11 @@ async function init() {
     document.getElementById('delete-section').style.display = ''
   }
 
-  // Load supplements and behaviours (evening only)
+  // Load supplements, behaviours, and focuses (evening only)
   if (!isMorning) {
     loadSupplements()
     loadBehaviours()
+    loadFocuses()
   }
 
   // Load weather: existing record location takes precedence over settings default
@@ -546,6 +607,13 @@ async function init() {
   setupDirtyTracking()
   document.getElementById('page-loader').style.display = 'none'
   document.getElementById('main-content-row').style.display = ''
+
+  const behaviours = await newUserCheckPromise
+  if (behaviours.length === 0) {
+    showNewUserSplash()
+  } else {
+    hideSplash()
+  }
 }
 
 init()
