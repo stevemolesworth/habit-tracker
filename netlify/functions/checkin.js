@@ -30,7 +30,7 @@ export default async function handler(req) {
     supplements,
     behaviours,
     notes,
-    weather_postcode, weather_snapshot
+    weather_postcode, weather_lat, weather_lng, weather_location_label, weather_snapshot
   } = body
 
   if (!check_in_type || !check_in_date) {
@@ -51,7 +51,7 @@ export default async function handler(req) {
       supplements,
       behaviours,
       notes,
-      weather_postcode, weather_snapshot
+      weather_postcode, weather_lat, weather_lng, weather_location_label, weather_snapshot
     }])
     .select()
     .single()

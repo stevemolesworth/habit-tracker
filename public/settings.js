@@ -3,9 +3,9 @@ import { api } from '/api.js'
 // ── Behaviours ────────────────────────────────────────────────
 
 function weightLabel(w) {
-  if (w === -3) return '-3 💩'
-  if (w === 3) return '+3 👍'
-  return w > 0 ? `+${w}` : `${w}`
+  if (w > 0) return '👍'.repeat(w)
+  if (w < 0) return '💩'.repeat(-w)
+  return '—'
 }
 
 async function loadBehaviours() {
@@ -18,7 +18,7 @@ async function loadBehaviours() {
     }
     list.innerHTML = behaviours.map(b => `
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-        <span>${b.name} <span class="nhsuk-u-secondary-text-color nhsuk-body-s">(${weightLabel(b.weight)})</span></span>
+        <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
         <div style="display:flex;gap:6px;flex-shrink:0">
           <button class="nhsuk-button nhsuk-button--secondary" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})">Edit</button>
           <button class="nhsuk-button nhsuk-button--reverse" style="margin:0;padding:4px 12px;font-size:0.875rem" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
@@ -39,13 +39,12 @@ window.editBehaviour = function(id, name, weight) {
   document.getElementById('edit-behaviour-name').value = name
   const slider = document.getElementById('edit-behaviour-weight')
   slider.value = weight
-  document.getElementById('edit-behaviour-weight-label').textContent = weight > 0 ? `+${weight}` : `${weight}`
+  document.getElementById('edit-behaviour-weight-label').textContent = weightLabel(weight)
   document.getElementById('behaviour-edit-modal').style.display = 'flex'
 }
 
 document.getElementById('edit-behaviour-weight').addEventListener('input', (e) => {
-  const v = Number(e.target.value)
-  document.getElementById('edit-behaviour-weight-label').textContent = v > 0 ? `+${v}` : `${v}`
+  document.getElementById('edit-behaviour-weight-label').textContent = weightLabel(Number(e.target.value))
 })
 
 document.getElementById('behaviour-edit-cancel-btn').addEventListener('click', () => {
@@ -136,8 +135,7 @@ document.getElementById('new-behaviour').addEventListener('keydown', (e) => {
 })
 
 document.getElementById('new-behaviour-weight').addEventListener('input', (e) => {
-  const v = Number(e.target.value)
-  document.getElementById('new-behaviour-weight-label').textContent = v > 0 ? `+${v}` : `${v}`
+  document.getElementById('new-behaviour-weight-label').textContent = weightLabel(Number(e.target.value))
 })
 
 // ── Supplements ──────────────────────────────────────────────
@@ -250,31 +248,6 @@ document.getElementById('new-supplement').addEventListener('keydown', (e) => {
   }
 })
 
-// ── Location ─────────────────────────────────────────────────
-
-async function loadPostcode() {
-  try {
-    const w = await api.getWeights()
-    if (w?.default_postcode) {
-      document.getElementById('default-postcode').value = w.default_postcode
-    }
-  } catch { /* leave blank */ }
-}
-
-document.getElementById('save-postcode-btn').addEventListener('click', async () => {
-  const value = document.getElementById('default-postcode').value.trim().replace(/\s+/g, '').toUpperCase()
-  if (!value) {
-    showFeedback('postcode-feedback', 'Please enter a postcode.', true)
-    return
-  }
-  try {
-    await api.updateWeights({ default_postcode: value })
-    showFeedback('postcode-feedback', 'Postcode saved.')
-  } catch (err) {
-    showFeedback('postcode-feedback', `Error: ${err.message}`, true)
-  }
-})
-
 // ── Helpers ───────────────────────────────────────────────────
 
 function showFeedback(id, msg, isError = false) {
@@ -332,6 +305,5 @@ document.getElementById('delete-range-confirm-btn').addEventListener('click', as
 
 // ── Init ──────────────────────────────────────────────────────
 
-loadPostcode()
 loadBehaviours()
 loadSupplements()

@@ -1,5 +1,5 @@
 import { api } from '/api.js'
-import { fetchWeather, buildWeatherStrip } from '/weather.js'
+import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weather.js'
 
 // London-aware date/time
 const londonHour = parseInt(
@@ -20,6 +20,7 @@ const isMorning = type === 'morning'
 
 // State
 let existingRecord = null
+let currentLocation = null  // { lat, lng, label }
 let currentWeatherData = null
 let isDirty = false
 let bypassGuard = false
@@ -48,27 +49,91 @@ document.getElementById('notes-label').textContent = isMorning
   : "What made today good? Anything you'd like to achieve tomorrow?"
 
 // --- Weather ---
+function setLocationLabel(label) {
+  const el = document.getElementById('weather-location-label')
+  const btn = document.getElementById('weather-toggle-location-btn')
+  if (label) {
+    el.textContent = `📍 ${label}`
+    btn.textContent = 'Change location'
+    document.getElementById('weather-location-form').style.display = 'none'
+  } else {
+    el.textContent = ''
+    btn.textContent = 'Add location'
+  }
+}
+
+document.getElementById('weather-toggle-location-btn').addEventListener('click', () => {
+  const form = document.getElementById('weather-location-form')
+  form.style.display = form.style.display === 'none' ? '' : 'none'
+})
+
 async function loadWeather() {
   const strip = document.getElementById('weather-strip')
-  const postcode = document.getElementById('weather-postcode').value.trim()
-  if (!postcode) {
-    strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">No weather data recorded</span>'
+  if (!currentLocation) {
+    strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">No location set</span>'
     return
   }
   strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>'
   try {
-    currentWeatherData = await fetchWeather(postcode, today)
+    currentWeatherData = await fetchWeather(currentLocation, today)
     strip.innerHTML = buildWeatherStrip(currentWeatherData, isPastDate ? 'evening' : type)
-    // If existing record, treat changed weather as a dirty signal
     if (existingRecord) {
-      const postcodeChanged = currentWeatherData.postcode !== existingRecord.weather_postcode
+      const locationChanged = currentLocation.lat !== existingRecord.weather_lat || currentLocation.lng !== existingRecord.weather_lng
       const snapshotChanged = JSON.stringify(currentWeatherData.hourly) !== JSON.stringify(existingRecord.weather_snapshot?.hourly)
-      if (postcodeChanged || snapshotChanged) markDirty()
+      if (locationChanged || snapshotChanged) markDirty()
     }
   } catch {
     strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${isPastDate ? 'Historic weather data not available' : 'Could not load weather'}</span>`
   }
 }
+
+document.getElementById('weather-search-btn').addEventListener('click', async () => {
+  const q = document.getElementById('weather-location-input').value.trim()
+  if (!q) return
+  const strip = document.getElementById('weather-strip')
+  strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Searching…</span>'
+  try {
+    currentLocation = await geocode(q)
+    setLocationLabel(currentLocation.label)
+    markDirty()
+    await loadWeather()
+  } catch (err) {
+    strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${err.message}</span>`
+  }
+})
+
+document.getElementById('weather-location-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    document.getElementById('weather-search-btn').click()
+  }
+})
+
+document.getElementById('weather-geo-btn').addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    document.getElementById('weather-strip').innerHTML =
+      '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Geolocation not supported</span>'
+    return
+  }
+  document.getElementById('weather-strip').innerHTML =
+    '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Getting your location…</span>'
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const lat = pos.coords.latitude
+    const lng = pos.coords.longitude
+    try {
+      const { label } = await reverseGeocode(lat, lng)
+      currentLocation = { lat, lng, label }
+    } catch {
+      currentLocation = { lat, lng, label: `${lat.toFixed(3)}, ${lng.toFixed(3)}` }
+    }
+    setLocationLabel(currentLocation.label)
+    markDirty()
+    await loadWeather()
+  }, () => {
+    document.getElementById('weather-strip').innerHTML =
+      '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Location access denied</span>'
+  })
+})
 
 document.getElementById('weather-refresh-btn').addEventListener('click', loadWeather)
 
@@ -90,6 +155,7 @@ function populateForm(record) {
 
   setVal('bedtime', record.bedtime?.slice(0, 5))
   setVal('wake_time', record.wake_time?.slice(0, 5))
+  updateSleepDuration()
   setRadio('sleep_quality', record.sleep_quality)
   setRadio('global_mood', record.global_mood)
   setRadio('focus_financial', record.focus_financial)
@@ -108,8 +174,12 @@ function populateForm(record) {
   setVal('alcohol_wine', record.alcohol_wine ?? 0)
   setVal('notes', record.notes)
 
-  if (record.weather_postcode) {
-    document.getElementById('weather-postcode').value = record.weather_postcode
+  if (record.weather_lat) {
+    currentLocation = { lat: record.weather_lat, lng: record.weather_lng, label: record.weather_location_label || '' }
+    document.getElementById('weather-location-input').value = record.weather_location_label || ''
+    setLocationLabel(currentLocation.label)
+  } else if (record.weather_postcode) {
+    document.getElementById('weather-location-input').value = record.weather_postcode
   }
 }
 
@@ -122,12 +192,14 @@ async function loadBehaviours() {
       list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No behaviours configured. Add them in <a href="/settings.html">Settings</a>.</p>'
       return
     }
-    list.innerHTML = behaviours.map(b => `
+    list.innerHTML = behaviours.map(b => {
+      const emoji = b.weight > 0 ? '👍'.repeat(b.weight) : b.weight < 0 ? '💩'.repeat(-b.weight) : ''
+      return `
       <div class="nhsuk-checkboxes__item">
         <input class="nhsuk-checkboxes__input" id="beh-${b.id}" name="behaviour" type="checkbox" value="${b.name}" tabindex="0">
-        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}</label>
-      </div>
-    `).join('')
+        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}${emoji ? ` <span style="letter-spacing:1px">${emoji}</span>` : ''}</label>
+      </div>`
+    }).join('')
 
     if (existingRecord?.behaviours) {
       Object.entries(existingRecord.behaviours).forEach(([name, checked]) => {
@@ -166,6 +238,28 @@ async function loadSupplements() {
     list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load supplements.</p>'
   }
 }
+
+// --- Sleep duration ---
+function updateSleepDuration() {
+  const bedtime = document.getElementById('bedtime').value
+  const wakeTime = document.getElementById('wake_time').value
+  const el = document.getElementById('sleep-duration')
+  if (!bedtime || !wakeTime) { el.style.display = 'none'; return }
+  const [bh, bm] = bedtime.split(':').map(Number)
+  const [wh, wm] = wakeTime.split(':').map(Number)
+  let diff = (wh * 60 + wm) - (bh * 60 + bm)
+  if (diff < 0) diff += 24 * 60
+  const hours = Math.floor(diff / 60)
+  const mins = diff % 60
+  const parts = []
+  if (hours > 0) parts.push(`${hours} hour${hours !== 1 ? 's' : ''}`)
+  if (mins > 0) parts.push(`${mins} minute${mins !== 1 ? 's' : ''}`)
+  el.textContent = `You slept for ${parts.join(' and ') || '0 minutes'}`
+  el.style.display = ''
+}
+
+document.getElementById('bedtime').addEventListener('change', updateSleepDuration)
+document.getElementById('wake_time').addEventListener('change', updateSleepDuration)
 
 // --- Dirty tracking ---
 function markDirty() {
@@ -315,7 +409,9 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
     behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
     notes: get('notes') || null,
-    weather_postcode: currentWeatherData?.postcode || null,
+    weather_lat: currentLocation?.lat ?? null,
+    weather_lng: currentLocation?.lng ?? null,
+    weather_location_label: currentLocation?.label ?? null,
     weather_snapshot: currentWeatherData ? { current: currentWeatherData.current, hourly: currentWeatherData.hourly } : null
   }
 
@@ -331,6 +427,13 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
       result = await api.updateCheckin(existingRecord.id, payload)
     } else {
       result = await api.submitCheckin(payload)
+    }
+    if (currentLocation) {
+      api.updateWeights({
+        default_location_lat: currentLocation.lat,
+        default_location_lng: currentLocation.lng,
+        default_location_label: currentLocation.label
+      }).catch(() => {})
     }
     isDirty = false
     location.href = `/confirmation.html?id=${result.id}&type=${type}`
@@ -374,15 +477,21 @@ async function init() {
   loadSupplements()
   loadBehaviours()
 
-  // Load weather: prefer stored postcode from existing record, else settings default
-  try {
-    if (!existingRecord?.weather_postcode) {
+  // Load weather: existing record location takes precedence over settings default
+  if (!currentLocation) {
+    try {
       const config = await api.getWeights()
-      if (config?.default_postcode) {
-        document.getElementById('weather-postcode').value = config.default_postcode
+      if (config?.default_location_lat) {
+        currentLocation = {
+          lat: config.default_location_lat,
+          lng: config.default_location_lng,
+          label: config.default_location_label || ''
+        }
+        document.getElementById('weather-location-input').value = config.default_location_label || ''
+        setLocationLabel(currentLocation.label)
       }
-    }
-  } catch { /* fall back to HTML default */ }
+    } catch { /* leave without location */ }
+  }
 
   await loadWeather()
 
