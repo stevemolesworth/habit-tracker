@@ -4,18 +4,18 @@ import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weath
 
 // Device-local date/time
 const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone
-const londonHour = parseInt(
+const localHour = parseInt(
   new Intl.DateTimeFormat('en-GB', { timeZone: userTZ, hour: 'numeric', hour12: false }).format(new Date())
 )
-const todayLondon = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date())
+const todayLocal = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date())
 
 // Allow a specific date to be passed (e.g. from calendar for past days)
 const params = new URLSearchParams(location.search)
-const today = params.get('date') || todayLondon
-const isPastDate = today !== todayLondon
+const today = params.get('date') || todayLocal
+const isPastDate = today !== todayLocal
 
 // Determine type: explicit ?type param → stored preference → time-based (17:00 cutoff)
-let type = params.get('type') || (!isPastDate && sessionStorage.getItem('checkin_type')) || (londonHour < 17 ? 'morning' : 'evening')
+let type = params.get('type') || (!isPastDate && sessionStorage.getItem('checkin_type')) || (localHour < 17 ? 'morning' : 'evening')
 if (params.get('type')) sessionStorage.setItem('checkin_type', type)
 
 const isMorning = type === 'morning'
@@ -42,7 +42,7 @@ let pendingNavContinue = null
 
 // --- Static DOM setup ---
 const dateStr = new Date().toLocaleDateString('en-GB', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London'
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: userTZ
 })
 const dateCaption = isPastDate
   ? new Date(today + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -344,8 +344,8 @@ function showLastUpdated(submittedAt) {
   const el = document.getElementById('last-updated')
   if (!el || !submittedAt) return
   const dt = new Date(submittedAt)
-  const dateStr = dt.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/London' })
-  const timeStr = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' })
+  const dateStr = dt.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: userTZ })
+  const timeStr = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: userTZ })
   el.textContent = `Last updated: ${dateStr} at ${timeStr} (${relativeTime(submittedAt)})`
   el.style.display = ''
 }
@@ -479,12 +479,12 @@ async function init() {
   // Auto-switch logic (no explicit ?type= override, today only)
   if (!params.get('type') && !isPastDate) {
     // After 17:00: always show evening
-    if (londonHour >= 17 && type !== 'evening') {
+    if (localHour >= 17 && type !== 'evening') {
       location.replace('/?type=evening')
       return
     }
     // Before 17:00: show evening if morning already submitted
-    if (londonHour < 17) {
+    if (localHour < 17) {
       try {
         const morningDone = await api.getTodayCheckin('morning', today)
         if (morningDone && type !== 'evening') {
