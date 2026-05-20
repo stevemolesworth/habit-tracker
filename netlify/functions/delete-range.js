@@ -1,9 +1,13 @@
 import { supabase } from './_shared/supabase.js'
+import { getAuthUser } from './_shared/auth.js'
 
 export default async function handler(req) {
   if (req.method !== 'DELETE') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } })
   }
+
+  const user = await getAuthUser(req)
+  if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })
 
   const url = new URL(req.url)
   const from = url.searchParams.get('from')
@@ -16,6 +20,7 @@ export default async function handler(req) {
   const { count, error } = await supabase
     .from('check_ins')
     .delete({ count: 'exact' })
+    .eq('user_id', user.id)
     .gte('check_in_date', from)
     .lte('check_in_date', to)
 

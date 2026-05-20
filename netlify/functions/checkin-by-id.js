@@ -1,4 +1,5 @@
 import { supabase } from './_shared/supabase.js'
+import { getAuthUser } from './_shared/auth.js'
 
 function calcHoursSlept(bedtime, wakeTime) {
   if (!bedtime || !wakeTime) return null
@@ -20,11 +21,15 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
+  const user = await getAuthUser(req)
+  if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })
+
   if (req.method === 'GET') {
     const { data, error } = await supabase
       .from('check_ins')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -55,6 +60,7 @@ export default async function handler(req) {
       .from('check_ins')
       .update(body)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -70,6 +76,7 @@ export default async function handler(req) {
       .from('check_ins')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })

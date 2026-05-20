@@ -1,4 +1,5 @@
 import { api } from '/api.js'
+import { authReady } from '/auth.js'
 import { buildWeatherStrip } from '/weather.js'
 
 const params = new URLSearchParams(location.search)
@@ -202,4 +203,4 @@ document.getElementById('delete-confirm-btn').addEventListener('click', async ()
   }
 })
 
-loadCheckin()
+authReady.then(() => loadCheckin())

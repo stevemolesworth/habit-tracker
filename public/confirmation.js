@@ -1,4 +1,5 @@
 import { api } from '/api.js'
+import { authReady } from '/auth.js'
 
 const MESSAGES = [
   'Well done!',
@@ -42,7 +43,8 @@ async function init() {
 }
 
 function renderStatus(record) {
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date())
+  const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date())
   const isToday = record.check_in_date === today
   const period = record.check_in_type === 'morning' ? 'morning' : 'evening'
 
@@ -95,4 +97,4 @@ function renderMood(current, allCheckins) {
   }
 }
 
-init()
+authReady.then(() => init())

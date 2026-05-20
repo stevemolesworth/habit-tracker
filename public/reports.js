@@ -1,4 +1,5 @@
 import { api } from '/api.js'
+import { authReady } from '/auth.js'
 
 // ── Date helpers ─────────────────────────────────────────────
 
@@ -396,8 +397,10 @@ document.getElementById('preset-date-range').addEventListener('click', () => {
 document.getElementById('apply-btn').addEventListener('click', loadReport)
 
 // Default to this month on load
-const { from: initFrom, to: initTo } = monthRange(0)
-document.getElementById('date-from').value = initFrom
-document.getElementById('date-to').value = initTo
-setActivePreset('preset-this-month')
-loadReport()
+authReady.then(() => {
+  const { from: initFrom, to: initTo } = monthRange(0)
+  document.getElementById('date-from').value = initFrom
+  document.getElementById('date-to').value = initTo
+  setActivePreset('preset-this-month')
+  loadReport()
+})
