@@ -543,7 +543,10 @@ async function autoSave() {
     await doSave(payload)
     setAutoSaveStatus('Saved')
     setTimeout(() => setAutoSaveStatus(''), 2000)
-    isDirty = false
+    const notesWasDirty = dirtyCategories.has('Notes')
+    dirtyCategories.clear()
+    if (notesWasDirty) dirtyCategories.add('Notes')
+    isDirty = notesWasDirty
   } catch {
     setAutoSaveStatus('Could not auto-save')
   }
