@@ -36,7 +36,8 @@ const dirtyCategories = new Set()
 
 const FIELD_CATEGORY = {
   bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
-  primary_mood: 'Mood',
+  primary_mood: 'Mood', secondary_mood_: 'Mood',
+  momentum_: 'Momentum',
   exercise_types: 'Exercise', exercise_sessions: 'Exercise', exercise_duration_minutes: 'Exercise',
   alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
@@ -60,6 +61,8 @@ document.getElementById('page-heading').innerHTML =
 // Show/hide sections
 if (!isMorning) document.getElementById('sleep-section').style.display = 'none' // renderEodSleep shows it after data loads
 document.getElementById('events-section').style.display = isMorning ? 'none' : ''
+document.getElementById('momentum-section').style.display = 'none' // renderMomentum shows it if items exist
+document.getElementById('checkin-inpage-nav').style.display = isMorning ? 'none' : ''
 document.getElementById('notes-label').textContent = isMorning
   ? 'What would make today good?'
   : "What made today good? Anything you'd like to achieve tomorrow?"
@@ -288,22 +291,56 @@ function renderSecondaryMoods(dims, morningRecord) {
     const morningHint = morningVal !== null
       ? `<span class="app-mood-morning-hint"> — this morning: ${morningVal}</span>`
       : ''
+    const emoji1 = dim.five_is_good !== false ? '😢' : '😊'
+    const emoji5 = dim.five_is_good !== false ? '😊' : '😢'
     return `
       <div class="nhsuk-form-group nhsuk-u-margin-top-3">
         <fieldset class="nhsuk-fieldset">
           <legend class="nhsuk-fieldset__legend nhsuk-label">
             <strong>${dim.name}</strong>${morningHint}
           </legend>
-          <div class="nhsuk-radios nhsuk-radios--inline">
-            ${[1,2,3,4,5].map(n => `
-              <div class="nhsuk-radios__item">
-                <input class="nhsuk-radios__input" id="sm-${dim.id}-${n}" name="secondary_mood_${dim.id}" type="radio" value="${n}" />
-                <label class="nhsuk-label nhsuk-radios__label" for="sm-${dim.id}-${n}">${n}</label>
-              </div>`).join('')}
+          <div class="app-mood-scale-row">
+            <span class="app-mood-anchor" aria-hidden="true">${emoji1}</span>
+            <div class="nhsuk-radios nhsuk-radios--inline">
+              ${[1,2,3,4,5].map(n => `
+                <div class="nhsuk-radios__item">
+                  <input class="nhsuk-radios__input" id="sm-${dim.id}-${n}" name="secondary_mood_${dim.id}" type="radio" value="${n}" />
+                  <label class="nhsuk-label nhsuk-radios__label" for="sm-${dim.id}-${n}">${n}</label>
+                </div>`).join('')}
+            </div>
+            <span class="app-mood-anchor" aria-hidden="true">${emoji5}</span>
           </div>
         </fieldset>
       </div>`
   }).join('')
+}
+
+// --- Momentum ---
+function renderMomentum(items) {
+  if (isMorning || !items?.length) return
+  document.getElementById('momentum-section').style.display = ''
+  document.getElementById('momentum-list').innerHTML = items.map(item => `
+    <div class="nhsuk-form-group nhsuk-u-margin-top-3">
+      <fieldset class="nhsuk-fieldset">
+        <legend class="nhsuk-fieldset__legend nhsuk-label">
+          <strong>${item.name}</strong>
+        </legend>
+        <div class="nhsuk-radios nhsuk-radios--inline">
+          ${[1,2,3,4,5].map(n => `
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="mom-${item.id}-${n}" name="momentum_${item.id}" type="radio" value="${n}" />
+              <label class="nhsuk-label nhsuk-radios__label" for="mom-${item.id}-${n}">${n}</label>
+            </div>`).join('')}
+        </div>
+      </fieldset>
+    </div>`).join('')
+
+  if (existingRecord?.momentum_scores) {
+    Object.entries(existingRecord.momentum_scores).forEach(([itemId, score]) => {
+      const el = document.querySelector(`[name="momentum_${itemId}"][value="${score}"]`)
+      if (el) el.checked = true
+    })
+  }
 }
 
 // --- Behaviours ---
@@ -563,11 +600,18 @@ function buildPayload(includeNotes = true) {
   const behavioursObj = {}
   form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
 
-  // Secondary moods: collect all secondary_mood_* radio groups
+  // Secondary moods
   const secondaryMoods = {}
   form.querySelectorAll('[name^="secondary_mood_"]:checked').forEach(el => {
     const dimId = el.name.replace('secondary_mood_', '')
     secondaryMoods[dimId] = Number(el.value)
+  })
+
+  // Momentum scores
+  const momentumScores = {}
+  form.querySelectorAll('[name^="momentum_"]:checked').forEach(el => {
+    const itemId = el.name.replace('momentum_', '')
+    momentumScores[itemId] = Number(el.value)
   })
 
   const primaryMoodVal = get('primary_mood') ? Number(get('primary_mood')) : null
@@ -578,6 +622,7 @@ function buildPayload(includeNotes = true) {
     primary_mood_morning: isMorning ? primaryMoodVal : null,
     primary_mood_eod: !isMorning ? primaryMoodVal : null,
     secondary_moods: Object.keys(secondaryMoods).length ? secondaryMoods : null,
+    momentum_scores: Object.keys(momentumScores).length ? momentumScores : null,
     exercised: exerciseTypes.length > 0,
     exercise_types: exerciseTypes.length ? exerciseTypes : null,
     exercise_sessions: Number(get('exercise_sessions') || 0) || null,
@@ -729,7 +774,7 @@ function showNewUserSplash() {
 
 document.getElementById('splash-skip-btn')?.addEventListener('click', (e) => {
   e.preventDefault()
-  showForm()
+  showForm(null, null, [], [])
 })
 
 // --- Init ---
@@ -754,12 +799,13 @@ async function init() {
 
   const fetchExisting = api.getTodayCheckin(type, today)
   const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
-  const [existingRes, morningRes, configRes, behavioursRes, moodDimsRes] = await Promise.allSettled([
+  const [existingRes, morningRes, configRes, behavioursRes, moodDimsRes, momentumRes] = await Promise.allSettled([
     fetchExisting,
     fetchMorning,
     api.getWeights(),
     api.getBehaviours(),
     api.getMoodDimensions(),
+    api.getMomentumItems(),
   ])
 
   existingRecord = existingRes.status === 'fulfilled' ? existingRes.value : null
@@ -767,6 +813,7 @@ async function init() {
   const config = configRes.status === 'fulfilled' ? configRes.value : null
   const behaviours = behavioursRes.status === 'fulfilled' ? (behavioursRes.value ?? []) : []
   const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
+  const momentumItems = momentumRes.status === 'fulfilled' ? (momentumRes.value ?? []) : []
 
   if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord && type !== 'evening') {
     location.replace('/?type=evening')
@@ -800,12 +847,13 @@ async function init() {
     return
   }
 
-  await showForm(morningRecord, config, moodDims)
+  await showForm(morningRecord, config, moodDims, momentumItems)
 }
 
-async function showForm(morningRecord = null, config = null, moodDims = []) {
-  // Render secondary moods before dirty tracking is set up
+async function showForm(morningRecord = null, config = null, moodDims = [], momentumItems = []) {
+  // Render dynamic sections before dirty tracking is set up
   renderEodSleep(morningRecord)
+  renderMomentum(momentumItems)
   renderSecondaryMoods(moodDims, morningRecord)
   renderMorningMood(morningRecord)
 

@@ -9,18 +9,22 @@ const btn = (label, icon, classes, onclick) =>
 
 // ── Secondary Moods ───────────────────────────────────────────
 
+let moodSortable = null
+
 async function loadMoodDimensions() {
   const list = document.getElementById('mood-dimension-list')
   try {
-    const dims = await api.getMoodDimensions()
+    const dims = await api.getMoodDimensionsAll()
     if (!dims.length) {
       list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No secondary moods yet.</li>'
     } else {
       list.innerHTML = dims.map(d => `
-        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-          <span>${d.name}</span>
+        <li data-id="${d.id}" style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px${d.paused ? ';opacity:0.55' : ''}">
+          <span class="app-drag-handle material-icons" aria-hidden="true">drag_indicator</span>
+          <span style="flex:1">${d.name}${d.paused ? '<span class="app-item-paused-badge">Paused</span>' : ''}</span>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}') `)}
+            ${btn(d.paused ? 'Resume' : 'Pause', d.paused ? 'play_arrow' : 'pause', 'nhsuk-button--secondary', `pauseMoodDimension('${d.id}', ${d.paused})`)}
+            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}', ${d.five_is_good !== false})`)}
             ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}')`)}
           </div>
         </li>
@@ -29,11 +33,21 @@ async function loadMoodDimensions() {
 
     const existingNames = new Set(dims.map(d => d.name.toLowerCase()))
     const quickBtns = document.querySelectorAll('[data-quick-mood]')
-    quickBtns.forEach(btn => {
-      btn.style.display = existingNames.has(btn.dataset.quickMood.toLowerCase()) ? 'none' : ''
+    quickBtns.forEach(b => {
+      b.style.display = existingNames.has(b.dataset.quickMood.toLowerCase()) ? 'none' : ''
     })
     const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
     document.getElementById('quick-add-details').style.display = anyVisible ? '' : 'none'
+
+    if (moodSortable) moodSortable.destroy()
+    moodSortable = Sortable.create(list, {
+      handle: '.app-drag-handle',
+      animation: 150,
+      onEnd: () => {
+        const ids = [...list.querySelectorAll('li[data-id]')].map(li => li.dataset.id)
+        api.reorderMoodDimensions(ids)
+      }
+    })
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load mood dimensions.</li>'
   }
@@ -41,9 +55,11 @@ async function loadMoodDimensions() {
 
 let editingMoodDimId = null
 
-window.editMoodDimension = function(id, name) {
+window.editMoodDimension = function(id, name, fiveIsGood) {
   editingMoodDimId = id
   document.getElementById('edit-mood-name').value = name
+  document.getElementById('edit-mood-dir-good').checked = fiveIsGood !== false
+  document.getElementById('edit-mood-dir-bad').checked = fiveIsGood === false
   document.getElementById('mood-edit-modal').style.display = 'flex'
 }
 
@@ -55,11 +71,13 @@ document.getElementById('mood-edit-cancel-btn').addEventListener('click', () => 
 document.getElementById('mood-edit-save-btn').addEventListener('click', async () => {
   const name = document.getElementById('edit-mood-name').value.trim()
   if (!name) return
+  const dirRadio = document.querySelector('[name="edit_mood_direction"]:checked')
+  const five_is_good = !dirRadio || dirRadio.value === 'good'
   const saveBtn = document.getElementById('mood-edit-save-btn')
   saveBtn.disabled = true
   saveBtn.textContent = 'Saving…'
   try {
-    await api.updateMoodDimension(editingMoodDimId, { name })
+    await api.updateMoodDimension(editingMoodDimId, { name, five_is_good })
     document.getElementById('mood-edit-modal').style.display = 'none'
     editingMoodDimId = null
     showFeedback('mood-dimension-feedback', 'Mood dimension updated.')
@@ -71,6 +89,15 @@ document.getElementById('mood-edit-save-btn').addEventListener('click', async ()
     saveBtn.textContent = 'Save'
   }
 })
+
+window.pauseMoodDimension = async function(id, isPaused) {
+  try {
+    await api.updateMoodDimension(id, { paused: !isPaused })
+    clearCache('moodDimensions'); loadMoodDimensions()
+  } catch (err) {
+    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+  }
+}
 
 let deletingMoodDimId = null
 
@@ -103,10 +130,10 @@ document.getElementById('mood-delete-confirm-btn').addEventListener('click', asy
   }
 })
 
-async function addMoodDimension(name) {
+async function addMoodDimension(name, fiveIsGood = true) {
   if (!name) return
   try {
-    await api.addMoodDimension(name)
+    await api.addMoodDimension(name, fiveIsGood)
     showFeedback('mood-dimension-feedback', `"${name}" added.`)
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
@@ -118,8 +145,10 @@ document.getElementById('add-mood-dimension-btn').addEventListener('click', () =
   const input = document.getElementById('new-mood-dimension')
   const name = input.value.trim()
   if (!name) return
+  const dirRadio = document.querySelector('[name="new_mood_direction"]:checked')
+  const fiveIsGood = !dirRadio || dirRadio.value === 'good'
   input.value = ''
-  addMoodDimension(name)
+  addMoodDimension(name, fiveIsGood)
 })
 
 document.getElementById('new-mood-dimension').addEventListener('keydown', (e) => {
@@ -129,17 +158,17 @@ document.getElementById('new-mood-dimension').addEventListener('keydown', (e) =>
   }
 })
 
-document.querySelectorAll('[data-quick-mood]').forEach(btn => {
-  btn.addEventListener('click', () => addMoodDimension(btn.dataset.quickMood))
+document.querySelectorAll('[data-quick-mood]').forEach(b => {
+  b.addEventListener('click', () => addMoodDimension(b.dataset.quickMood))
 })
 
 // ── Behaviours ────────────────────────────────────────────────
 
-document.querySelectorAll('[data-quick-behaviour]').forEach(btn => {
-  btn.addEventListener('click', async () => {
+document.querySelectorAll('[data-quick-behaviour]').forEach(b => {
+  b.addEventListener('click', async () => {
     try {
-      await api.addBehaviour(btn.dataset.quickBehaviour, Number(btn.dataset.quickWeight))
-      showFeedback('behaviour-feedback', `"${btn.dataset.quickBehaviour}" added.`)
+      await api.addBehaviour(b.dataset.quickBehaviour, Number(b.dataset.quickWeight))
+      showFeedback('behaviour-feedback', `"${b.dataset.quickBehaviour}" added.`)
       clearCache('behaviours'); loadBehaviours()
     } catch (err) {
       showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
@@ -153,6 +182,8 @@ function weightLabel(w) {
   return '—'
 }
 
+let behaviourSortable = null
+
 async function loadBehaviours() {
   const list = document.getElementById('behaviour-list')
   try {
@@ -161,8 +192,9 @@ async function loadBehaviours() {
       list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No behaviours yet.</li>'
     } else {
       list.innerHTML = behaviours.map(b => `
-        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-          <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
+        <li data-id="${b.id}" style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+          <span class="app-drag-handle material-icons" aria-hidden="true">drag_indicator</span>
+          <span style="flex:1">${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
           <div style="display:flex;gap:6px;flex-shrink:0">
             ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})`)}
             ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')`)}
@@ -178,6 +210,16 @@ async function loadBehaviours() {
     })
     const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
     document.getElementById('quick-add-behaviour-details').style.display = anyVisible ? '' : 'none'
+
+    if (behaviourSortable) behaviourSortable.destroy()
+    behaviourSortable = Sortable.create(list, {
+      handle: '.app-drag-handle',
+      animation: 150,
+      onEnd: () => {
+        const ids = [...list.querySelectorAll('li[data-id]')].map(li => li.dataset.id)
+        api.reorderBehaviours(ids)
+      }
+    })
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load behaviours.</li>'
   }
@@ -285,6 +327,138 @@ document.getElementById('new-behaviour').addEventListener('keydown', (e) => {
 
 document.getElementById('new-behaviour-weight').addEventListener('input', (e) => {
   document.getElementById('new-behaviour-weight-label').textContent = weightLabel(Number(e.target.value))
+})
+
+// ── Momentum ──────────────────────────────────────────────────
+
+let momentumSortable = null
+
+async function loadMomentumItems() {
+  const list = document.getElementById('momentum-item-list')
+  try {
+    const items = await api.getMomentumItemsAll()
+    if (!items.length) {
+      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No momentum items yet.</li>'
+    } else {
+      list.innerHTML = items.map(m => `
+        <li data-id="${m.id}" style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px${m.paused ? ';opacity:0.55' : ''}">
+          <span class="app-drag-handle material-icons" aria-hidden="true">drag_indicator</span>
+          <span style="flex:1">${m.name}${m.paused ? '<span class="app-item-paused-badge">Paused</span>' : ''}</span>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            ${btn(m.paused ? 'Resume' : 'Pause', m.paused ? 'play_arrow' : 'pause', 'nhsuk-button--secondary', `pauseMomentumItem('${m.id}', ${m.paused})`)}
+            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMomentumItem('${m.id}', '${m.name.replace(/'/g, "\\'")}') `)}
+            ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteMomentumItem('${m.id}', '${m.name.replace(/'/g, "\\'")}')`)}
+          </div>
+        </li>
+      `).join('')
+    }
+
+    if (momentumSortable) momentumSortable.destroy()
+    momentumSortable = Sortable.create(list, {
+      handle: '.app-drag-handle',
+      animation: 150,
+      onEnd: () => {
+        const ids = [...list.querySelectorAll('li[data-id]')].map(li => li.dataset.id)
+        api.reorderMomentumItems(ids)
+      }
+    })
+  } catch {
+    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load momentum items.</li>'
+  }
+}
+
+let editingMomentumId = null
+
+window.editMomentumItem = function(id, name) {
+  editingMomentumId = id
+  document.getElementById('edit-momentum-name').value = name
+  document.getElementById('momentum-edit-modal').style.display = 'flex'
+}
+
+document.getElementById('momentum-edit-cancel-btn').addEventListener('click', () => {
+  document.getElementById('momentum-edit-modal').style.display = 'none'
+  editingMomentumId = null
+})
+
+document.getElementById('momentum-edit-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('edit-momentum-name').value.trim()
+  if (!name) return
+  const saveBtn = document.getElementById('momentum-edit-save-btn')
+  saveBtn.disabled = true
+  saveBtn.textContent = 'Saving…'
+  try {
+    await api.updateMomentumItem(editingMomentumId, { name })
+    document.getElementById('momentum-edit-modal').style.display = 'none'
+    editingMomentumId = null
+    showFeedback('momentum-item-feedback', 'Momentum item updated.')
+    clearCache('momentumItems'); loadMomentumItems()
+  } catch (err) {
+    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+  } finally {
+    saveBtn.disabled = false
+    saveBtn.textContent = 'Save'
+  }
+})
+
+window.pauseMomentumItem = async function(id, isPaused) {
+  try {
+    await api.updateMomentumItem(id, { paused: !isPaused })
+    clearCache('momentumItems'); loadMomentumItems()
+  } catch (err) {
+    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+  }
+}
+
+let deletingMomentumId = null
+
+window.confirmDeleteMomentumItem = function(id, name) {
+  deletingMomentumId = id
+  document.getElementById('momentum-delete-summary').textContent = `Remove "${name}" from your momentum items?`
+  document.getElementById('momentum-delete-modal').style.display = 'flex'
+}
+
+document.getElementById('momentum-delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('momentum-delete-modal').style.display = 'none'
+  deletingMomentumId = null
+})
+
+document.getElementById('momentum-delete-confirm-btn').addEventListener('click', async () => {
+  const delBtn = document.getElementById('momentum-delete-confirm-btn')
+  delBtn.disabled = true
+  delBtn.textContent = 'Removing…'
+  try {
+    await api.deleteMomentumItem(deletingMomentumId)
+    document.getElementById('momentum-delete-modal').style.display = 'none'
+    deletingMomentumId = null
+    clearCache('momentumItems'); loadMomentumItems()
+  } catch (err) {
+    document.getElementById('momentum-delete-modal').style.display = 'none'
+    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+  } finally {
+    delBtn.disabled = false
+    delBtn.textContent = 'Remove'
+  }
+})
+
+document.getElementById('add-momentum-item-btn').addEventListener('click', async () => {
+  const input = document.getElementById('new-momentum-item')
+  const name = input.value.trim()
+  if (!name) return
+  try {
+    await api.addMomentumItem(name)
+    input.value = ''
+    showFeedback('momentum-item-feedback', `"${name}" added.`)
+    clearCache('momentumItems'); loadMomentumItems()
+  } catch (err) {
+    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+  }
+})
+
+document.getElementById('new-momentum-item').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    document.getElementById('add-momentum-item-btn').click()
+  }
 })
 
 // ── Supplements ──────────────────────────────────────────────
@@ -404,11 +578,11 @@ document.getElementById('new-supplement').addEventListener('keydown', (e) => {
   }
 })
 
-document.querySelectorAll('[data-quick-supplement]').forEach(btn => {
-  btn.addEventListener('click', async () => {
+document.querySelectorAll('[data-quick-supplement]').forEach(b => {
+  b.addEventListener('click', async () => {
     try {
-      await api.addSupplement(btn.dataset.quickSupplement)
-      showFeedback('supp-feedback', `"${btn.dataset.quickSupplement}" added.`)
+      await api.addSupplement(b.dataset.quickSupplement)
+      showFeedback('supp-feedback', `"${b.dataset.quickSupplement}" added.`)
       clearCache('supplements'); loadSupplements()
     } catch (err) {
       showFeedback('supp-feedback', `Error: ${err.message}`, true)
@@ -491,6 +665,7 @@ authReady.then(() => {
   loadLocation()
   loadMoodDimensions()
   loadBehaviours()
+  loadMomentumItems()
   loadSupplements()
   loadTrackAlcohol()
 })

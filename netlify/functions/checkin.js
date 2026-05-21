@@ -28,7 +28,7 @@ export default async function handler(req) {
   const {
     check_in_type, check_in_date,
     bedtime, wake_time, sleep_quality,
-    primary_mood_morning, primary_mood_eod, secondary_moods,
+    primary_mood_morning, primary_mood_eod, secondary_moods, momentum_scores,
     exercised, exercise_types, exercise_sessions, exercise_duration_minutes,
     alcohol_spirits, alcohol_beer, alcohol_wine,
     supplements,
@@ -50,7 +50,7 @@ export default async function handler(req) {
       user_id: user.id,
       check_in_type, check_in_date, submitted_at,
       bedtime, wake_time, hours_slept, sleep_quality,
-      primary_mood_morning, primary_mood_eod, secondary_moods,
+      primary_mood_morning, primary_mood_eod, secondary_moods, momentum_scores,
       exercised, exercise_types, exercise_sessions, exercise_duration_minutes,
       alcohol_spirits, alcohol_beer, alcohol_wine,
       supplements,

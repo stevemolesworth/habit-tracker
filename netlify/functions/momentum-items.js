@@ -10,7 +10,7 @@ export default async function handler(req) {
   if (req.method === 'GET') {
     const includeAll = url.searchParams.get('all') === '1'
     let query = supabase
-      .from('mood_dimensions')
+      .from('momentum_items')
       .select('*')
       .eq('user_id', user.id)
       .eq('active', true)
@@ -30,19 +30,20 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
 
-    const { name, five_is_good = true } = body
+    const { name } = body
     if (!name?.trim()) {
       return new Response(JSON.stringify({ error: 'name is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
 
     const { count } = await supabase
-      .from('mood_dimensions')
+      .from('momentum_items')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
+      .eq('active', true)
 
     const { data, error } = await supabase
-      .from('mood_dimensions')
-      .insert([{ user_id: user.id, name: name.trim(), five_is_good: Boolean(five_is_good), sort_order: count ?? 0 }])
+      .from('momentum_items')
+      .insert([{ user_id: user.id, name: name.trim(), sort_order: count ?? 0 }])
       .select()
       .single()
 
@@ -62,7 +63,7 @@ export default async function handler(req) {
       if (!Array.isArray(ids)) return new Response(JSON.stringify({ error: 'ids must be an array' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
 
       await Promise.all(ids.map((id, index) =>
-        supabase.from('mood_dimensions').update({ sort_order: index }).eq('id', id).eq('user_id', user.id)
+        supabase.from('momentum_items').update({ sort_order: index }).eq('id', id).eq('user_id', user.id)
       ))
       return new Response(null, { status: 204 })
     }
@@ -80,12 +81,11 @@ export default async function handler(req) {
       if (!body.name?.trim()) return new Response(JSON.stringify({ error: 'name cannot be empty' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
       update.name = body.name.trim()
     }
-    if (body.five_is_good !== undefined) update.five_is_good = Boolean(body.five_is_good)
     if (body.paused !== undefined) update.paused = Boolean(body.paused)
     if (body.sort_order !== undefined) update.sort_order = body.sort_order
 
     const { data, error } = await supabase
-      .from('mood_dimensions')
+      .from('momentum_items')
       .update(update)
       .eq('id', id)
       .eq('user_id', user.id)
@@ -101,7 +101,7 @@ export default async function handler(req) {
     if (!id) return new Response(JSON.stringify({ error: 'id is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
 
     const { error } = await supabase
-      .from('mood_dimensions')
+      .from('momentum_items')
       .update({ active: false })
       .eq('id', id)
       .eq('user_id', user.id)

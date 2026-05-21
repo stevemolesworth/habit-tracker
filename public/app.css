@@ -404,3 +404,38 @@ a.app-bool-dot:hover { opacity: 0.75; }
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Mood scale emoji anchors */
+.app-mood-scale-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-mood-anchor {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Drag-to-reorder */
+.app-drag-handle {
+  cursor: grab;
+  color: #768692;
+  margin-right: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.app-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Paused item states */
+.app-item-paused-badge {
+  font-size: 0.75rem;
+  color: #768692;
+  background: #f0f4f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+}

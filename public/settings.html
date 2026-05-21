@@ -64,6 +64,19 @@
                   <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-mood-dimension">Add mood dimension</label>
                   <input class="nhsuk-input nhsuk-input--width-20" id="new-mood-dimension" type="text" placeholder="e.g. Creativity" />
                 </div>
+                <fieldset class="nhsuk-fieldset nhsuk-u-margin-top-3">
+                  <legend class="nhsuk-fieldset__legend nhsuk-label">Is 5 good or bad?</legend>
+                  <div class="nhsuk-radios nhsuk-radios--inline">
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="mood-dir-good" name="new_mood_direction" type="radio" value="good" checked />
+                      <label class="nhsuk-label nhsuk-radios__label" for="mood-dir-good">5 is good 😊</label>
+                    </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="mood-dir-bad" name="new_mood_direction" type="radio" value="bad" />
+                      <label class="nhsuk-label nhsuk-radios__label" for="mood-dir-bad">5 is bad 😢</label>
+                    </div>
+                  </div>
+                </fieldset>
                 <button class="nhsuk-button" id="add-mood-dimension-btn">Add mood</button>
               </div>
               <p id="mood-dimension-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display:none"></p>
@@ -113,6 +126,23 @@
                 <button class="nhsuk-button nhsuk-u-margin-top-3" id="add-behaviour-btn">Add behaviour</button>
               </div>
               <p id="behaviour-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
+            </section>
+
+            <!-- Momentum -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Momentum</h2>
+              <p class="nhsuk-body">Momentum items are rated 1–5 at each end-of-day check-in, helping you track progress on goals, projects, or habits over time.</p>
+              <ul class="nhsuk-list" id="momentum-item-list">
+                <li class="nhsuk-u-secondary-text-color">Loading…</li>
+              </ul>
+              <div class="nhsuk-u-margin-top-3">
+                <div class="nhsuk-form-group">
+                  <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-momentum-item">Add momentum item</label>
+                  <input class="nhsuk-input nhsuk-input--width-20" id="new-momentum-item" type="text" placeholder="e.g. Project X" />
+                </div>
+                <button class="nhsuk-button" id="add-momentum-item-btn">Add item</button>
+              </div>
+              <p id="momentum-item-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display:none"></p>
             </section>
 
             <!-- Supplements -->
@@ -182,7 +212,7 @@
             </div>
           </div>
         </div>
-        <p class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-6" style="text-align:right">v19</p>
+        <p class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-6" style="text-align:right">v20</p>
       </main>
     </div>
 
@@ -304,6 +334,19 @@
           <label class="nhsuk-label" for="edit-mood-name">Name</label>
           <input class="nhsuk-input" id="edit-mood-name" type="text" />
         </div>
+        <fieldset class="nhsuk-fieldset nhsuk-u-margin-top-3">
+          <legend class="nhsuk-fieldset__legend nhsuk-label">Is 5 good or bad?</legend>
+          <div class="nhsuk-radios nhsuk-radios--inline">
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="edit-mood-dir-good" name="edit_mood_direction" type="radio" value="good" checked />
+              <label class="nhsuk-label nhsuk-radios__label" for="edit-mood-dir-good">5 is good 😊</label>
+            </div>
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="edit-mood-dir-bad" name="edit_mood_direction" type="radio" value="bad" />
+              <label class="nhsuk-label nhsuk-radios__label" for="edit-mood-dir-bad">5 is bad 😢</label>
+            </div>
+          </div>
+        </fieldset>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
           <button class="nhsuk-button" id="mood-edit-save-btn" style="margin:0">Save</button>
           <button class="nhsuk-button nhsuk-button--secondary" id="mood-edit-cancel-btn" style="margin:0">Cancel</button>
@@ -323,6 +366,33 @@
       </div>
     </div>
 
+    <!-- Momentum item edit modal -->
+    <div id="momentum-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit momentum item</h2>
+        <div class="nhsuk-form-group">
+          <label class="nhsuk-label" for="edit-momentum-name">Name</label>
+          <input class="nhsuk-input" id="edit-momentum-name" type="text" />
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+          <button class="nhsuk-button" id="momentum-edit-save-btn" style="margin:0">Save</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="momentum-edit-cancel-btn" style="margin:0">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Momentum item delete modal -->
+    <div id="momentum-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove momentum item?</h2>
+        <p class="nhsuk-body" id="momentum-delete-summary"></p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="momentum-delete-confirm-btn" style="margin:0">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="momentum-delete-cancel-btn" style="margin:0">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <footer class="nhsuk-footer" role="contentinfo">
       <div class="nhsuk-width-container">
         <h2 class="nhsuk-u-visually-hidden">Support links</h2>
@@ -337,6 +407,7 @@
       </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <script type="module" src="/settings.js"></script>
   </body>
 </html>

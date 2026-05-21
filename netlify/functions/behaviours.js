@@ -13,6 +13,7 @@ export default async function handler(req) {
       .select('*')
       .eq('user_id', user.id)
       .eq('active', true)
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
 
     if (error) {
@@ -48,6 +49,22 @@ export default async function handler(req) {
   }
 
   if (req.method === 'PUT') {
+    const reorder = url.searchParams.get('reorder') === '1'
+
+    if (reorder) {
+      let body
+      try { body = await req.json() } catch {
+        return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+      }
+      const { ids } = body
+      if (!Array.isArray(ids)) return new Response(JSON.stringify({ error: 'ids must be an array' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+
+      await Promise.all(ids.map((id, index) =>
+        supabase.from('behaviours').update({ sort_order: index }).eq('id', id).eq('user_id', user.id)
+      ))
+      return new Response(null, { status: 204 })
+    }
+
     const id = url.searchParams.get('id')
     if (!id) {
       return new Response(JSON.stringify({ error: 'id is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })

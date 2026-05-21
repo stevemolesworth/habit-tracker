@@ -76,6 +76,16 @@
               </div>
             </div>
 
+            <!-- In-page nav (EOD only, shown by JS) -->
+            <nav class="nhsuk-contents-list" id="checkin-inpage-nav" aria-label="Sections" style="display:none">
+              <h2 class="nhsuk-u-visually-hidden">Contents</h2>
+              <ol class="nhsuk-contents-list__list">
+                <li class="nhsuk-contents-list__item"><a class="nhsuk-contents-list__link" href="#section-behaviours">Behaviours</a></li>
+                <li class="nhsuk-contents-list__item"><a class="nhsuk-contents-list__link" href="#section-momentum">Momentum</a></li>
+                <li class="nhsuk-contents-list__item"><a class="nhsuk-contents-list__link" href="#section-mood">Mood</a></li>
+              </ol>
+            </nav>
+
             <form id="checkin-form" novalidate>
               <!-- ══ Sleep ══════════════════════════════════════════════ -->
               <section class="app-section" id="sleep-section">
@@ -138,64 +148,9 @@
                 </div><!-- /#sleep-fields -->
               </section>
 
-              <!-- ══ Section A: Moods ══════════════════════════════════ -->
-              <section class="app-section" id="moods-section">
-                <h2 class="nhsuk-heading-l">Moods</h2>
-
-                <!-- Primary Mood -->
-                <div class="nhsuk-form-group nhsuk-u-margin-top-3">
-                  <fieldset class="nhsuk-fieldset">
-                    <legend class="nhsuk-fieldset__legend nhsuk-label">
-                      <strong>Mood</strong><span id="morning-mood-display" class="app-mood-morning-hint" style="display: none"> — this morning: <span id="morning-mood-value"></span></span>
-                    </legend>
-                    <p class="nhsuk-hint nhsuk-u-margin-bottom-2 nhsuk-u-visually-hidden">1 = Poor, 5 = Excellent</p>
-                    <div class="nhsuk-radios nhsuk-radios--inline">
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="gm-1" name="primary_mood" type="radio" value="1" tabindex="0" /><label
-                          class="nhsuk-label nhsuk-radios__label"
-                          for="gm-1"
-                          >1</label
-                        >
-                      </div>
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="gm-2" name="primary_mood" type="radio" value="2" /><label
-                          class="nhsuk-label nhsuk-radios__label"
-                          for="gm-2"
-                          >2</label
-                        >
-                      </div>
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="gm-3" name="primary_mood" type="radio" value="3" /><label
-                          class="nhsuk-label nhsuk-radios__label"
-                          for="gm-3"
-                          >3</label
-                        >
-                      </div>
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="gm-4" name="primary_mood" type="radio" value="4" /><label
-                          class="nhsuk-label nhsuk-radios__label"
-                          for="gm-4"
-                          >4</label
-                        >
-                      </div>
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="gm-5" name="primary_mood" type="radio" value="5" /><label
-                          class="nhsuk-label nhsuk-radios__label"
-                          for="gm-5"
-                          >5</label
-                        >
-                      </div>
-                    </div>
-                  </fieldset>
-                </div>
-
-                <!-- Secondary Moods (rendered by JS) -->
-                <div id="secondary-moods-list"></div>
-              </section>
-
               <!-- ══ Section B: Events (EOD only) ══════════════════════ -->
               <section class="app-section" id="events-section">
-                <h2 class="nhsuk-heading-l">Events</h2>
+                <h2 class="nhsuk-heading-l" id="section-behaviours">Events</h2>
 
                 <!-- Alcohol -->
                 <div id="alcohol-section">
@@ -315,6 +270,56 @@
                     <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading…</p>
                   </div>
                 </div>
+              </section>
+
+              <!-- ══ Momentum (EOD only) ═══════════════════════════════ -->
+              <section class="app-section" id="momentum-section" style="display:none">
+                <h2 class="nhsuk-heading-l" id="section-momentum">Momentum</h2>
+                <div id="momentum-list"></div>
+              </section>
+
+              <!-- ══ Section A: Moods ══════════════════════════════════ -->
+              <section class="app-section" id="moods-section">
+                <h2 class="nhsuk-heading-l" id="section-mood">Moods</h2>
+
+                <!-- Primary Mood -->
+                <div class="nhsuk-form-group nhsuk-u-margin-top-3">
+                  <fieldset class="nhsuk-fieldset">
+                    <legend class="nhsuk-fieldset__legend nhsuk-label">
+                      <strong>Mood</strong><span id="morning-mood-display" class="app-mood-morning-hint" style="display: none"> — this morning: <span id="morning-mood-value"></span></span>
+                    </legend>
+                    <p class="nhsuk-hint nhsuk-u-margin-bottom-2 nhsuk-u-visually-hidden">1 = Poor, 5 = Excellent</p>
+                    <div class="app-mood-scale-row">
+                      <span class="app-mood-anchor" aria-hidden="true">😢</span>
+                      <div class="nhsuk-radios nhsuk-radios--inline">
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="gm-1" name="primary_mood" type="radio" value="1" tabindex="0" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="gm-1">1</label>
+                        </div>
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="gm-2" name="primary_mood" type="radio" value="2" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="gm-2">2</label>
+                        </div>
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="gm-3" name="primary_mood" type="radio" value="3" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="gm-3">3</label>
+                        </div>
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="gm-4" name="primary_mood" type="radio" value="4" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="gm-4">4</label>
+                        </div>
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="gm-5" name="primary_mood" type="radio" value="5" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="gm-5">5</label>
+                        </div>
+                      </div>
+                      <span class="app-mood-anchor" aria-hidden="true">😊</span>
+                    </div>
+                  </fieldset>
+                </div>
+
+                <!-- Secondary Moods (rendered by JS) -->
+                <div id="secondary-moods-list"></div>
               </section>
 
               <!-- Notes -->
