@@ -525,6 +525,8 @@ document.getElementById('new-momentum-item').addEventListener('input', (e) => {
 
 // ── Supplements ──────────────────────────────────────────────
 
+let supplementSortable = null
+
 async function loadSupplements() {
   const list = document.getElementById('supplement-list')
   try {
@@ -533,8 +535,9 @@ async function loadSupplements() {
       list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No supplements yet.</li>'
     } else {
       list.innerHTML = supplements.map(s => `
-        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-          <span>${s.name}</span>
+        <li data-id="${s.id}" style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+          <span class="app-drag-handle material-icons" aria-hidden="true">drag_indicator</span>
+          <span style="flex:1">${s.name}</span>
           <div style="display:flex;gap:6px;flex-shrink:0">
             ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}') `)}
             ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)}
@@ -550,6 +553,16 @@ async function loadSupplements() {
     })
     const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
     document.getElementById('quick-supplement-suggestions').style.display = anyVisible ? '' : 'none'
+
+    if (supplementSortable) supplementSortable.destroy()
+    supplementSortable = Sortable.create(list, {
+      handle: '.app-drag-handle',
+      animation: 150,
+      onEnd: () => {
+        const ids = [...list.querySelectorAll('li[data-id]')].map(li => li.dataset.id)
+        api.reorderSupplements(ids)
+      }
+    })
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load supplements.</li>'
   }

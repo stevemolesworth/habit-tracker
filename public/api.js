@@ -47,6 +47,7 @@ export const api = {
   addSupplement: (name) => request('/api/supplements', { method: 'POST', body: JSON.stringify({ name }) }),
   updateSupplement: (id, name) => request(`/api/supplements?id=${id}`, { method: 'PUT', body: JSON.stringify({ name }) }),
   deleteSupplement: (id) => request(`/api/supplements?id=${id}`, { method: 'DELETE' }),
+  reorderSupplements: (ids) => { clearCache('supplements'); return request('/api/supplements?reorder=1', { method: 'PUT', body: JSON.stringify({ ids }) }) },
   getBehaviours: cached('behaviours', () => request('/api/behaviours')),
   addBehaviour: (name, weight) => request('/api/behaviours', { method: 'POST', body: JSON.stringify({ name, weight }) }),
   updateBehaviour: (id, name, weight) => request(`/api/behaviours?id=${id}`, { method: 'PUT', body: JSON.stringify({ name, weight }) }),
