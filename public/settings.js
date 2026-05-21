@@ -1,4 +1,4 @@
-import { api } from '/api.js'
+import { api, clearCache } from '/api.js'
 import { authReady } from '/auth.js'
 import { geocode } from '/weather.js'
 
@@ -69,7 +69,7 @@ document.getElementById('behaviour-edit-save-btn').addEventListener('click', asy
     document.getElementById('behaviour-edit-modal').style.display = 'none'
     editingBehaviourId = null
     showFeedback('behaviour-feedback', 'Behaviour updated.')
-    loadBehaviours()
+    clearCache('behaviours'); loadBehaviours()
   } catch (err) {
     showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
   } finally {
@@ -99,7 +99,7 @@ document.getElementById('behaviour-delete-confirm-btn').addEventListener('click'
     await api.deleteBehaviour(deletingBehaviourId)
     document.getElementById('behaviour-delete-modal').style.display = 'none'
     deletingBehaviourId = null
-    loadBehaviours()
+    clearCache('behaviours'); loadBehaviours()
   } catch (err) {
     document.getElementById('behaviour-delete-modal').style.display = 'none'
     showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
@@ -124,7 +124,7 @@ document.getElementById('add-behaviour-btn').addEventListener('click', async () 
     nameInput.value = ''
     weightInput.value = '1'
     showFeedback('behaviour-feedback', `"${name}" added.`)
-    loadBehaviours()
+    clearCache('behaviours'); loadBehaviours()
   } catch (err) {
     showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
   }
@@ -195,7 +195,7 @@ document.getElementById('focus-edit-save-btn').addEventListener('click', async (
     document.getElementById('focus-edit-modal').style.display = 'none'
     editingFocusId = null
     showFeedback('focus-feedback', 'Focus updated.')
-    loadFocuses()
+    clearCache('focuses'); loadFocuses()
   } catch (err) {
     showFeedback('focus-feedback', `Error: ${err.message}`, true)
   } finally {
@@ -207,7 +207,7 @@ document.getElementById('focus-edit-save-btn').addEventListener('click', async (
 window.toggleFocus = async function(id, currentlyActive) {
   try {
     await api.updateFocus(id, { is_active: !currentlyActive })
-    loadFocuses()
+    clearCache('focuses'); loadFocuses()
   } catch (err) {
     showFeedback('focus-feedback', `Error: ${err.message}`, true)
   }
@@ -234,7 +234,7 @@ document.getElementById('focus-delete-confirm-btn').addEventListener('click', as
     await api.deleteFocus(deletingFocusId)
     document.getElementById('focus-delete-modal').style.display = 'none'
     deletingFocusId = null
-    loadFocuses()
+    clearCache('focuses'); loadFocuses()
   } catch (err) {
     document.getElementById('focus-delete-modal').style.display = 'none'
     showFeedback('focus-feedback', `Error: ${err.message}`, true)
@@ -252,7 +252,7 @@ document.getElementById('add-focus-btn').addEventListener('click', async () => {
     await api.addFocus(title)
     input.value = ''
     showFeedback('focus-feedback', `"${title}" added.`)
-    loadFocuses()
+    clearCache('focuses'); loadFocuses()
   } catch (err) {
     showFeedback('focus-feedback', `Error: ${err.message}`, true)
   }
@@ -313,7 +313,7 @@ document.getElementById('supplement-edit-save-btn').addEventListener('click', as
     document.getElementById('supplement-edit-modal').style.display = 'none'
     editingSupplementId = null
     showFeedback('supp-feedback', 'Supplement updated.')
-    loadSupplements()
+    clearCache('supplements'); loadSupplements()
   } catch (err) {
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
   } finally {
@@ -343,7 +343,7 @@ document.getElementById('supplement-delete-confirm-btn').addEventListener('click
     await api.deleteSupplement(deletingSupplementId)
     document.getElementById('supplement-delete-modal').style.display = 'none'
     deletingSupplementId = null
-    loadSupplements()
+    clearCache('supplements'); loadSupplements()
   } catch (err) {
     document.getElementById('supplement-delete-modal').style.display = 'none'
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
@@ -361,7 +361,7 @@ document.getElementById('add-supplement-btn').addEventListener('click', async ()
     await api.addSupplement(name)
     input.value = ''
     showFeedback('supp-feedback', `"${name}" added.`)
-    loadSupplements()
+    clearCache('supplements'); loadSupplements()
   } catch (err) {
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
   }
@@ -411,6 +411,7 @@ document.getElementById('location-save-btn').addEventListener('click', async () 
   try {
     const loc = await geocode(query)
     await api.updateWeights({ default_location_lat: loc.lat, default_location_lng: loc.lng, default_location_label: loc.label })
+    clearCache('weights')
     label.textContent = `Current: ${loc.label}`
     input.value = ''
     feedback.textContent = 'Saved.'
@@ -434,6 +435,7 @@ document.getElementById('track-alcohol').addEventListener('change', async (e) =>
   const feedback = document.getElementById('track-alcohol-feedback')
   try {
     await api.updateWeights({ track_alcohol: e.target.checked })
+    clearCache('weights')
     feedback.textContent = 'Saved.'
     feedback.style.display = ''
     setTimeout(() => { feedback.style.display = 'none' }, 2000)

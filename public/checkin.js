@@ -1,4 +1,4 @@
-import { api } from '/api.js'
+import { api, clearCache } from '/api.js'
 import { authReady } from '/auth.js'
 import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weather.js'
 
@@ -217,18 +217,11 @@ function populateForm(record) {
 }
 
 // --- Morning mood (shown on evening check-in) ---
-async function loadMorningMood() {
-  try {
-    const record = await api.getTodayCheckin('morning', today)
-    const display = document.getElementById('morning-mood-display')
-    const value = document.getElementById('morning-mood-value')
-    if (record?.global_mood) {
-      value.textContent = record.global_mood
-    } else {
-      value.textContent = 'Not recorded'
-    }
-    display.style.display = ''
-  } catch { /* silently skip */ }
+function renderMorningMood(record) {
+  const display = document.getElementById('morning-mood-display')
+  const value = document.getElementById('morning-mood-value')
+  value.textContent = record?.global_mood ?? 'Not recorded'
+  display.style.display = ''
 }
 
 // --- Behaviours ---
@@ -612,34 +605,34 @@ function renderCheckinNav() {
 async function init() {
   await authReady
 
-  const newUserCheckPromise = api.getBehaviours().catch(() => [])
+  // After 17:00: sync redirect before any network calls
+  if (!params.get('type') && !isPastDate && localHour >= 17 && type !== 'evening') {
+    location.replace('/?type=evening')
+    return
+  }
 
-  // Auto-switch logic (no explicit ?type= override, today only)
-  if (!params.get('type') && !isPastDate) {
-    // After 17:00: always show evening
-    if (localHour >= 17 && type !== 'evening') {
-      location.replace('/?type=evening')
-      return
-    }
-    // Before 17:00: show evening if morning already submitted
-    if (localHour < 17) {
-      try {
-        const morningDone = await api.getTodayCheckin('morning', today)
-        if (morningDone && type !== 'evening') {
-          location.replace('/?type=evening')
-          return
-        }
-      } catch { /* non-fatal */ }
-    }
+  // Fire all needed requests in parallel
+  const fetchExisting = api.getTodayCheckin(type, today)
+  const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
+  const [existingRes, morningRes, configRes, behavioursRes] = await Promise.allSettled([
+    fetchExisting,
+    fetchMorning,
+    api.getWeights(),
+    api.getBehaviours(),
+  ])
+
+  existingRecord = existingRes.status === 'fulfilled' ? existingRes.value : null
+  const morningRecord = morningRes.status === 'fulfilled' ? morningRes.value : null
+  const config = configRes.status === 'fulfilled' ? configRes.value : null
+  const behaviours = behavioursRes.status === 'fulfilled' ? (behavioursRes.value ?? []) : []
+
+  // Before 17:00 auto-switch: if morning is done, show evening
+  if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord && type !== 'evening') {
+    location.replace('/?type=evening')
+    return
   }
 
   renderCheckinNav()
-
-  try {
-    existingRecord = await api.getTodayCheckin(type, today)
-  } catch {
-    existingRecord = null
-  }
 
   if (existingRecord) {
     // document.getElementById('already-submitted-banner').style.display = ''
@@ -651,63 +644,56 @@ async function init() {
     document.getElementById('delete-section').style.display = ''
   }
 
-  // On evening, pre-fill sleep fields from morning if not already set on the evening record
-  if (!isMorning && !existingRecord?.sleep_quality) {
-    try {
-      const morningRecord = await api.getTodayCheckin('morning', today)
-      if (morningRecord) {
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val }
-        const setRadio = (name, val) => { if (!val) return; const el = document.querySelector(`[name="${name}"][value="${val}"]`); if (el) el.checked = true }
-        setVal('bedtime', morningRecord.bedtime?.slice(0, 5))
-        setVal('wake_time', morningRecord.wake_time?.slice(0, 5))
-        setRadio('sleep_quality', morningRecord.sleep_quality)
-        updateSleepDuration()
-      }
-    } catch { /* non-fatal */ }
+  // On evening, pre-fill sleep from morning if not already on the evening record
+  if (!isMorning && !existingRecord?.sleep_quality && morningRecord) {
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val }
+    const setRadio = (name, val) => { if (!val) return; const el = document.querySelector(`[name="${name}"][value="${val}"]`); if (el) el.checked = true }
+    setVal('bedtime', morningRecord.bedtime?.slice(0, 5))
+    setVal('wake_time', morningRecord.wake_time?.slice(0, 5))
+    setRadio('sleep_quality', morningRecord.sleep_quality)
+    updateSleepDuration()
   }
 
-  const behaviours = await newUserCheckPromise
   if (behaviours.length === 0) {
     showNewUserSplash()
     return
   }
 
-  await showForm()
+  await showForm(morningRecord, config)
 }
 
-async function showForm() {
+async function showForm(morningRecord = null, config = null) {
   loadSupplements()
   if (!isMorning) {
     loadBehaviours()
     loadFocuses()
-    loadMorningMood()
+    renderMorningMood(morningRecord)
   }
 
-  // Load config (location + feature flags)
+  // Apply pre-fetched config, or fetch if not available
   if (!currentLocation) {
     try {
-      const config = await api.getWeights()
-      if (config?.default_location_lat) {
+      const cfg = config ?? await api.getWeights()
+      if (cfg?.default_location_lat) {
         currentLocation = {
-          lat: config.default_location_lat,
-          lng: config.default_location_lng,
-          label: config.default_location_label || ''
+          lat: cfg.default_location_lat,
+          lng: cfg.default_location_lng,
+          label: cfg.default_location_label || ''
         }
-        document.getElementById('weather-location-input').value = config.default_location_label || ''
+        document.getElementById('weather-location-input').value = cfg.default_location_label || ''
         setLocationLabel(currentLocation.label)
       }
-      if (config?.track_alcohol === false) {
+      if (cfg?.track_alcohol === false) {
         document.getElementById('alcohol-section').style.display = 'none'
       }
     } catch { /* leave without location */ }
   }
 
-  await loadWeather()
-
   setupDirtyTracking()
   document.getElementById('page-loader').style.display = 'none'
   document.getElementById('main-content-row').style.display = ''
   hideSplash()
+  loadWeather() // non-blocking — updates the weather widget in-place when ready
 }
 
 init()
