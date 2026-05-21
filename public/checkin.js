@@ -260,11 +260,14 @@ async function loadBehaviours() {
       list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No events configured. Add them in <a href="/settings.html">Settings</a>.</p>'
       return
     }
-    list.innerHTML = behaviours.map(b => `
+    list.innerHTML = behaviours.map(b => {
+      const emoji = b.weight > 0 ? '👍'.repeat(b.weight) : b.weight < 0 ? '💩'.repeat(-b.weight) : ''
+      return `
       <div class="nhsuk-checkboxes__item">
         <input class="nhsuk-checkboxes__input" id="beh-${b.id}" name="behaviour" type="checkbox" value="${b.name}" tabindex="0">
-        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}</label>
-      </div>`).join('')
+        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}${emoji ? ` <span style="letter-spacing:1px">${emoji}</span>` : ''}</label>
+      </div>`
+    }).join('')
 
     if (existingRecord?.behaviours) {
       Object.entries(existingRecord.behaviours).forEach(([name, checked]) => {
@@ -361,6 +364,15 @@ function setupDurationInput() {
   })
 }
 
+// --- Alcohol unit count ---
+function updateAlcoholCount() {
+  const total = ['alcohol_spirits', 'alcohol_beer', 'alcohol_wine']
+    .reduce((sum, id) => sum + (Number(document.getElementById(id)?.value) || 0), 0)
+  const el = document.getElementById('alcohol-unit-count')
+  if (!el) return
+  el.textContent = total > 0 ? `(${total} unit${total === 1 ? '' : 's'})` : '(units)'
+}
+
 // --- Steppers ---
 function setupSteppers() {
   document.querySelectorAll('.app-stepper__btn[data-target]').forEach(btn => {
@@ -371,6 +383,11 @@ function setupSteppers() {
       input.value = Math.max(0, (Number(input.value) || 0) + delta)
       input.dispatchEvent(new Event('change', { bubbles: true }))
     })
+  })
+  // Also update alcohol count when inputs change directly
+  ;['alcohol_spirits', 'alcohol_beer', 'alcohol_wine'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', updateAlcoholCount)
+    document.getElementById(id)?.addEventListener('input', updateAlcoholCount)
   })
 }
 
@@ -708,6 +725,7 @@ async function init() {
     btn.textContent = 'Save Changes'
     btn.disabled = true
     populateForm(existingRecord)
+    updateAlcoholCount()
     showLastUpdated(existingRecord.submitted_at)
     document.getElementById('delete-section').style.display = ''
   }
