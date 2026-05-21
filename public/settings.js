@@ -78,10 +78,10 @@ document.getElementById('mood-edit-save-btn').addEventListener('click', async ()
   saveBtn.disabled = true
   saveBtn.textContent = 'Saving…'
   try {
-    await api.updateMoodDimension(editingMoodDimId, { name, five_is_good })
+    const saved = await api.updateMoodDimension(editingMoodDimId, { name, five_is_good })
     document.getElementById('mood-edit-modal').style.display = 'none'
     editingMoodDimId = null
-    showFeedback('mood-dimension-feedback', 'Mood dimension updated.')
+    showFeedback('mood-dimension-feedback', `Saved — direction: ${saved.five_is_good ? '5 is good' : '5 is bad'}`)
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
     const errEl = document.getElementById('mood-edit-error')

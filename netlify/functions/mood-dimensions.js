@@ -21,7 +21,7 @@ export default async function handler(req) {
 
     const { data, error } = await query
     if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
-    return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } })
   }
 
   if (req.method === 'POST') {
