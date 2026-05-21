@@ -135,6 +135,18 @@ document.querySelectorAll('[data-quick-mood]').forEach(btn => {
 
 // ── Behaviours ────────────────────────────────────────────────
 
+document.querySelectorAll('[data-quick-behaviour]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    try {
+      await api.addBehaviour(btn.dataset.quickBehaviour, Number(btn.dataset.quickWeight))
+      showFeedback('behaviour-feedback', `"${btn.dataset.quickBehaviour}" added.`)
+      clearCache('behaviours'); loadBehaviours()
+    } catch (err) {
+      showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+    }
+  })
+})
+
 function weightLabel(w) {
   if (w > 0) return '👍'.repeat(w)
   if (w < 0) return '💩'.repeat(-w)
@@ -147,17 +159,25 @@ async function loadBehaviours() {
     const behaviours = await api.getBehaviours()
     if (!behaviours.length) {
       list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No behaviours yet.</li>'
-      return
+    } else {
+      list.innerHTML = behaviours.map(b => `
+        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+          <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})`)}
+            ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')`)}
+          </div>
+        </li>
+      `).join('')
     }
-    list.innerHTML = behaviours.map(b => `
-      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-        <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})`)}
-          ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')`)}
-        </div>
-      </li>
-    `).join('')
+
+    const existingNames = new Set(behaviours.map(b => b.name.toLowerCase()))
+    const quickBtns = document.querySelectorAll('[data-quick-behaviour]')
+    quickBtns.forEach(b => {
+      b.style.display = existingNames.has(b.dataset.quickBehaviour.toLowerCase()) ? 'none' : ''
+    })
+    const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
+    document.getElementById('quick-add-behaviour-details').style.display = anyVisible ? '' : 'none'
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load behaviours.</li>'
   }
@@ -275,17 +295,25 @@ async function loadSupplements() {
     const supplements = await api.getSupplements()
     if (!supplements.length) {
       list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No supplements yet.</li>'
-      return
+    } else {
+      list.innerHTML = supplements.map(s => `
+        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+          <span>${s.name}</span>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}') `)}
+            ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)}
+          </div>
+        </li>
+      `).join('')
     }
-    list.innerHTML = supplements.map(s => `
-      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-        <span>${s.name}</span>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}') `)}
-          ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)}
-        </div>
-      </li>
-    `).join('')
+
+    const existingNames = new Set(supplements.map(s => s.name.toLowerCase()))
+    const quickBtns = document.querySelectorAll('[data-quick-supplement]')
+    quickBtns.forEach(b => {
+      b.style.display = existingNames.has(b.dataset.quickSupplement.toLowerCase()) ? 'none' : ''
+    })
+    const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
+    document.getElementById('quick-add-supplement-details').style.display = anyVisible ? '' : 'none'
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load supplements.</li>'
   }
@@ -374,6 +402,18 @@ document.getElementById('new-supplement').addEventListener('keydown', (e) => {
     e.preventDefault()
     document.getElementById('add-supplement-btn').click()
   }
+})
+
+document.querySelectorAll('[data-quick-supplement]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    try {
+      await api.addSupplement(btn.dataset.quickSupplement)
+      showFeedback('supp-feedback', `"${btn.dataset.quickSupplement}" added.`)
+      clearCache('supplements'); loadSupplements()
+    } catch (err) {
+      showFeedback('supp-feedback', `Error: ${err.message}`, true)
+    }
+  })
 })
 
 // ── Default location ──────────────────────────────────────────
