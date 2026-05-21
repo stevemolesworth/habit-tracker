@@ -60,6 +60,7 @@ window.editMoodDimension = function(id, name, fiveIsGood) {
   document.getElementById('edit-mood-name').value = name
   document.getElementById('edit-mood-dir-good').checked = fiveIsGood !== false
   document.getElementById('edit-mood-dir-bad').checked = fiveIsGood === false
+  document.getElementById('mood-edit-error').style.display = 'none'
   document.getElementById('mood-edit-modal').style.display = 'flex'
 }
 
@@ -83,7 +84,9 @@ document.getElementById('mood-edit-save-btn').addEventListener('click', async ()
     showFeedback('mood-dimension-feedback', 'Mood dimension updated.')
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
-    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+    const errEl = document.getElementById('mood-edit-error')
+    errEl.textContent = `Error: ${err.message}`
+    errEl.style.display = ''
   } finally {
     saveBtn.disabled = false
     saveBtn.textContent = 'Save'
