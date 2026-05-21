@@ -109,7 +109,7 @@ async function loadWeather() {
     if (existingRecord) {
       const locationChanged = currentLocation.lat !== existingRecord.weather_lat || currentLocation.lng !== existingRecord.weather_lng
       const snapshotChanged = JSON.stringify(currentWeatherData.hourly) !== JSON.stringify(existingRecord.weather_snapshot?.hourly)
-      if (locationChanged || snapshotChanged) markDirty('weather')
+      if (locationChanged || snapshotChanged) { markDirty('weather'); scheduleAutoSave() }
     }
   } catch {
     strip.innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${isPastDate ? 'Historic weather data not available' : 'Could not load weather'}</span>`
