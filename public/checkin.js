@@ -786,7 +786,12 @@ async function showForm(morningRecord = null, config = null, moodDims = []) {
 
   setupSteppers()
   setupExerciseTypeSync()
-  if (!isMorning) setupDurationInput()
+  if (!isMorning) {
+    setupDurationInput()
+    if (existingRecord?.exercise_duration_minutes) {
+      durationControl?.setValue(existingRecord.exercise_duration_minutes)
+    }
+  }
   setupDirtyTracking()
 
   document.getElementById('page-loader').style.display = 'none'
