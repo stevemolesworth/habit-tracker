@@ -6,11 +6,8 @@ import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weath
 const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
 document.getElementById('app-splash').style.backgroundImage =
   `url('${splashImages[Math.floor(Math.random() * splashImages.length)]}')`
-const splashStart = Date.now()
 function hideSplash() {
-  const elapsed = Date.now() - splashStart
-  const remaining = Math.max(0, 2000 - elapsed)
-  setTimeout(() => { document.getElementById('app-splash').style.display = 'none' }, remaining)
+  document.getElementById('app-splash').style.display = 'none'
 }
 
 // Device-local date/time
