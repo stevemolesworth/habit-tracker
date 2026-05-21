@@ -348,6 +348,14 @@ a.app-bool-dot:hover { opacity: 0.75; }
   .app-btn-label { display: none; }
 }
 
+/* Morning mood read-only hint on EOD check-in */
+.app-mood-morning-hint {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #4c6272;
+  margin-left: 4px;
+}
+
 /* Alcohol stepper */
 .app-stepper {
   display: inline-flex;

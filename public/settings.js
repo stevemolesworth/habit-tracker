@@ -7,6 +7,124 @@ const btn = (label, icon, classes, onclick) =>
   `<span class="material-icons app-btn-icon" aria-hidden="true">${icon}</span>` +
   `<span class="app-btn-label">${label}</span></button>`
 
+// ── Secondary Moods ───────────────────────────────────────────
+
+async function loadMoodDimensions() {
+  const list = document.getElementById('mood-dimension-list')
+  try {
+    const dims = await api.getMoodDimensions()
+    if (!dims.length) {
+      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No secondary moods yet.</li>'
+      return
+    }
+    list.innerHTML = dims.map(d => `
+      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+        <span>${d.name}</span>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}') `)}
+          ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}')`)}
+        </div>
+      </li>
+    `).join('')
+  } catch {
+    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load mood dimensions.</li>'
+  }
+}
+
+let editingMoodDimId = null
+
+window.editMoodDimension = function(id, name) {
+  editingMoodDimId = id
+  document.getElementById('edit-mood-name').value = name
+  document.getElementById('mood-edit-modal').style.display = 'flex'
+}
+
+document.getElementById('mood-edit-cancel-btn').addEventListener('click', () => {
+  document.getElementById('mood-edit-modal').style.display = 'none'
+  editingMoodDimId = null
+})
+
+document.getElementById('mood-edit-save-btn').addEventListener('click', async () => {
+  const name = document.getElementById('edit-mood-name').value.trim()
+  if (!name) return
+  const saveBtn = document.getElementById('mood-edit-save-btn')
+  saveBtn.disabled = true
+  saveBtn.textContent = 'Saving…'
+  try {
+    await api.updateMoodDimension(editingMoodDimId, { name })
+    document.getElementById('mood-edit-modal').style.display = 'none'
+    editingMoodDimId = null
+    showFeedback('mood-dimension-feedback', 'Mood dimension updated.')
+    clearCache('moodDimensions'); loadMoodDimensions()
+  } catch (err) {
+    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+  } finally {
+    saveBtn.disabled = false
+    saveBtn.textContent = 'Save'
+  }
+})
+
+let deletingMoodDimId = null
+
+window.confirmDeleteMoodDimension = function(id, name) {
+  deletingMoodDimId = id
+  document.getElementById('mood-delete-summary').textContent = `Remove "${name}" from your mood dimensions?`
+  document.getElementById('mood-delete-modal').style.display = 'flex'
+}
+
+document.getElementById('mood-delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('mood-delete-modal').style.display = 'none'
+  deletingMoodDimId = null
+})
+
+document.getElementById('mood-delete-confirm-btn').addEventListener('click', async () => {
+  const delBtn = document.getElementById('mood-delete-confirm-btn')
+  delBtn.disabled = true
+  delBtn.textContent = 'Removing…'
+  try {
+    await api.deleteMoodDimension(deletingMoodDimId)
+    document.getElementById('mood-delete-modal').style.display = 'none'
+    deletingMoodDimId = null
+    clearCache('moodDimensions'); loadMoodDimensions()
+  } catch (err) {
+    document.getElementById('mood-delete-modal').style.display = 'none'
+    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+  } finally {
+    delBtn.disabled = false
+    delBtn.textContent = 'Remove'
+  }
+})
+
+async function addMoodDimension(name) {
+  if (!name) return
+  try {
+    await api.addMoodDimension(name)
+    showFeedback('mood-dimension-feedback', `"${name}" added.`)
+    clearCache('moodDimensions'); loadMoodDimensions()
+  } catch (err) {
+    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+  }
+}
+
+document.getElementById('add-mood-dimension-btn').addEventListener('click', () => {
+  const input = document.getElementById('new-mood-dimension')
+  const name = input.value.trim()
+  if (!name) return
+  input.value = ''
+  addMoodDimension(name)
+})
+
+document.getElementById('new-mood-dimension').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    document.getElementById('add-mood-dimension-btn').click()
+  }
+})
+
+document.querySelectorAll('[data-quick-mood]').forEach(btn => {
+  btn.addEventListener('click', () => addMoodDimension(btn.dataset.quickMood))
+})
+
 // ── Behaviours ────────────────────────────────────────────────
 
 function weightLabel(w) {
@@ -61,9 +179,9 @@ document.getElementById('behaviour-edit-save-btn').addEventListener('click', asy
   const name = document.getElementById('edit-behaviour-name').value.trim()
   const weight = Number(document.getElementById('edit-behaviour-weight').value)
   if (!name) return
-  const btn = document.getElementById('behaviour-edit-save-btn')
-  btn.disabled = true
-  btn.textContent = 'Saving…'
+  const saveBtn = document.getElementById('behaviour-edit-save-btn')
+  saveBtn.disabled = true
+  saveBtn.textContent = 'Saving…'
   try {
     await api.updateBehaviour(editingBehaviourId, name, weight)
     document.getElementById('behaviour-edit-modal').style.display = 'none'
@@ -73,8 +191,8 @@ document.getElementById('behaviour-edit-save-btn').addEventListener('click', asy
   } catch (err) {
     showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
   } finally {
-    btn.disabled = false
-    btn.textContent = 'Save'
+    saveBtn.disabled = false
+    saveBtn.textContent = 'Save'
   }
 })
 
@@ -92,9 +210,9 @@ document.getElementById('behaviour-delete-cancel-btn').addEventListener('click',
 })
 
 document.getElementById('behaviour-delete-confirm-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('behaviour-delete-confirm-btn')
-  btn.disabled = true
-  btn.textContent = 'Removing…'
+  const delBtn = document.getElementById('behaviour-delete-confirm-btn')
+  delBtn.disabled = true
+  delBtn.textContent = 'Removing…'
   try {
     await api.deleteBehaviour(deletingBehaviourId)
     document.getElementById('behaviour-delete-modal').style.display = 'none'
@@ -104,8 +222,8 @@ document.getElementById('behaviour-delete-confirm-btn').addEventListener('click'
     document.getElementById('behaviour-delete-modal').style.display = 'none'
     showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
   } finally {
-    btn.disabled = false
-    btn.textContent = 'Remove'
+    delBtn.disabled = false
+    delBtn.textContent = 'Remove'
   }
 })
 
@@ -141,130 +259,6 @@ document.getElementById('new-behaviour-weight').addEventListener('input', (e) =>
   document.getElementById('new-behaviour-weight-label').textContent = weightLabel(Number(e.target.value))
 })
 
-// ── Focuses ───────────────────────────────────────────────────
-
-async function loadFocuses() {
-  const list = document.getElementById('focus-list')
-  try {
-    const focuses = await api.getFocuses()
-    if (!focuses.length) {
-      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No focuses yet.</li>'
-      return
-    }
-    list.innerHTML = focuses.map(f => {
-      const badge = f.is_active
-        ? ''
-        : ' <span style="font-size:0.75rem;background:#768692;color:#fff;padding:1px 6px;border-radius:2px;vertical-align:middle">Inactive</span>'
-      const toggleLabel = f.is_active ? 'Deactivate' : 'Activate'
-      return `
-        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-          <span>${f.title}${badge}</span>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')`)  }
-            ${btn(toggleLabel, 'pause', 'nhsuk-button--secondary', `toggleFocus('${f.id}', ${f.is_active})`)}
-            ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')`)}
-          </div>
-        </li>`
-    }).join('')
-  } catch {
-    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load focuses.</li>'
-  }
-}
-
-let editingFocusId = null
-
-window.editFocus = function(id, title) {
-  editingFocusId = id
-  document.getElementById('edit-focus-title').value = title
-  document.getElementById('focus-edit-modal').style.display = 'flex'
-}
-
-document.getElementById('focus-edit-cancel-btn').addEventListener('click', () => {
-  document.getElementById('focus-edit-modal').style.display = 'none'
-  editingFocusId = null
-})
-
-document.getElementById('focus-edit-save-btn').addEventListener('click', async () => {
-  const title = document.getElementById('edit-focus-title').value.trim()
-  if (!title) return
-  const btn = document.getElementById('focus-edit-save-btn')
-  btn.disabled = true
-  btn.textContent = 'Saving…'
-  try {
-    await api.updateFocus(editingFocusId, { title })
-    document.getElementById('focus-edit-modal').style.display = 'none'
-    editingFocusId = null
-    showFeedback('focus-feedback', 'Focus updated.')
-    clearCache('focuses'); loadFocuses()
-  } catch (err) {
-    showFeedback('focus-feedback', `Error: ${err.message}`, true)
-  } finally {
-    btn.disabled = false
-    btn.textContent = 'Save'
-  }
-})
-
-window.toggleFocus = async function(id, currentlyActive) {
-  try {
-    await api.updateFocus(id, { is_active: !currentlyActive })
-    clearCache('focuses'); loadFocuses()
-  } catch (err) {
-    showFeedback('focus-feedback', `Error: ${err.message}`, true)
-  }
-}
-
-let deletingFocusId = null
-
-window.confirmDeleteFocus = function(id, title) {
-  deletingFocusId = id
-  document.getElementById('focus-delete-summary').textContent = `Remove "${title}" from your focuses list?`
-  document.getElementById('focus-delete-modal').style.display = 'flex'
-}
-
-document.getElementById('focus-delete-cancel-btn').addEventListener('click', () => {
-  document.getElementById('focus-delete-modal').style.display = 'none'
-  deletingFocusId = null
-})
-
-document.getElementById('focus-delete-confirm-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('focus-delete-confirm-btn')
-  btn.disabled = true
-  btn.textContent = 'Removing…'
-  try {
-    await api.deleteFocus(deletingFocusId)
-    document.getElementById('focus-delete-modal').style.display = 'none'
-    deletingFocusId = null
-    clearCache('focuses'); loadFocuses()
-  } catch (err) {
-    document.getElementById('focus-delete-modal').style.display = 'none'
-    showFeedback('focus-feedback', `Error: ${err.message}`, true)
-  } finally {
-    btn.disabled = false
-    btn.textContent = 'Remove'
-  }
-})
-
-document.getElementById('add-focus-btn').addEventListener('click', async () => {
-  const input = document.getElementById('new-focus')
-  const title = input.value.trim()
-  if (!title) return
-  try {
-    await api.addFocus(title)
-    input.value = ''
-    showFeedback('focus-feedback', `"${title}" added.`)
-    clearCache('focuses'); loadFocuses()
-  } catch (err) {
-    showFeedback('focus-feedback', `Error: ${err.message}`, true)
-  }
-})
-
-document.getElementById('new-focus').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault()
-    document.getElementById('add-focus-btn').click()
-  }
-})
-
 // ── Supplements ──────────────────────────────────────────────
 
 async function loadSupplements() {
@@ -279,7 +273,7 @@ async function loadSupplements() {
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${s.name}</span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)  }
+          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}') `)}
           ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)}
         </div>
       </li>
@@ -305,9 +299,9 @@ document.getElementById('supplement-edit-cancel-btn').addEventListener('click', 
 document.getElementById('supplement-edit-save-btn').addEventListener('click', async () => {
   const name = document.getElementById('edit-supplement-name').value.trim()
   if (!name) return
-  const btn = document.getElementById('supplement-edit-save-btn')
-  btn.disabled = true
-  btn.textContent = 'Saving…'
+  const saveBtn = document.getElementById('supplement-edit-save-btn')
+  saveBtn.disabled = true
+  saveBtn.textContent = 'Saving…'
   try {
     await api.updateSupplement(editingSupplementId, name)
     document.getElementById('supplement-edit-modal').style.display = 'none'
@@ -317,8 +311,8 @@ document.getElementById('supplement-edit-save-btn').addEventListener('click', as
   } catch (err) {
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
   } finally {
-    btn.disabled = false
-    btn.textContent = 'Save'
+    saveBtn.disabled = false
+    saveBtn.textContent = 'Save'
   }
 })
 
@@ -336,9 +330,9 @@ document.getElementById('supplement-delete-cancel-btn').addEventListener('click'
 })
 
 document.getElementById('supplement-delete-confirm-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('supplement-delete-confirm-btn')
-  btn.disabled = true
-  btn.textContent = 'Removing…'
+  const delBtn = document.getElementById('supplement-delete-confirm-btn')
+  delBtn.disabled = true
+  delBtn.textContent = 'Removing…'
   try {
     await api.deleteSupplement(deletingSupplementId)
     document.getElementById('supplement-delete-modal').style.display = 'none'
@@ -348,8 +342,8 @@ document.getElementById('supplement-delete-confirm-btn').addEventListener('click
     document.getElementById('supplement-delete-modal').style.display = 'none'
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
   } finally {
-    btn.disabled = false
-    btn.textContent = 'Remove'
+    delBtn.disabled = false
+    delBtn.textContent = 'Remove'
   }
 })
 
@@ -373,18 +367,6 @@ document.getElementById('new-supplement').addEventListener('keydown', (e) => {
     document.getElementById('add-supplement-btn').click()
   }
 })
-
-// ── Helpers ───────────────────────────────────────────────────
-
-function showFeedback(id, msg, isError = false) {
-  const el = document.getElementById(id)
-  el.textContent = msg
-  el.style.color = isError ? '#d5281b' : '#007f3b'
-  el.style.display = ''
-  setTimeout(() => { el.style.display = 'none' }, 4000)
-}
-
-// ── Init ──────────────────────────────────────────────────────
 
 // ── Default location ──────────────────────────────────────────
 
@@ -426,7 +408,7 @@ document.getElementById('location-save-btn').addEventListener('click', async () 
 async function loadTrackAlcohol() {
   try {
     const config = await api.getWeights()
-    const enabled = config?.track_alcohol !== false // default true
+    const enabled = config?.track_alcohol !== false
     document.getElementById('track-alcohol').checked = enabled
   } catch { /* leave default checked */ }
 }
@@ -445,9 +427,21 @@ document.getElementById('track-alcohol').addEventListener('change', async (e) =>
   }
 })
 
+// ── Helpers ───────────────────────────────────────────────────
+
+function showFeedback(id, msg, isError = false) {
+  const el = document.getElementById(id)
+  el.textContent = msg
+  el.style.color = isError ? '#d5281b' : '#007f3b'
+  el.style.display = ''
+  setTimeout(() => { el.style.display = 'none' }, 4000)
+}
+
+// ── Init ──────────────────────────────────────────────────────
+
 authReady.then(() => {
   loadLocation()
-  loadFocuses()
+  loadMoodDimensions()
   loadBehaviours()
   loadSupplements()
   loadTrackAlcohol()

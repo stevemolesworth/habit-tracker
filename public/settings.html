@@ -34,28 +34,28 @@
 
         <div class="nhsuk-grid-row">
           <div class="nhsuk-grid-column-two-thirds">
-            <!-- Focuses -->
+            <!-- Secondary Moods -->
             <section class="app-section">
-              <h2 class="nhsuk-heading-m">Focuses</h2>
-              <p class="nhsuk-body">
-                Focuses are the broad areas of your life you want to improve or pay attention to — things like friends and family, work, home admin, financial
-                management, or staying calm.
-              </p>
-              <p>At the end of each day, you'll be asked to rate how well you focused on each one, on a scale of 1 to 5.</p>
-              <p>Deactivating a focus hides it from future check-ins but keeps your historical data intact.</p>
-
-              <ul class="nhsuk-list" id="focus-list">
+              <h2 class="nhsuk-heading-m">Secondary Moods</h2>
+              <p class="nhsuk-body">Additional mood dimensions tracked alongside your primary mood. Each check-in you'll score each one from 1–5.</p>
+              <p class="nhsuk-body-s nhsuk-u-margin-bottom-2">Quick add:</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" data-quick-mood="Anxiety">+ Anxiety</button>
+                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" data-quick-mood="Optimism">+ Optimism</button>
+                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" data-quick-mood="Energy">+ Energy</button>
+                <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" data-quick-mood="Motivation">+ Motivation</button>
+              </div>
+              <ul class="nhsuk-list" id="mood-dimension-list">
                 <li class="nhsuk-u-secondary-text-color">Loading…</li>
               </ul>
-
               <div class="nhsuk-u-margin-top-3">
                 <div class="nhsuk-form-group">
-                  <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-focus">Add focus</label>
-                  <input class="nhsuk-input nhsuk-input--width-20" id="new-focus" type="text" placeholder="e.g. Deep work" />
+                  <label class="nhsuk-label nhsuk-u-visually-hidden" for="new-mood-dimension">Add mood dimension</label>
+                  <input class="nhsuk-input nhsuk-input--width-20" id="new-mood-dimension" type="text" placeholder="e.g. Creativity" />
                 </div>
-                <button class="nhsuk-button" id="add-focus-btn">Add focus</button>
+                <button class="nhsuk-button" id="add-mood-dimension-btn">Add mood</button>
               </div>
-              <p id="focus-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
+              <p id="mood-dimension-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display:none"></p>
             </section>
 
             <!-- Behaviours -->
@@ -148,7 +148,7 @@
             </div>
           </div>
         </div>
-        <p class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-6" style="text-align:right">v10</p>
+        <p class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-6" style="text-align:right">v11</p>
       </main>
     </div>
 
@@ -262,56 +262,29 @@
       </div>
     </div>
 
-    <!-- Focus edit modal -->
-    <div
-      id="focus-edit-modal"
-      style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(33, 43, 50, 0.6);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-      "
-    >
-      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 440px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
-        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit focus</h2>
+    <!-- Mood dimension edit modal -->
+    <div id="mood-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:440px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit mood dimension</h2>
         <div class="nhsuk-form-group">
-          <label class="nhsuk-label" for="edit-focus-title">Title</label>
-          <input class="nhsuk-input" id="edit-focus-title" type="text" />
+          <label class="nhsuk-label" for="edit-mood-name">Name</label>
+          <input class="nhsuk-input" id="edit-mood-name" type="text" />
         </div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
-          <button class="nhsuk-button" id="focus-edit-save-btn" style="margin: 0">Save</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="focus-edit-cancel-btn" style="margin: 0">Cancel</button>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+          <button class="nhsuk-button" id="mood-edit-save-btn" style="margin:0">Save</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="mood-edit-cancel-btn" style="margin:0">Cancel</button>
         </div>
       </div>
     </div>
 
-    <!-- Focus delete confirm modal -->
-    <div
-      id="focus-delete-modal"
-      style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(33, 43, 50, 0.6);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-      "
-    >
-      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 440px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
-        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove focus?</h2>
-        <p class="nhsuk-body" id="focus-delete-summary"></p>
-        <p class="nhsuk-body-s nhsuk-u-secondary-text-color">
-          This will permanently remove the focus and delete its scores from all past check-ins. This cannot be undone.
-        </p>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
-          <button class="nhsuk-button nhsuk-button--warning" id="focus-delete-confirm-btn" style="margin: 0">Remove</button>
-          <button class="nhsuk-button nhsuk-button--secondary" id="focus-delete-cancel-btn" style="margin: 0">Cancel</button>
+    <!-- Mood dimension delete modal -->
+    <div id="mood-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:420px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove mood dimension?</h2>
+        <p class="nhsuk-body" id="mood-delete-summary"></p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="mood-delete-confirm-btn" style="margin:0">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="mood-delete-cancel-btn" style="margin:0">Cancel</button>
         </div>
       </div>
     </div>

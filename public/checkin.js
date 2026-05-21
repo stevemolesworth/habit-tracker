@@ -1,8 +1,9 @@
 import { api, clearCache } from '/api.js'
 import { authReady } from '/auth.js'
 import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weather.js'
+import { initDurationInput } from '/duration-input.js'
 
-// Splash background — random chicken image, minimum 2s display
+// Splash background — random chicken image
 const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
 document.getElementById('app-splash').style.backgroundImage =
   `url('${splashImages[Math.floor(Math.random() * splashImages.length)]}')`
@@ -17,12 +18,10 @@ const localHour = parseInt(
 )
 const todayLocal = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date())
 
-// Allow a specific date to be passed (e.g. from calendar for past days)
 const params = new URLSearchParams(location.search)
 const today = params.get('date') || todayLocal
 const isPastDate = today !== todayLocal
 
-// Determine type: explicit ?type param → stored preference → time-based (17:00 cutoff)
 let type = params.get('type') || (!isPastDate && sessionStorage.getItem('checkin_type')) || (localHour < 17 ? 'morning' : 'evening')
 if (params.get('type')) sessionStorage.setItem('checkin_type', type)
 
@@ -30,18 +29,18 @@ const isMorning = type === 'morning'
 
 // State
 let existingRecord = null
-let currentLocation = null  // { lat, lng, label }
+let currentLocation = null
 let currentWeatherData = null
 let isDirty = false
 const dirtyCategories = new Set()
 
 const FIELD_CATEGORY = {
   bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
-  global_mood: 'Mood',
-  exercised: 'Exercise', exercise_types: 'Exercise',
+  primary_mood: 'Mood',
+  exercise_types: 'Exercise', exercise_sessions: 'Exercise', exercise_duration_minutes: 'Exercise',
   alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
-  behaviour: 'Behaviours',
+  behaviour: 'Events',
   notes: 'Notes',
   weather: 'Weather'
 }
@@ -59,11 +58,8 @@ document.getElementById('page-heading').innerHTML =
   `${isMorning ? 'Morning' : 'End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
 
 // Show/hide sections
-document.getElementById('focus-section').style.display = isMorning ? 'none' : ''
-document.getElementById('exercise-section').style.display = isMorning ? 'none' : ''
-document.getElementById('alcohol-section').style.display = isMorning ? 'none' : ''
-document.getElementById('behaviours-section').style.display = isMorning ? 'none' : ''
-document.getElementById('mood-legend').textContent = isMorning ? 'Overall mood' : 'Mood now'
+document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
+document.getElementById('events-section').style.display = isMorning ? 'none' : ''
 document.getElementById('notes-label').textContent = isMorning
   ? 'What would make today good?'
   : "What made today good? Anything you'd like to achieve tomorrow?"
@@ -91,7 +87,6 @@ document.getElementById('weather-toggle-location-btn').addEventListener('click',
 async function loadWeather() {
   const strip = document.getElementById('weather-strip')
 
-  // Past check-ins: always show the snapshot captured at submission time
   if (isPastDate && existingRecord?.weather_snapshot?.hourly?.length) {
     currentWeatherData = existingRecord.weather_snapshot
     strip.innerHTML = buildWeatherStrip(existingRecord.weather_snapshot, type)
@@ -132,20 +127,15 @@ document.getElementById('weather-search-btn').addEventListener('click', async ()
 })
 
 document.getElementById('weather-location-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault()
-    document.getElementById('weather-search-btn').click()
-  }
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('weather-search-btn').click() }
 })
 
 document.getElementById('weather-geo-btn').addEventListener('click', () => {
   if (!navigator.geolocation) {
-    document.getElementById('weather-strip').innerHTML =
-      '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Geolocation not supported</span>'
+    document.getElementById('weather-strip').innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Geolocation not supported</span>'
     return
   }
-  document.getElementById('weather-strip').innerHTML =
-    '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Getting your location…</span>'
+  document.getElementById('weather-strip').innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Getting your location…</span>'
   navigator.geolocation.getCurrentPosition(async pos => {
     const lat = pos.coords.latitude
     const lng = pos.coords.longitude
@@ -161,25 +151,15 @@ document.getElementById('weather-geo-btn').addEventListener('click', () => {
   }, (err) => {
     const msg = err.code === 1
       ? 'Location blocked — check your browser\'s site permissions and try again.'
-      : err.code === 2
-        ? 'Location unavailable. Try entering a postcode instead.'
-        : 'Location request timed out. Try again or enter a postcode.'
-    document.getElementById('weather-strip').innerHTML =
-      `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${msg}</span>`
+      : err.code === 2 ? 'Location unavailable. Try entering a postcode instead.'
+      : 'Location request timed out. Try again or enter a postcode.'
+    document.getElementById('weather-strip').innerHTML = `<span class="nhsuk-u-secondary-text-color nhsuk-body-s">${msg}</span>`
   }, { timeout: 10000 })
 })
 
-
 // --- Form population from existing record ---
 function populateForm(record) {
-  const setVal = (id, val) => {
-    const el = document.getElementById(id)
-    if (el && val !== null && val !== undefined) el.value = val
-  }
-  const setCheck = (id, val) => {
-    const el = document.getElementById(id)
-    if (el) el.checked = !!val
-  }
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== null && val !== undefined) el.value = val }
   const setRadio = (name, val) => {
     if (val === null || val === undefined) return
     const el = document.querySelector(`[name="${name}"][value="${val}"]`)
@@ -189,19 +169,38 @@ function populateForm(record) {
   setVal('bedtime', record.bedtime?.slice(0, 5))
   setVal('wake_time', record.wake_time?.slice(0, 5))
   updateSleepDuration()
+
   setRadio('sleep_quality', record.sleep_quality)
-  setRadio('global_mood', record.global_mood)
-  setCheck('exercised', record.exercised)
-  if (record.exercised) document.getElementById('exercise-details').style.display = ''
+
+  // Primary mood — use the field matching this check-in type
+  const primaryVal = isMorning ? record.primary_mood_morning : record.primary_mood_eod
+  setRadio('primary_mood', primaryVal)
+
+  // Secondary moods
+  if (record.secondary_moods) {
+    Object.entries(record.secondary_moods).forEach(([dimId, score]) => {
+      const el = document.querySelector(`[name="secondary_mood_${dimId}"][value="${score}"]`)
+      if (el) el.checked = true
+    })
+  }
+
+  // Exercise
+  setVal('exercise_sessions', record.exercise_sessions ?? 0)
+  if (record.exercise_duration_minutes != null) {
+    durationControl?.setValue(record.exercise_duration_minutes)
+  }
   if (record.exercise_types?.length) {
     record.exercise_types.forEach(t => {
       const el = document.querySelector(`[name="exercise_types"][value="${t}"]`)
       if (el) el.checked = true
     })
   }
+
+  // Alcohol
   setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
   setVal('alcohol_beer', record.alcohol_beer ?? 0)
   setVal('alcohol_wine', record.alcohol_wine ?? 0)
+
   setVal('notes', record.notes)
   savedNotesValue = record.notes || null
 
@@ -214,12 +213,42 @@ function populateForm(record) {
   }
 }
 
-// --- Morning mood (shown on evening check-in) ---
-function renderMorningMood(record) {
+// --- Morning mood shown on EOD check-in ---
+function renderMorningMood(morningRecord) {
   const display = document.getElementById('morning-mood-display')
   const value = document.getElementById('morning-mood-value')
-  value.textContent = record?.global_mood ?? 'Not recorded'
-  display.style.display = ''
+  if (!isMorning && morningRecord?.primary_mood_morning) {
+    value.textContent = morningRecord.primary_mood_morning
+    display.style.display = ''
+  }
+}
+
+// --- Secondary moods rendering ---
+function renderSecondaryMoods(dims, morningRecord) {
+  const container = document.getElementById('secondary-moods-list')
+  if (!dims.length) { container.innerHTML = ''; return }
+
+  container.innerHTML = dims.map(dim => {
+    const morningVal = !isMorning ? (morningRecord?.secondary_moods?.[dim.id] ?? null) : null
+    const morningHint = morningVal !== null
+      ? `<span class="app-mood-morning-hint"> — this morning: ${morningVal}</span>`
+      : ''
+    return `
+      <div class="nhsuk-form-group nhsuk-u-margin-top-3">
+        <fieldset class="nhsuk-fieldset">
+          <legend class="nhsuk-fieldset__legend nhsuk-label">
+            <strong>${dim.name}</strong>${morningHint}
+          </legend>
+          <div class="nhsuk-radios nhsuk-radios--inline">
+            ${[1,2,3,4,5].map(n => `
+              <div class="nhsuk-radios__item">
+                <input class="nhsuk-radios__input" id="sm-${dim.id}-${n}" name="secondary_mood_${dim.id}" type="radio" value="${n}" />
+                <label class="nhsuk-label nhsuk-radios__label" for="sm-${dim.id}-${n}">${n}</label>
+              </div>`).join('')}
+          </div>
+        </fieldset>
+      </div>`
+  }).join('')
 }
 
 // --- Behaviours ---
@@ -228,17 +257,14 @@ async function loadBehaviours() {
   try {
     const behaviours = await api.getBehaviours()
     if (!behaviours.length) {
-      list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No behaviours configured. Add them in <a href="/settings.html">Settings</a>.</p>'
+      list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No events configured. Add them in <a href="/settings.html">Settings</a>.</p>'
       return
     }
-    list.innerHTML = behaviours.map(b => {
-      const emoji = b.weight > 0 ? '👍'.repeat(b.weight) : b.weight < 0 ? '💩'.repeat(-b.weight) : ''
-      return `
+    list.innerHTML = behaviours.map(b => `
       <div class="nhsuk-checkboxes__item">
         <input class="nhsuk-checkboxes__input" id="beh-${b.id}" name="behaviour" type="checkbox" value="${b.name}" tabindex="0">
-        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}${emoji ? ` <span style="letter-spacing:1px">${emoji}</span>` : ''}</label>
-      </div>`
-    }).join('')
+        <label class="nhsuk-label nhsuk-checkboxes__label" for="beh-${b.id}">${b.name}</label>
+      </div>`).join('')
 
     if (existingRecord?.behaviours) {
       Object.entries(existingRecord.behaviours).forEach(([name, checked]) => {
@@ -247,43 +273,7 @@ async function loadBehaviours() {
       })
     }
   } catch {
-    list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load behaviours.</p>'
-  }
-}
-
-// --- Focuses ---
-async function loadFocuses() {
-  const container = document.getElementById('focuses-list')
-  try {
-    const focuses = await api.getFocuses()
-    const active = focuses.filter(f => f.is_active)
-    if (!active.length) {
-      container.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">No focuses configured. Add them in <a href="/settings.html">Settings</a>.</p>'
-      return
-    }
-    container.innerHTML = active.map(f => `
-      <div class="nhsuk-form-group" data-focus-id="${f.id}">
-        <fieldset class="nhsuk-fieldset">
-          <legend class="nhsuk-fieldset__legend nhsuk-label">${f.title}</legend>
-          <div class="nhsuk-radios nhsuk-radios--inline">
-            ${[1,2,3,4,5].map(n => `
-              <div class="nhsuk-radios__item">
-                <input class="nhsuk-radios__input" id="focus-${f.id}-${n}" name="focus_${f.id}" type="radio" value="${n}">
-                <label class="nhsuk-label nhsuk-radios__label" for="focus-${f.id}-${n}">${n}</label>
-              </div>`).join('')}
-          </div>
-        </fieldset>
-      </div>`).join('')
-    if (existingRecord?.focuses) {
-      for (const [id, score] of Object.entries(existingRecord.focuses)) {
-        if (score) {
-          const input = container.querySelector(`[name="focus_${id}"][value="${score}"]`)
-          if (input) input.checked = true
-        }
-      }
-    }
-  } catch {
-    container.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load focuses.</p>'
+    list.innerHTML = '<p class="nhsuk-body nhsuk-u-secondary-text-color">Could not load events.</p>'
   }
 }
 
@@ -300,8 +290,7 @@ async function loadSupplements() {
       <div class="nhsuk-checkboxes__item">
         <input class="nhsuk-checkboxes__input" id="supp-${s.id}" name="supplement" type="checkbox" value="${s.name}" tabindex="0">
         <label class="nhsuk-label nhsuk-checkboxes__label" for="supp-${s.id}">${s.name}</label>
-      </div>
-    `).join('')
+      </div>`).join('')
 
     if (existingRecord?.supplements) {
       Object.entries(existingRecord.supplements).forEach(([name, checked]) => {
@@ -344,16 +333,55 @@ document.getElementById('wake_time').addEventListener('change', () => {
   updateSleepDuration()
 })
 
+// --- Exercise: type checkboxes auto-increment sessions ---
+function setupExerciseTypeSync() {
+  document.querySelectorAll('[name="exercise_types"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const checked = document.querySelectorAll('[name="exercise_types"]:checked').length
+      const input = document.getElementById('exercise_sessions')
+      input.value = checked
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+  })
+}
+
+// --- Duration input ---
+let durationControl = null
+
+function setupDurationInput() {
+  const display = document.getElementById('exercise-duration-display')
+  const hidden = document.getElementById('exercise_duration_minutes')
+  const dec = document.getElementById('exercise-duration-dec')
+  const inc = document.getElementById('exercise-duration-inc')
+  if (!display || !hidden) return
+  durationControl = initDurationInput(display, hidden, dec, inc)
+  hidden.addEventListener('change', () => {
+    markDirty('exercise_duration_minutes')
+    scheduleAutoSave()
+  })
+}
+
+// --- Steppers ---
+function setupSteppers() {
+  document.querySelectorAll('.app-stepper__btn[data-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target)
+      if (!input) return
+      const delta = Number(btn.dataset.delta)
+      input.value = Math.max(0, (Number(input.value) || 0) + delta)
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+  })
+}
+
 // --- Dirty tracking ---
 function markDirty(fieldName) {
-  if (fieldName?.startsWith('focus_')) dirtyCategories.add('Focus')
+  if (fieldName?.startsWith('secondary_mood_')) dirtyCategories.add('Mood')
   const cat = FIELD_CATEGORY[fieldName]
   if (cat) dirtyCategories.add(cat)
   if (isDirty) return
   isDirty = true
-  if (existingRecord) {
-    document.getElementById('submit-btn').disabled = false
-  }
+  if (existingRecord) document.getElementById('submit-btn').disabled = false
 }
 
 function setupDirtyTracking() {
@@ -387,7 +415,6 @@ document.getElementById('nav-guard-continue').addEventListener('click', () => {
   if (pendingNavContinue) pendingNavContinue()
 })
 
-// Intercept all nav link clicks
 document.querySelectorAll('a[href]').forEach(link => {
   if (link.closest('#app-splash')) return
   link.addEventListener('click', (e) => {
@@ -397,23 +424,15 @@ document.querySelectorAll('a[href]').forEach(link => {
   })
 })
 
-// Back button guard
 history.replaceState({ guard: true }, '')
 window.addEventListener('popstate', () => {
   if (bypassGuard || !isDirty) return
   history.pushState({ guard: true }, '')
-  showNavGuard(() => {
-    bypassGuard = true
-    history.go(-2)
-  })
+  showNavGuard(() => { bypassGuard = true; history.go(-2) })
 })
 
-// Tab/window close
 window.addEventListener('beforeunload', (e) => {
-  if (isDirty) {
-    e.preventDefault()
-    e.returnValue = ''
-  }
+  if (isDirty) { e.preventDefault(); e.returnValue = '' }
 })
 
 // --- Last updated display ---
@@ -444,15 +463,12 @@ function relativeTime(isoStr) {
 document.getElementById('delete-btn').addEventListener('click', () => {
   document.getElementById('delete-modal').style.display = 'flex'
 })
-
 document.getElementById('delete-cancel-btn').addEventListener('click', () => {
   document.getElementById('delete-modal').style.display = 'none'
 })
-
 document.getElementById('delete-confirm-btn').addEventListener('click', async () => {
   const btn = document.getElementById('delete-confirm-btn')
-  btn.disabled = true
-  btn.textContent = 'Deleting…'
+  btn.disabled = true; btn.textContent = 'Deleting…'
   try {
     await api.deleteCheckin(existingRecord.id)
     isDirty = false
@@ -460,39 +476,40 @@ document.getElementById('delete-confirm-btn').addEventListener('click', async ()
   } catch (err) {
     document.getElementById('delete-modal').style.display = 'none'
     showError(`Could not delete: ${err.message}`)
-    btn.disabled = false
-    btn.textContent = 'Delete'
+    btn.disabled = false; btn.textContent = 'Delete'
   }
-})
-
-// --- Exercise toggle ---
-document.getElementById('exercised').addEventListener('change', (e) => {
-  document.getElementById('exercise-details').style.display = e.target.checked ? '' : 'none'
 })
 
 // --- Payload builder ---
 function buildPayload(includeNotes = true) {
   const form = document.getElementById('checkin-form')
   const get = (name) => form.elements[name]?.value || null
-  const bool = (name) => form.elements[name]?.checked || false
+
   const exerciseTypes = [...form.querySelectorAll('[name="exercise_types"]:checked')].map(el => el.value)
   const supplementsObj = {}
   form.querySelectorAll('[name="supplement"]').forEach(el => { supplementsObj[el.value] = el.checked })
   const behavioursObj = {}
   form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
-  const focusesObj = {}
-  document.querySelectorAll('#focuses-list [data-focus-id]').forEach(fieldset => {
-    const id = fieldset.dataset.focusId
-    const checked = fieldset.querySelector(`[name="focus_${id}"]:checked`)
-    focusesObj[id] = checked ? Number(checked.value) : null
+
+  // Secondary moods: collect all secondary_mood_* radio groups
+  const secondaryMoods = {}
+  form.querySelectorAll('[name^="secondary_mood_"]:checked').forEach(el => {
+    const dimId = el.name.replace('secondary_mood_', '')
+    secondaryMoods[dimId] = Number(el.value)
   })
+
+  const primaryMoodVal = get('primary_mood') ? Number(get('primary_mood')) : null
+
   return {
     check_in_type: type,
     check_in_date: today,
-    global_mood: get('global_mood') ? Number(get('global_mood')) : null,
-    focuses: focusesObj,
-    exercised: bool('exercised'),
+    primary_mood_morning: isMorning ? primaryMoodVal : null,
+    primary_mood_eod: !isMorning ? primaryMoodVal : null,
+    secondary_moods: Object.keys(secondaryMoods).length ? secondaryMoods : null,
+    exercised: exerciseTypes.length > 0,
     exercise_types: exerciseTypes.length ? exerciseTypes : null,
+    exercise_sessions: Number(get('exercise_sessions') || 0) || null,
+    exercise_duration_minutes: durationControl ? (durationControl.getValue() || null) : null,
     alcohol_spirits: Number(get('alcohol_spirits') || 0),
     alcohol_beer: Number(get('alcohol_beer') || 0),
     alcohol_wine: Number(get('alcohol_wine') || 0),
@@ -527,7 +544,7 @@ async function doSave(payload) {
   return result
 }
 
-// --- Auto-save (all fields except notes) ---
+// --- Auto-save ---
 let autoSaveTimer = null
 
 function setAutoSaveStatus(msg) {
@@ -569,8 +586,7 @@ document.getElementById('notes').addEventListener('input', updateNotesBtnState)
 
 document.getElementById('save-notes-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-notes-btn')
-  btn.disabled = true
-  btn.textContent = 'Saving…'
+  btn.disabled = true; btn.textContent = 'Saving…'
   try {
     const payload = buildPayload(true)
     await doSave(payload)
@@ -578,8 +594,7 @@ document.getElementById('save-notes-btn').addEventListener('click', async () => 
     btn.textContent = 'Save notes'
     updateNotesBtnState()
   } catch {
-    btn.disabled = false
-    btn.textContent = 'Save notes'
+    btn.disabled = false; btn.textContent = 'Save notes'
   }
 })
 
@@ -587,37 +602,29 @@ document.getElementById('save-notes-btn').addEventListener('click', async () => 
 document.getElementById('checkin-form').addEventListener('submit', async (e) => {
   e.preventDefault()
   const btn = document.getElementById('submit-btn')
-  btn.disabled = true
-  btn.textContent = 'Saving…'
+  btn.disabled = true; btn.textContent = 'Saving…'
   hideError()
 
-  // Sleep validation
-  const bedtimeVal = document.getElementById('bedtime').value
-  const wakeVal = document.getElementById('wake_time').value
-  const bedtimeGroup = document.getElementById('bedtime-group')
-  const wakeGroup = document.getElementById('wake-time-group')
-  const bedtimeErr = document.getElementById('bedtime-error')
-  const wakeErr = document.getElementById('wake-time-error')
-  bedtimeGroup.classList.remove('nhsuk-form-group--error')
-  wakeGroup.classList.remove('nhsuk-form-group--error')
-  bedtimeErr.style.display = 'none'
-  wakeErr.style.display = 'none'
-  let sleepValid = true
-  if (!bedtimeVal) {
-    bedtimeGroup.classList.add('nhsuk-form-group--error')
-    bedtimeErr.style.display = ''
-    sleepValid = false
-  }
-  if (!wakeVal) {
-    wakeGroup.classList.add('nhsuk-form-group--error')
-    wakeErr.style.display = ''
-    sleepValid = false
-  }
-  if (!sleepValid) {
-    btn.disabled = false
-    btn.textContent = existingRecord ? 'Save changes' : 'Submit check-in'
-    document.getElementById('bedtime-group').scrollIntoView({ behavior: 'smooth', block: 'center' })
-    return
+  if (isMorning) {
+    const bedtimeVal = document.getElementById('bedtime').value
+    const wakeVal = document.getElementById('wake_time').value
+    let sleepValid = true
+    if (!bedtimeVal) {
+      document.getElementById('bedtime-group').classList.add('nhsuk-form-group--error')
+      document.getElementById('bedtime-error').style.display = ''
+      sleepValid = false
+    }
+    if (!wakeVal) {
+      document.getElementById('wake-time-group').classList.add('nhsuk-form-group--error')
+      document.getElementById('wake-time-error').style.display = ''
+      sleepValid = false
+    }
+    if (!sleepValid) {
+      btn.disabled = false
+      btn.textContent = existingRecord ? 'Save changes' : 'Submit check-in'
+      document.getElementById('bedtime-group').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
   }
 
   try {
@@ -638,10 +645,7 @@ function showError(msg) {
   banner.style.display = ''
   banner.scrollIntoView({ behavior: 'smooth' })
 }
-
-function hideError() {
-  document.getElementById('error-banner').style.display = 'none'
-}
+function hideError() { document.getElementById('error-banner').style.display = 'none' }
 
 // --- New-user splash ---
 function showNewUserSplash() {
@@ -655,7 +659,6 @@ document.getElementById('splash-skip-btn')?.addEventListener('click', (e) => {
   e.preventDefault()
   showForm()
 })
-
 
 // --- Init ---
 function renderCheckinNav() {
@@ -672,28 +675,27 @@ function renderCheckinNav() {
 async function init() {
   await authReady
 
-  // After 17:00: sync redirect before any network calls
   if (!params.get('type') && !isPastDate && localHour >= 17 && type !== 'evening') {
     location.replace('/?type=evening')
     return
   }
 
-  // Fire all needed requests in parallel
   const fetchExisting = api.getTodayCheckin(type, today)
   const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
-  const [existingRes, morningRes, configRes, behavioursRes] = await Promise.allSettled([
+  const [existingRes, morningRes, configRes, behavioursRes, moodDimsRes] = await Promise.allSettled([
     fetchExisting,
     fetchMorning,
     api.getWeights(),
     api.getBehaviours(),
+    api.getMoodDimensions(),
   ])
 
   existingRecord = existingRes.status === 'fulfilled' ? existingRes.value : null
   const morningRecord = morningRes.status === 'fulfilled' ? morningRes.value : null
   const config = configRes.status === 'fulfilled' ? configRes.value : null
   const behaviours = behavioursRes.status === 'fulfilled' ? (behavioursRes.value ?? []) : []
+  const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
 
-  // Before 17:00 auto-switch: if morning is done, show evening
   if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord && type !== 'evening') {
     location.replace('/?type=evening')
     return
@@ -710,7 +712,7 @@ async function init() {
     document.getElementById('delete-section').style.display = ''
   }
 
-  // On evening, pre-fill sleep from morning if not already on the evening record
+  // On evening, pre-fill sleep from morning if not on the evening record
   if (!isMorning && !existingRecord?.sleep_quality && morningRecord) {
     const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val }
     const setRadio = (name, val) => { if (!val) return; const el = document.querySelector(`[name="${name}"][value="${val}"]`); if (el) el.checked = true }
@@ -720,36 +722,32 @@ async function init() {
     updateSleepDuration()
   }
 
-  if (behaviours.length === 0) {
+  if (behaviours.length === 0 && moodDims.length === 0) {
     showNewUserSplash()
     return
   }
 
-  await showForm(morningRecord, config)
+  await showForm(morningRecord, config, moodDims)
 }
 
-function setupSteppers() {
-  document.querySelectorAll('.app-stepper__btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = document.getElementById(btn.dataset.target)
-      if (!input) return
-      const delta = Number(btn.dataset.delta)
-      input.value = Math.max(0, (Number(input.value) || 0) + delta)
-      input.dispatchEvent(new Event('change', { bubbles: true }))
+async function showForm(morningRecord = null, config = null, moodDims = []) {
+  // Render secondary moods before dirty tracking is set up
+  renderSecondaryMoods(moodDims, morningRecord)
+  renderMorningMood(morningRecord)
+
+  // Re-populate secondary mood values if editing existing record
+  if (existingRecord?.secondary_moods) {
+    Object.entries(existingRecord.secondary_moods).forEach(([dimId, score]) => {
+      const el = document.querySelector(`[name="secondary_mood_${dimId}"][value="${score}"]`)
+      if (el) el.checked = true
     })
-  })
-}
-
-async function showForm(morningRecord = null, config = null) {
-  loadSupplements()
-  setupSteppers()
-  if (!isMorning) {
-    loadBehaviours()
-    loadFocuses()
-    renderMorningMood(morningRecord)
   }
 
-  // Apply pre-fetched config, or fetch if not available
+  loadSupplements()
+  if (!isMorning) {
+    loadBehaviours()
+  }
+
   if (!currentLocation) {
     try {
       const cfg = config ?? await api.getWeights()
@@ -768,11 +766,15 @@ async function showForm(morningRecord = null, config = null) {
     } catch { /* leave without location */ }
   }
 
+  setupSteppers()
+  setupExerciseTypeSync()
+  if (!isMorning) setupDurationInput()
   setupDirtyTracking()
+
   document.getElementById('page-loader').style.display = 'none'
   document.getElementById('main-content-row').style.display = ''
   hideSplash()
-  loadWeather() // non-blocking — updates the weather widget in-place when ready
+  loadWeather()
 }
 
 init()
