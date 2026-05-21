@@ -1,5 +1,6 @@
 import { api } from '/api.js'
 import { authReady, getProfile, getToken, signOut } from '/auth.js'
+import { showToast } from '/toast.js'
 
 // ── Name edit ─────────────────────────────────────────────────
 
@@ -68,7 +69,7 @@ async function downloadExport(format) {
     a.click()
     URL.revokeObjectURL(url)
   } catch (err) {
-    showFeedback('export-feedback', `Export failed: ${err.message}`, true)
+    showToast(`Export failed: ${err.message}`, 'error')
   } finally {
     btn.disabled = false
     btn.textContent = format === 'csv' ? 'Download CSV' : 'Download JSON'
@@ -88,11 +89,11 @@ document.getElementById('delete-range-btn').addEventListener('click', () => {
   const from = document.getElementById('delete-from').value
   const to = document.getElementById('delete-to').value
   if (!from || !to) {
-    showFeedback('delete-range-feedback', 'Please select both a from and to date.', true)
+    showToast('Please select both a from and to date.', 'error')
     return
   }
   if (from > to) {
-    showFeedback('delete-range-feedback', '"From" date must be on or before "To" date.', true)
+    showToast('"From" date must be on or before "To" date.', 'error')
     return
   }
   document.getElementById('delete-range-summary').textContent =
@@ -113,10 +114,10 @@ document.getElementById('delete-range-confirm-btn').addEventListener('click', as
   try {
     const result = await api.deleteRange(from, to)
     document.getElementById('delete-range-modal').style.display = 'none'
-    showFeedback('delete-range-feedback', `${result.deleted} check-in${result.deleted === 1 ? '' : 's'} deleted.`)
+    showToast(`${result.deleted} check-in${result.deleted === 1 ? '' : 's'} deleted.`)
   } catch (err) {
     document.getElementById('delete-range-modal').style.display = 'none'
-    showFeedback('delete-range-feedback', `Error: ${err.message}`, true)
+    showToast(`Error: ${err.message}`, 'error')
   } finally {
     btn.disabled = false
     btn.textContent = 'Delete'
@@ -162,16 +163,6 @@ document.getElementById('delete-account-confirm-btn').addEventListener('click', 
     btn.textContent = 'Delete account'
   }
 })
-
-// ── Helpers ───────────────────────────────────────────────────
-
-function showFeedback(id, msg, isError = false) {
-  const el = document.getElementById(id)
-  el.textContent = msg
-  el.style.color = isError ? '#d5281b' : '#007f3b'
-  el.style.display = ''
-  setTimeout(() => { el.style.display = 'none' }, 4000)
-}
 
 // ── Init ──────────────────────────────────────────────────────
 

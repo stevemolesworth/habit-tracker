@@ -1,6 +1,7 @@
 import { api, clearCache } from '/api.js'
 import { authReady } from '/auth.js'
 import { geocode } from '/weather.js'
+import { showToast } from '/toast.js'
 
 const btn = (label, icon, classes, onclick) =>
   `<button class="nhsuk-button ${classes} nhsuk-button--small" style="margin:0" onclick="${onclick}">` +
@@ -81,7 +82,7 @@ document.getElementById('mood-edit-save-btn').addEventListener('click', async ()
     const saved = await api.updateMoodDimension(editingMoodDimId, { name, five_is_good })
     document.getElementById('mood-edit-modal').style.display = 'none'
     editingMoodDimId = null
-    showFeedback('mood-dimension-feedback', `Saved — direction: ${saved.five_is_good ? '5 is good' : '5 is bad'}`)
+    showToast( `Saved — direction: ${saved.five_is_good ? '5 is good' : '5 is bad'}`)
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
     const errEl = document.getElementById('mood-edit-error')
@@ -98,7 +99,7 @@ window.pauseMoodDimension = async function(id, isPaused) {
     await api.updateMoodDimension(id, { paused: !isPaused })
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
-    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   }
 }
 
@@ -126,7 +127,7 @@ document.getElementById('mood-delete-confirm-btn').addEventListener('click', asy
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
     document.getElementById('mood-delete-modal').style.display = 'none'
-    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     delBtn.disabled = false
     delBtn.textContent = 'Remove'
@@ -137,10 +138,10 @@ async function addMoodDimension(name, fiveIsGood = true) {
   if (!name) return
   try {
     await api.addMoodDimension(name, fiveIsGood)
-    showFeedback('mood-dimension-feedback', `"${name}" added.`)
+    showToast( `"${name}" added.`)
     clearCache('moodDimensions'); loadMoodDimensions()
   } catch (err) {
-    showFeedback('mood-dimension-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   }
 }
 
@@ -297,10 +298,10 @@ document.getElementById('behaviour-edit-save-btn').addEventListener('click', asy
     await api.updateBehaviour(editingBehaviourId, name, weight)
     document.getElementById('behaviour-edit-modal').style.display = 'none'
     editingBehaviourId = null
-    showFeedback('behaviour-feedback', 'Behaviour updated.')
+    showToast( 'Behaviour updated.')
     clearCache('behaviours'); loadBehaviours()
   } catch (err) {
-    showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     saveBtn.disabled = false
     saveBtn.textContent = 'Save'
@@ -331,7 +332,7 @@ document.getElementById('behaviour-delete-confirm-btn').addEventListener('click'
     clearCache('behaviours'); loadBehaviours()
   } catch (err) {
     document.getElementById('behaviour-delete-modal').style.display = 'none'
-    showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     delBtn.disabled = false
     delBtn.textContent = 'Remove'
@@ -345,16 +346,16 @@ document.getElementById('add-behaviour-btn').addEventListener('click', async () 
   const weight = Number(weightInput.value)
   if (!name) return
   if (!Number.isInteger(weight) || weight < -3 || weight > 3) {
-    showFeedback('behaviour-feedback', 'Weight must be a whole number between -3 and 3.', true)
+    showToast( 'Weight must be a whole number between -3 and 3.', true)
     return
   }
   try {
     await api.addBehaviour(name, weight)
     resetBehaviourForm()
-    showFeedback('behaviour-feedback', `"${name}" added.`)
+    showToast( `"${name}" added.`)
     clearCache('behaviours'); loadBehaviours()
   } catch (err) {
-    showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   }
 })
 
@@ -437,10 +438,10 @@ document.getElementById('momentum-edit-save-btn').addEventListener('click', asyn
     await api.updateMomentumItem(editingMomentumId, { name })
     document.getElementById('momentum-edit-modal').style.display = 'none'
     editingMomentumId = null
-    showFeedback('momentum-item-feedback', 'Momentum item updated.')
+    showToast( 'Momentum item updated.')
     clearCache('momentumItems'); loadMomentumItems()
   } catch (err) {
-    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     saveBtn.disabled = false
     saveBtn.textContent = 'Save'
@@ -452,7 +453,7 @@ window.pauseMomentumItem = async function(id, isPaused) {
     await api.updateMomentumItem(id, { paused: !isPaused })
     clearCache('momentumItems'); loadMomentumItems()
   } catch (err) {
-    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   }
 }
 
@@ -480,7 +481,7 @@ document.getElementById('momentum-delete-confirm-btn').addEventListener('click',
     clearCache('momentumItems'); loadMomentumItems()
   } catch (err) {
     document.getElementById('momentum-delete-modal').style.display = 'none'
-    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     delBtn.disabled = false
     delBtn.textContent = 'Remove'
@@ -500,10 +501,10 @@ document.getElementById('add-momentum-item-btn').addEventListener('click', async
   try {
     await api.addMomentumItem(name)
     resetMomentumForm()
-    showFeedback('momentum-item-feedback', `"${name}" added.`)
+    showToast( `"${name}" added.`)
     clearCache('momentumItems'); loadMomentumItems()
   } catch (err) {
-    showFeedback('momentum-item-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   }
 })
 
@@ -577,10 +578,10 @@ document.getElementById('supplement-edit-save-btn').addEventListener('click', as
     await api.updateSupplement(editingSupplementId, name)
     document.getElementById('supplement-edit-modal').style.display = 'none'
     editingSupplementId = null
-    showFeedback('supp-feedback', 'Supplement updated.')
+    showToast( 'Supplement updated.')
     clearCache('supplements'); loadSupplements()
   } catch (err) {
-    showFeedback('supp-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     saveBtn.disabled = false
     saveBtn.textContent = 'Save'
@@ -611,7 +612,7 @@ document.getElementById('supplement-delete-confirm-btn').addEventListener('click
     clearCache('supplements'); loadSupplements()
   } catch (err) {
     document.getElementById('supplement-delete-modal').style.display = 'none'
-    showFeedback('supp-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   } finally {
     delBtn.disabled = false
     delBtn.textContent = 'Remove'
@@ -625,10 +626,10 @@ document.getElementById('add-supplement-btn').addEventListener('click', async ()
   try {
     await api.addSupplement(name)
     resetSupplementForm()
-    showFeedback('supp-feedback', `"${name}" added.`)
+    showToast( `"${name}" added.`)
     clearCache('supplements'); loadSupplements()
   } catch (err) {
-    showFeedback('supp-feedback', `Error: ${err.message}`, true)
+    showToast( `Error: ${err.message}`, true)
   }
 })
 
@@ -681,22 +682,18 @@ async function loadLocation() {
 
 document.getElementById('location-save-btn').addEventListener('click', async () => {
   const input = document.getElementById('location-input')
-  const feedback = document.getElementById('location-feedback')
   const label = document.getElementById('location-current-label')
   const query = input.value.trim()
   if (!query) return
-  feedback.textContent = 'Saving…'
-  feedback.style.display = ''
   try {
     const loc = await geocode(query)
     await api.updateWeights({ default_location_lat: loc.lat, default_location_lng: loc.lng, default_location_label: loc.label })
     clearCache('weights')
     label.textContent = `Current: ${loc.label}`
     input.value = ''
-    feedback.textContent = 'Saved.'
-    setTimeout(() => { feedback.style.display = 'none' }, 2000)
+    showToast('Location saved.')
   } catch (err) {
-    feedback.textContent = err.message || 'Could not save location.'
+    showToast(err.message || 'Could not save location.', 'error')
   }
 })
 
@@ -711,28 +708,14 @@ async function loadTrackAlcohol() {
 }
 
 document.getElementById('track-alcohol').addEventListener('change', async (e) => {
-  const feedback = document.getElementById('track-alcohol-feedback')
   try {
     await api.updateWeights({ track_alcohol: e.target.checked })
     clearCache('weights')
-    feedback.textContent = 'Saved.'
-    feedback.style.display = ''
-    setTimeout(() => { feedback.style.display = 'none' }, 2000)
+    showToast('Saved.')
   } catch {
-    feedback.textContent = 'Could not save — please try again.'
-    feedback.style.display = ''
+    showToast('Could not save — please try again.', 'error')
   }
 })
-
-// ── Helpers ───────────────────────────────────────────────────
-
-function showFeedback(id, msg, isError = false) {
-  const el = document.getElementById(id)
-  el.textContent = msg
-  el.style.color = isError ? '#d5281b' : '#007f3b'
-  el.style.display = ''
-  setTimeout(() => { el.style.display = 'none' }, 4000)
-}
 
 // ── Init ──────────────────────────────────────────────────────
 
