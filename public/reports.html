@@ -33,13 +33,18 @@
 
           <!-- Date range -->
           <section class="app-section">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-              <button class="nhsuk-button nhsuk-button--secondary" id="preset-last-7" style="margin:0">Last 7 days</button>
-              <button class="nhsuk-button nhsuk-button--secondary" id="preset-this-week" style="margin:0">This week</button>
-              <button class="nhsuk-button nhsuk-button--secondary" id="preset-last-week" style="margin:0">Last week</button>
-              <button class="nhsuk-button nhsuk-button--secondary" id="preset-this-month" style="margin:0">This month</button>
-              <button class="nhsuk-button nhsuk-button--secondary" id="preset-last-month" style="margin:0">Last month</button>
-              <button class="nhsuk-button nhsuk-button--secondary" id="preset-date-range" style="margin:0">Date range</button>
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+              <div class="nhsuk-form-group" style="margin:0">
+                <label class="nhsuk-label nhsuk-u-margin-bottom-1" for="period-select">Period</label>
+                <select class="nhsuk-select" id="period-select">
+                  <option value="last-7">Last 7 days</option>
+                  <option value="this-week">This week</option>
+                  <option value="last-week">Last week</option>
+                  <option value="this-month">This month</option>
+                  <option value="last-month">Last month</option>
+                  <option value="date-range">Custom date range…</option>
+                </select>
+              </div>
             </div>
             <div id="date-range-inputs" style="display:none;gap:16px;align-items:flex-end;flex-wrap:wrap">
               <div class="nhsuk-form-group" style="margin:0">

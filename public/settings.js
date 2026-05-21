@@ -1,5 +1,11 @@
 import { api } from '/api.js'
 import { authReady } from '/auth.js'
+import { geocode } from '/weather.js'
+
+const btn = (label, icon, classes, onclick) =>
+  `<button class="nhsuk-button ${classes} nhsuk-button--small" style="margin:0" onclick="${onclick}">` +
+  `<span class="material-icons app-btn-icon" aria-hidden="true">${icon}</span>` +
+  `<span class="app-btn-label">${label}</span></button>`
 
 // ── Behaviours ────────────────────────────────────────────────
 
@@ -21,8 +27,8 @@ async function loadBehaviours() {
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${b.name} <span style="letter-spacing:1px">${weightLabel(b.weight)}</span></span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})">Edit</button>
-          <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" style="margin:0" onclick="confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')">Remove</button>
+          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}', ${b.weight})`)}
+          ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteBehaviour('${b.id}', '${b.name.replace(/'/g, "\\'")}')`)}
         </div>
       </li>
     `).join('')
@@ -154,9 +160,9 @@ async function loadFocuses() {
         <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
           <span>${f.title}${badge}</span>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Edit</button>
-            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="toggleFocus('${f.id}', ${f.is_active})">${toggleLabel}</button>
-            <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" style="margin:0" onclick="confirmDeleteFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')">Remove</button>
+            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')`)  }
+            ${btn(toggleLabel, 'pause', 'nhsuk-button--secondary', `toggleFocus('${f.id}', ${f.is_active})`)}
+            ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteFocus('${f.id}', '${f.title.replace(/'/g, "\\'")}')`)}
           </div>
         </li>`
     }).join('')
@@ -273,8 +279,8 @@ async function loadSupplements() {
       <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
         <span>${s.name}</span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0" onclick="editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Edit</button>
-          <button class="nhsuk-button nhsuk-button--warning nhsuk-button--small" style="margin:0" onclick="confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')">Remove</button>
+          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)  }
+          ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteSupplement('${s.id}', '${s.name.replace(/'/g, "\\'")}')`)}
         </div>
       </li>
     `).join('')
@@ -380,6 +386,40 @@ function showFeedback(id, msg, isError = false) {
 
 // ── Init ──────────────────────────────────────────────────────
 
+// ── Default location ──────────────────────────────────────────
+
+async function loadLocation() {
+  const label = document.getElementById('location-current-label')
+  try {
+    const config = await api.getWeights()
+    label.textContent = config?.default_location_label
+      ? `Current: ${config.default_location_label}`
+      : 'No default location set.'
+  } catch {
+    label.textContent = 'Could not load current location.'
+  }
+}
+
+document.getElementById('location-save-btn').addEventListener('click', async () => {
+  const input = document.getElementById('location-input')
+  const feedback = document.getElementById('location-feedback')
+  const label = document.getElementById('location-current-label')
+  const query = input.value.trim()
+  if (!query) return
+  feedback.textContent = 'Saving…'
+  feedback.style.display = ''
+  try {
+    const loc = await geocode(query)
+    await api.updateWeights({ default_location_lat: loc.lat, default_location_lng: loc.lng, default_location_label: loc.label })
+    label.textContent = `Current: ${loc.label}`
+    input.value = ''
+    feedback.textContent = 'Saved.'
+    setTimeout(() => { feedback.style.display = 'none' }, 2000)
+  } catch (err) {
+    feedback.textContent = err.message || 'Could not save location.'
+  }
+})
+
 // ── Track alcohol toggle ──────────────────────────────────────
 
 async function loadTrackAlcohol() {
@@ -404,8 +444,9 @@ document.getElementById('track-alcohol').addEventListener('change', async (e) =>
 })
 
 authReady.then(() => {
-  loadTrackAlcohol()
+  loadLocation()
   loadFocuses()
   loadBehaviours()
   loadSupplements()
+  loadTrackAlcohol()
 })

@@ -147,11 +147,6 @@
   text-decoration: underline;
 }
 
-.nhsuk-button--active-preset {
-  background-color: #003d78;
-  box-shadow: 0 2px 0 #001f3d;
-  color: #ffffff;
-}
 
 @media (max-width: 480px) {
   .app-global-header__inner {
@@ -340,4 +335,13 @@ a.app-bool-dot:hover { opacity: 0.75; }
   .app-calendar__day-number {
     font-size: 0.875rem;
   }
+}
+
+/* Material icon buttons — icon on small screens, text on larger */
+.app-btn-icon { display: none; font-size: 18px; line-height: 1; vertical-align: middle; }
+.app-btn-label { display: inline; }
+
+@media (max-width: 640px) {
+  .app-btn-icon { display: inline; }
+  .app-btn-label { display: none; }
 }

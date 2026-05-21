@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Settings — 🐔 Chicken Check-In</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
@@ -34,16 +35,6 @@
 
         <div class="nhsuk-grid-row">
           <div class="nhsuk-grid-column-two-thirds">
-            <!-- What to track -->
-            <section class="app-section">
-              <h2 class="nhsuk-heading-m">What to track</h2>
-              <div class="nhsuk-checkboxes__item">
-                <input class="nhsuk-checkboxes__input" id="track-alcohol" type="checkbox" checked />
-                <label class="nhsuk-label nhsuk-checkboxes__label" for="track-alcohol">Include alcohol logging</label>
-              </div>
-              <p id="track-alcohol-feedback" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-2" style="display: none"></p>
-            </section>
-
             <!-- Focuses -->
             <section class="app-section">
               <h2 class="nhsuk-heading-m">Focuses</h2>
@@ -120,6 +111,31 @@
                 <button class="nhsuk-button" id="add-supplement-btn">Add supplement</button>
               </div>
               <p id="supp-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display: none"></p>
+            </section>
+
+            <!-- Location -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Default location</h2>
+              <p class="nhsuk-body">Used for the weather widget on check-ins. Updated automatically when you change location on a check-in.</p>
+              <p class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-bottom-3" id="location-current-label">Loading…</p>
+              <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+                <div class="nhsuk-form-group" style="margin:0">
+                  <label class="nhsuk-label nhsuk-u-visually-hidden" for="location-input">Location</label>
+                  <input class="nhsuk-input nhsuk-input--width-20" id="location-input" type="text" placeholder="Postcode or city name" />
+                </div>
+                <button class="nhsuk-button nhsuk-button--secondary" id="location-save-btn" style="margin:0">Save location</button>
+              </div>
+              <p id="location-feedback" class="nhsuk-body-s nhsuk-u-margin-top-2" style="display:none"></p>
+            </section>
+
+            <!-- What to track -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">What to track</h2>
+              <div class="nhsuk-checkboxes__item">
+                <input class="nhsuk-checkboxes__input" id="track-alcohol" type="checkbox" checked />
+                <label class="nhsuk-label nhsuk-checkboxes__label" for="track-alcohol">Include alcohol logging</label>
+              </div>
+              <p id="track-alcohol-feedback" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-2" style="display: none"></p>
             </section>
           </div>
 

@@ -367,62 +367,27 @@ function last7Range() {
   }
 }
 
-function setActivePreset(id) {
-  ['preset-last-7', 'preset-this-week', 'preset-last-week', 'preset-this-month', 'preset-last-month', 'preset-date-range'].forEach(bid => {
-    document.getElementById(bid).classList.toggle('nhsuk-button--active-preset', bid === id)
-  })
+function applyPreset(value) {
+  const dateRangeInputs = document.getElementById('date-range-inputs')
+  if (value === 'date-range') {
+    dateRangeInputs.style.display = 'flex'
+    return
+  }
+  dateRangeInputs.style.display = 'none'
+  const ranges = {
+    'last-7': last7Range(),
+    'this-week': weekRange(0),
+    'last-week': weekRange(-1),
+    'this-month': monthRange(0),
+    'last-month': monthRange(-1)
+  }
+  const { from, to } = ranges[value] || last7Range()
+  document.getElementById('date-from').value = from
+  document.getElementById('date-to').value = to
+  loadReport()
 }
 
-document.getElementById('preset-last-7').addEventListener('click', () => {
-  const { from, to } = last7Range()
-  document.getElementById('date-range-inputs').style.display = 'none'
-  document.getElementById('date-from').value = from
-  document.getElementById('date-to').value = to
-  setActivePreset('preset-last-7')
-  loadReport()
-})
-
-document.getElementById('preset-this-week').addEventListener('click', () => {
-  const { from, to } = weekRange(0)
-  document.getElementById('date-range-inputs').style.display = 'none'
-  document.getElementById('date-from').value = from
-  document.getElementById('date-to').value = to
-  setActivePreset('preset-this-week')
-  loadReport()
-})
-
-document.getElementById('preset-last-week').addEventListener('click', () => {
-  const { from, to } = weekRange(-1)
-  document.getElementById('date-range-inputs').style.display = 'none'
-  document.getElementById('date-from').value = from
-  document.getElementById('date-to').value = to
-  setActivePreset('preset-last-week')
-  loadReport()
-})
-
-document.getElementById('preset-this-month').addEventListener('click', () => {
-  const { from, to } = monthRange(0)
-  document.getElementById('date-range-inputs').style.display = 'none'
-  document.getElementById('date-from').value = from
-  document.getElementById('date-to').value = to
-  setActivePreset('preset-this-month')
-  loadReport()
-})
-
-document.getElementById('preset-last-month').addEventListener('click', () => {
-  const { from, to } = monthRange(-1)
-  document.getElementById('date-range-inputs').style.display = 'none'
-  document.getElementById('date-from').value = from
-  document.getElementById('date-to').value = to
-  setActivePreset('preset-last-month')
-  loadReport()
-})
-
-document.getElementById('preset-date-range').addEventListener('click', () => {
-  document.getElementById('date-range-inputs').style.display = 'flex'
-  setActivePreset('preset-date-range')
-})
-
+document.getElementById('period-select').addEventListener('change', e => applyPreset(e.target.value))
 document.getElementById('apply-btn').addEventListener('click', loadReport)
 
 // Default to last 7 days on load
@@ -434,9 +399,6 @@ authReady.then(async () => {
     }
   } catch { /* non-fatal */ }
 
-  const { from: initFrom, to: initTo } = last7Range()
-  document.getElementById('date-from').value = initFrom
-  document.getElementById('date-to').value = initTo
-  setActivePreset('preset-last-7')
-  loadReport()
+  document.getElementById('period-select').value = 'last-7'
+  applyPreset('last-7')
 })

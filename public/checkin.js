@@ -642,7 +642,7 @@ async function init() {
   }
 
   if (existingRecord) {
-    document.getElementById('already-submitted-banner').style.display = ''
+    // document.getElementById('already-submitted-banner').style.display = ''
     const btn = document.getElementById('submit-btn')
     btn.textContent = 'Save Changes'
     btn.disabled = true
