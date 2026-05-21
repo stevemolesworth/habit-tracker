@@ -200,16 +200,19 @@
                       <legend class="nhsuk-fieldset__legend nhsuk-label nhsuk-u-visually-hidden">Type(s)</legend>
                       <div class="nhsuk-checkboxes nhsuk-checkboxes--small">
                         <div class="nhsuk-checkboxes__item">
-                          <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0" />
+                          <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0" aria-describedby="ex-aerobic-hint" />
                           <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic</label>
+                          <div id="ex-aerobic-hint" class="nhsuk-hint nhsuk-checkboxes__hint">Running, spinning, swimming, tennis</div>
                         </div>
                         <div class="nhsuk-checkboxes__item">
-                          <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" />
+                          <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" aria-describedby="ex-strength-hint" />
                           <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
+                          <div id="ex-strength-hint" class="nhsuk-hint nhsuk-checkboxes__hint">Gym, pilates</div>
                         </div>
                         <div class="nhsuk-checkboxes__item">
-                          <input class="nhsuk-checkboxes__input" id="ex-walking" name="exercise_types" type="checkbox" value="walking" />
+                          <input class="nhsuk-checkboxes__input" id="ex-walking" name="exercise_types" type="checkbox" value="walking" aria-describedby="ex-walking-hint" />
                           <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-walking">Strenuous walk</label>
+                          <div id="ex-walking-hint" class="nhsuk-hint nhsuk-checkboxes__hint">A brisk walk, hiking, etc.</div>
                         </div>
                       </div>
                     </fieldset>
