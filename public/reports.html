@@ -76,38 +76,48 @@
           <div id="report-content" style="display:none">
 
             <!-- Mood -->
-            <section class="app-section">
-              <h2 class="nhsuk-heading-m">Mood</h2>
-              <div style="height:200px"><canvas id="chart-mood"></canvas></div>
-            </section>
+            <details class="nhsuk-details app-section" open data-charts="chart-mood">
+              <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Mood</span></summary>
+              <div class="nhsuk-details__text">
+                <div style="height:200px"><canvas id="chart-mood"></canvas></div>
+              </div>
+            </details>
 
             <!-- Sleep -->
-            <section class="app-section">
-              <h2 class="nhsuk-heading-m">Sleep</h2>
-              <p class="nhsuk-hint"><span style="color:#007f3b">■</span> Good &nbsp;<span style="color:#e8850c">■</span> Average &nbsp;<span style="color:#d5281b">■</span> Bad</p>
-              <div style="height:220px"><canvas id="chart-sleep-timeline"></canvas></div>
-              <p class="nhsuk-hint nhsuk-u-margin-top-3">Hours slept</p>
-              <div style="height:140px"><canvas id="chart-sleep-hours"></canvas></div>
-            </section>
+            <details class="nhsuk-details app-section" data-charts="chart-sleep-timeline,chart-sleep-hours">
+              <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Sleep</span></summary>
+              <div class="nhsuk-details__text">
+                <p class="nhsuk-hint"><span style="color:#007f3b">■</span> Good &nbsp;<span style="color:#e8850c">■</span> Average &nbsp;<span style="color:#d5281b">■</span> Bad</p>
+                <div style="height:220px"><canvas id="chart-sleep-timeline"></canvas></div>
+                <p class="nhsuk-hint nhsuk-u-margin-top-3">Hours slept</p>
+                <div style="height:140px"><canvas id="chart-sleep-hours"></canvas></div>
+              </div>
+            </details>
 
             <!-- Focus -->
-            <section class="app-section">
-              <h2 class="nhsuk-heading-m">Focus</h2>
-              <div style="height:200px"><canvas id="chart-focus"></canvas></div>
-            </section>
+            <details class="nhsuk-details app-section" data-charts="chart-focus">
+              <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Focus</span></summary>
+              <div class="nhsuk-details__text">
+                <div style="height:200px"><canvas id="chart-focus"></canvas></div>
+              </div>
+            </details>
 
             <!-- Alcohol -->
-            <section class="app-section" id="alcohol-section">
-              <h2 class="nhsuk-heading-m">Alcohol</h2>
-              <p class="nhsuk-hint">Total units per day.</p>
-              <div style="height:180px"><canvas id="chart-alcohol"></canvas></div>
-            </section>
+            <details class="nhsuk-details app-section" id="alcohol-section" data-charts="chart-alcohol">
+              <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Alcohol</span></summary>
+              <div class="nhsuk-details__text">
+                <p class="nhsuk-hint">Total units per day.</p>
+                <div style="height:180px"><canvas id="chart-alcohol"></canvas></div>
+              </div>
+            </details>
 
             <!-- Habits & behaviours -->
-            <section class="app-section">
-              <h2 class="nhsuk-heading-m">Habits &amp; behaviours</h2>
-              <div id="bool-rows"></div>
-            </section>
+            <details class="nhsuk-details app-section">
+              <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Habits &amp; behaviours</span></summary>
+              <div class="nhsuk-details__text">
+                <div id="bool-rows"></div>
+              </div>
+            </details>
 
           </div>
 

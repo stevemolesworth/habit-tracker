@@ -402,3 +402,11 @@ authReady.then(async () => {
   document.getElementById('period-select').value = 'last-7'
   applyPreset('last-7')
 })
+
+// Resize charts when a collapsed <details> is opened (Chart.js renders at 0px when hidden)
+document.querySelectorAll('details[data-charts]').forEach(el => {
+  el.addEventListener('toggle', () => {
+    if (!el.open) return
+    el.dataset.charts.split(',').forEach(id => { if (charts[id]) charts[id].resize() })
+  })
+})

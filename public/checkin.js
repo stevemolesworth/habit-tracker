@@ -206,6 +206,7 @@ function populateForm(record) {
   setVal('alcohol_beer', record.alcohol_beer ?? 0)
   setVal('alcohol_wine', record.alcohol_wine ?? 0)
   setVal('notes', record.notes)
+  savedNotesValue = record.notes || null
 
   if (record.weather_lat) {
     currentLocation = { lat: record.weather_lat, lng: record.weather_lng, label: record.weather_location_label || '' }
@@ -360,8 +361,14 @@ function markDirty(fieldName) {
 
 function setupDirtyTracking() {
   const form = document.getElementById('checkin-form')
-  form.addEventListener('input', e => markDirty(e.target.name || e.target.id))
-  form.addEventListener('change', e => markDirty(e.target.name || e.target.id))
+  form.addEventListener('input', e => {
+    markDirty(e.target.name || e.target.id)
+    if (e.target.name !== 'notes' && e.target.id !== 'notes') scheduleAutoSave()
+  })
+  form.addEventListener('change', e => {
+    markDirty(e.target.name || e.target.id)
+    if (e.target.name !== 'notes' && e.target.id !== 'notes') scheduleAutoSave()
+  })
 }
 
 // --- Navigation guard ---
@@ -466,12 +473,122 @@ document.getElementById('exercised').addEventListener('change', (e) => {
   document.getElementById('exercise-details').style.display = e.target.checked ? '' : 'none'
 })
 
+// --- Payload builder ---
+function buildPayload(includeNotes = true) {
+  const form = document.getElementById('checkin-form')
+  const get = (name) => form.elements[name]?.value || null
+  const bool = (name) => form.elements[name]?.checked || false
+  const exerciseTypes = [...form.querySelectorAll('[name="exercise_types"]:checked')].map(el => el.value)
+  const supplementsObj = {}
+  form.querySelectorAll('[name="supplement"]').forEach(el => { supplementsObj[el.value] = el.checked })
+  const behavioursObj = {}
+  form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
+  const focusesObj = {}
+  document.querySelectorAll('#focuses-list [data-focus-id]').forEach(fieldset => {
+    const id = fieldset.dataset.focusId
+    const checked = fieldset.querySelector(`[name="focus_${id}"]:checked`)
+    focusesObj[id] = checked ? Number(checked.value) : null
+  })
+  return {
+    check_in_type: type,
+    check_in_date: today,
+    global_mood: get('global_mood') ? Number(get('global_mood')) : null,
+    focuses: focusesObj,
+    exercised: bool('exercised'),
+    exercise_types: exerciseTypes.length ? exerciseTypes : null,
+    alcohol_spirits: Number(get('alcohol_spirits') || 0),
+    alcohol_beer: Number(get('alcohol_beer') || 0),
+    alcohol_wine: Number(get('alcohol_wine') || 0),
+    supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
+    behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
+    notes: includeNotes ? (get('notes') || null) : (existingRecord?.notes ?? null),
+    bedtime: get('bedtime') || null,
+    wake_time: get('wake_time') || null,
+    sleep_quality: get('sleep_quality') ? Number(get('sleep_quality')) : null,
+    weather_lat: currentLocation?.lat ?? null,
+    weather_lng: currentLocation?.lng ?? null,
+    weather_location_label: currentLocation?.label ?? null,
+    weather_snapshot: currentWeatherData ? { current: currentWeatherData.current, hourly: currentWeatherData.hourly } : null
+  }
+}
+
+// --- Core save ---
+async function doSave(payload) {
+  let result
+  if (existingRecord) {
+    result = await api.updateCheckin(existingRecord.id, payload)
+  } else {
+    result = await api.submitCheckin(payload)
+    existingRecord = result
+    document.getElementById('delete-section').style.display = ''
+    document.getElementById('submit-btn').textContent = 'Save changes'
+  }
+  if (currentLocation) {
+    api.updateWeights({ default_location_lat: currentLocation.lat, default_location_lng: currentLocation.lng, default_location_label: currentLocation.label }).catch(() => {})
+  }
+  showLastUpdated(result.submitted_at)
+  return result
+}
+
+// --- Auto-save (all fields except notes) ---
+let autoSaveTimer = null
+
+function setAutoSaveStatus(msg) {
+  const el = document.getElementById('autosave-status')
+  el.textContent = msg
+  el.style.display = msg ? '' : 'none'
+}
+
+async function autoSave() {
+  try {
+    setAutoSaveStatus('Saving…')
+    const payload = buildPayload(false)
+    await doSave(payload)
+    setAutoSaveStatus('Saved')
+    setTimeout(() => setAutoSaveStatus(''), 2000)
+    isDirty = false
+  } catch {
+    setAutoSaveStatus('Could not auto-save')
+  }
+}
+
+function scheduleAutoSave() {
+  clearTimeout(autoSaveTimer)
+  autoSaveTimer = setTimeout(autoSave, 1200)
+}
+
+// --- Notes save button ---
+let savedNotesValue = null
+
+function updateNotesBtnState() {
+  const current = document.getElementById('notes').value
+  document.getElementById('save-notes-btn').disabled = current === savedNotesValue || (!current && !savedNotesValue)
+}
+
+document.getElementById('notes').addEventListener('input', updateNotesBtnState)
+
+document.getElementById('save-notes-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('save-notes-btn')
+  btn.disabled = true
+  btn.textContent = 'Saving…'
+  try {
+    const payload = buildPayload(true)
+    await doSave(payload)
+    savedNotesValue = document.getElementById('notes').value || null
+    btn.textContent = 'Save notes'
+    updateNotesBtnState()
+  } catch {
+    btn.disabled = false
+    btn.textContent = 'Save notes'
+  }
+})
+
 // --- Form submission ---
 document.getElementById('checkin-form').addEventListener('submit', async (e) => {
   e.preventDefault()
   const btn = document.getElementById('submit-btn')
   btn.disabled = true
-  btn.textContent = existingRecord ? 'Saving…' : 'Submitting…'
+  btn.textContent = 'Saving…'
   hideError()
 
   // Sleep validation
@@ -503,65 +620,15 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
     return
   }
 
-  const form = e.target
-  const get = (name) => form.elements[name]?.value || null
-  const bool = (name) => form.elements[name]?.checked || false
-
-  const exerciseTypes = [...form.querySelectorAll('[name="exercise_types"]:checked')].map(el => el.value)
-  const supplementsObj = {}
-  form.querySelectorAll('[name="supplement"]').forEach(el => { supplementsObj[el.value] = el.checked })
-  const behavioursObj = {}
-  form.querySelectorAll('[name="behaviour"]').forEach(el => { behavioursObj[el.value] = el.checked })
-  const focusesObj = {}
-  document.querySelectorAll('#focuses-list [data-focus-id]').forEach(fieldset => {
-    const id = fieldset.dataset.focusId
-    const checked = fieldset.querySelector(`[name="focus_${id}"]:checked`)
-    focusesObj[id] = checked ? Number(checked.value) : null
-  })
-
-  const payload = {
-    check_in_type: type,
-    check_in_date: today,
-    global_mood: get('global_mood') ? Number(get('global_mood')) : null,
-    focuses: focusesObj,
-    exercised: bool('exercised'),
-    exercise_types: exerciseTypes.length ? exerciseTypes : null,
-    alcohol_spirits: Number(get('alcohol_spirits') || 0),
-    alcohol_beer: Number(get('alcohol_beer') || 0),
-    alcohol_wine: Number(get('alcohol_wine') || 0),
-    supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
-    behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
-    notes: get('notes') || null,
-    weather_lat: currentLocation?.lat ?? null,
-    weather_lng: currentLocation?.lng ?? null,
-    weather_location_label: currentLocation?.label ?? null,
-    weather_snapshot: currentWeatherData ? { current: currentWeatherData.current, hourly: currentWeatherData.hourly } : null
-  }
-
-  payload.bedtime = get('bedtime') || null
-  payload.wake_time = get('wake_time') || null
-  payload.sleep_quality = get('sleep_quality') ? Number(get('sleep_quality')) : null
-
   try {
-    let result
-    if (existingRecord) {
-      result = await api.updateCheckin(existingRecord.id, payload)
-    } else {
-      result = await api.submitCheckin(payload)
-    }
-    if (currentLocation) {
-      api.updateWeights({
-        default_location_lat: currentLocation.lat,
-        default_location_lng: currentLocation.lng,
-        default_location_label: currentLocation.label
-      }).catch(() => {})
-    }
+    clearTimeout(autoSaveTimer)
+    const result = await doSave(buildPayload(true))
     isDirty = false
     location.href = `/confirmation.html?id=${result.id}&type=${type}`
   } catch (err) {
     showError(err.message)
     btn.disabled = false
-    btn.textContent = existingRecord ? 'Save Changes' : 'Submit check-in'
+    btn.textContent = existingRecord ? 'Save changes' : 'Submit check-in'
   }
 })
 
@@ -635,7 +702,6 @@ async function init() {
   renderCheckinNav()
 
   if (existingRecord) {
-    // document.getElementById('already-submitted-banner').style.display = ''
     const btn = document.getElementById('submit-btn')
     btn.textContent = 'Save Changes'
     btn.disabled = true

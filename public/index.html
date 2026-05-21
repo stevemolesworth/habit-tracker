@@ -58,12 +58,7 @@
           <span class="nhsuk-body nhsuk-u-secondary-text-color">Loading your check-in…</span>
         </div>
 
-        <div class="nhsuk-inset-text nhsuk-u-margin-top-0" id="already-submitted-banner">
-          <span class="nhsuk-u-visually-hidden">Information: </span>
-          <p>This check-in already has data. Feel free to add or change anything.</p>
-        </div>
-
-        <div id="main-content-row" class="nhsuk-grid-row" style="display: none">
+<div id="main-content-row" class="nhsuk-grid-row" style="display: none">
           <div class="nhsuk-grid-column-two-thirds">
             <div id="error-banner" class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" style="display: none">
               <h2 class="nhsuk-error-summary__title" id="error-summary-title">There was a problem</h2>
@@ -247,9 +242,11 @@
                   <label class="nhsuk-label" for="notes" id="notes-label">Optional notes</label>
                   <textarea class="nhsuk-textarea" id="notes" name="notes" rows="4"></textarea>
                 </div>
+                <button class="nhsuk-button nhsuk-button--secondary" type="button" id="save-notes-btn" disabled>Save notes</button>
               </section>
 
               <button class="nhsuk-button" type="submit" id="submit-btn">Submit check-in</button>
+              <p id="autosave-status" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-1" style="display:none"></p>
 
               <p id="last-updated" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-2" style="display: none"></p>
 
