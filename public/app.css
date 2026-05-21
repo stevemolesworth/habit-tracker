@@ -473,3 +473,7 @@ a.app-bool-dot:hover { opacity: 0.75; }
 
 .app-toast--success { border-left: 4px solid #007f3b; }
 .app-toast--error   { border-left: 4px solid #d5281b; }
+
+#quick-mood-suggestions .nhsuk-button,
+#quick-behaviour-suggestions .nhsuk-button,
+#quick-supplement-suggestions .nhsuk-button { margin-bottom: 8px; }

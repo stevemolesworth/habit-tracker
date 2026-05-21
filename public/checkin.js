@@ -496,7 +496,7 @@ function markDirty(fieldName) {
   if (cat) dirtyCategories.add(cat)
   if (isDirty) return
   isDirty = true
-  if (existingRecord) document.getElementById('submit-btn').disabled = false
+  document.getElementById('submit-btn').disabled = false
 }
 
 function setupDirtyTracking() {
@@ -657,6 +657,7 @@ async function autoSave() {
     dirtyCategories.clear()
     if (notesWasDirty) dirtyCategories.add('Notes')
     isDirty = notesWasDirty
+    if (!isDirty) document.getElementById('submit-btn').disabled = true
   } catch {
     clearTimeout(autoSaveToastTimer)
     showToast('Could not auto-save', 'error')
@@ -723,9 +724,12 @@ document.getElementById('checkin-form').addEventListener('submit', async (e) => 
 
   try {
     clearTimeout(autoSaveTimer)
-    const result = await doSave(buildPayload(true))
+    await doSave(buildPayload(true))
     isDirty = false
-    location.href = `/confirmation.html?id=${result.id}&type=${type}`
+    dirtyCategories.clear()
+    btn.disabled = true
+    btn.textContent = 'Save changes'
+    showToast('Check-in saved')
   } catch (err) {
     showError(err.message)
     btn.disabled = false
@@ -799,10 +803,10 @@ async function init() {
 
   renderCheckinNav()
 
+  const submitBtn = document.getElementById('submit-btn')
+  submitBtn.disabled = true
   if (existingRecord) {
-    const btn = document.getElementById('submit-btn')
-    btn.textContent = 'Save Changes'
-    btn.disabled = true
+    submitBtn.textContent = 'Save changes'
     populateForm(existingRecord)
     updateAlcoholCount()
     document.getElementById('delete-section').style.display = ''
