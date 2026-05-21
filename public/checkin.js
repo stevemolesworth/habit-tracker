@@ -257,7 +257,7 @@ function renderEodSleep(morningRecord) {
       e.preventDefault()
       const open = fields.style.display !== 'none'
       fields.style.display = open ? 'none' : ''
-      e.target.textContent = open ? 'Edit sleep data' : 'Hide'
+      e.target.textContent = open ? 'Edit' : 'Hide'
     })
   } else {
     summaryDiv.style.display = 'none'
@@ -301,7 +301,7 @@ function renderSecondaryMoods(dims, morningRecord) {
           </legend>
           <div class="app-mood-scale-row">
             <span class="app-mood-anchor" aria-hidden="true">${emoji1}</span>
-            <div class="nhsuk-radios nhsuk-radios--inline">
+            <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
               ${[1,2,3,4,5].map(n => `
                 <div class="nhsuk-radios__item">
                   <input class="nhsuk-radios__input" id="sm-${dim.id}-${n}" name="secondary_mood_${dim.id}" type="radio" value="${n}" />
@@ -319,18 +319,23 @@ function renderSecondaryMoods(dims, morningRecord) {
 function renderMomentum(items) {
   if (isMorning || !items?.length) return
   document.getElementById('momentum-section').style.display = ''
+  document.getElementById('nav-momentum-item').style.display = ''
   document.getElementById('momentum-list').innerHTML = items.map(item => `
     <div class="nhsuk-form-group nhsuk-u-margin-top-3">
       <fieldset class="nhsuk-fieldset">
         <legend class="nhsuk-fieldset__legend nhsuk-label">
           <strong>${item.name}</strong>
         </legend>
-        <div class="nhsuk-radios nhsuk-radios--inline">
-          ${[1,2,3,4,5].map(n => `
-            <div class="nhsuk-radios__item">
-              <input class="nhsuk-radios__input" id="mom-${item.id}-${n}" name="momentum_${item.id}" type="radio" value="${n}" />
-              <label class="nhsuk-label nhsuk-radios__label" for="mom-${item.id}-${n}">${n}</label>
-            </div>`).join('')}
+        <div class="app-mood-scale-row">
+          <span class="app-mood-anchor" aria-hidden="true">😢</span>
+          <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
+            ${[1,2,3,4,5].map(n => `
+              <div class="nhsuk-radios__item">
+                <input class="nhsuk-radios__input" id="mom-${item.id}-${n}" name="momentum_${item.id}" type="radio" value="${n}" />
+                <label class="nhsuk-label nhsuk-radios__label" for="mom-${item.id}-${n}">${n}</label>
+              </div>`).join('')}
+          </div>
+          <span class="app-mood-anchor" aria-hidden="true">😊</span>
         </div>
       </fieldset>
     </div>`).join('')

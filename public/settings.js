@@ -21,7 +21,7 @@ async function loadMoodDimensions() {
       list.innerHTML = dims.map(d => `
         <li data-id="${d.id}" style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px${d.paused ? ';opacity:0.55' : ''}">
           <span class="app-drag-handle material-icons" aria-hidden="true">drag_indicator</span>
-          <span style="flex:1">${d.name}${d.paused ? '<span class="app-item-paused-badge">Paused</span>' : ''}</span>
+          <span style="flex:1">${d.name} ${d.five_is_good !== false ? '😊' : '😢'}${d.paused ? '<span class="app-item-paused-badge">Paused</span>' : ''}</span>
           <div style="display:flex;gap:6px;flex-shrink:0">
             ${btn(d.paused ? 'Resume' : 'Pause', d.paused ? 'play_arrow' : 'pause', 'nhsuk-button--secondary', `pauseMoodDimension('${d.id}', ${d.paused})`)}
             ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}', ${d.five_is_good !== false})`)}
@@ -37,7 +37,7 @@ async function loadMoodDimensions() {
       b.style.display = existingNames.has(b.dataset.quickMood.toLowerCase()) ? 'none' : ''
     })
     const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
-    document.getElementById('quick-add-details').style.display = anyVisible ? '' : 'none'
+    document.getElementById('quick-mood-suggestions').style.display = anyVisible ? '' : 'none'
 
     if (moodSortable) moodSortable.destroy()
     moodSortable = Sortable.create(list, {
@@ -144,15 +144,25 @@ async function addMoodDimension(name, fiveIsGood = true) {
   }
 }
 
+function resetMoodForm() {
+  document.getElementById('new-mood-dimension').value = ''
+  document.getElementById('mood-dir-good').checked = true
+  document.getElementById('add-mood-dimension-btn').disabled = true
+  document.getElementById('cancel-mood-btn').disabled = true
+  document.querySelectorAll('[data-quick-mood]').forEach(b => { b.disabled = false })
+}
+
 document.getElementById('add-mood-dimension-btn').addEventListener('click', () => {
   const input = document.getElementById('new-mood-dimension')
   const name = input.value.trim()
   if (!name) return
   const dirRadio = document.querySelector('[name="new_mood_direction"]:checked')
   const fiveIsGood = !dirRadio || dirRadio.value === 'good'
-  input.value = ''
+  resetMoodForm()
   addMoodDimension(name, fiveIsGood)
 })
+
+document.getElementById('cancel-mood-btn').addEventListener('click', resetMoodForm)
 
 document.getElementById('new-mood-dimension').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -161,23 +171,51 @@ document.getElementById('new-mood-dimension').addEventListener('keydown', (e) =>
   }
 })
 
+document.getElementById('new-mood-dimension').addEventListener('input', (e) => {
+  const hasValue = !!e.target.value.trim()
+  document.getElementById('add-mood-dimension-btn').disabled = !hasValue
+  document.getElementById('cancel-mood-btn').disabled = !hasValue
+  if (!hasValue) document.querySelectorAll('[data-quick-mood]').forEach(b => { b.disabled = false })
+})
+
 document.querySelectorAll('[data-quick-mood]').forEach(b => {
-  b.addEventListener('click', () => addMoodDimension(b.dataset.quickMood))
+  b.addEventListener('click', () => {
+    document.getElementById('new-mood-dimension').value = b.dataset.quickMood
+    document.getElementById('add-mood-dimension-btn').disabled = false
+    document.getElementById('cancel-mood-btn').disabled = false
+    b.disabled = true
+    document.getElementById('new-mood-dimension').focus()
+  })
 })
 
 // ── Behaviours ────────────────────────────────────────────────
 
+function resetBehaviourForm() {
+  const input = document.getElementById('new-behaviour')
+  const slider = document.getElementById('new-behaviour-weight')
+  input.value = ''
+  slider.value = '1'
+  document.getElementById('new-behaviour-weight-label').textContent = weightLabel(1)
+  document.getElementById('add-behaviour-btn').disabled = true
+  document.getElementById('cancel-behaviour-btn').disabled = true
+  document.querySelectorAll('[data-quick-behaviour]').forEach(b => { b.disabled = false })
+}
+
 document.querySelectorAll('[data-quick-behaviour]').forEach(b => {
-  b.addEventListener('click', async () => {
-    try {
-      await api.addBehaviour(b.dataset.quickBehaviour, Number(b.dataset.quickWeight))
-      showFeedback('behaviour-feedback', `"${b.dataset.quickBehaviour}" added.`)
-      clearCache('behaviours'); loadBehaviours()
-    } catch (err) {
-      showFeedback('behaviour-feedback', `Error: ${err.message}`, true)
-    }
+  b.addEventListener('click', () => {
+    const input = document.getElementById('new-behaviour')
+    const slider = document.getElementById('new-behaviour-weight')
+    input.value = b.dataset.quickBehaviour
+    slider.value = b.dataset.quickWeight ?? '1'
+    document.getElementById('new-behaviour-weight-label').textContent = weightLabel(Number(slider.value))
+    document.getElementById('add-behaviour-btn').disabled = false
+    document.getElementById('cancel-behaviour-btn').disabled = false
+    b.disabled = true
+    input.focus()
   })
 })
+
+document.getElementById('cancel-behaviour-btn').addEventListener('click', resetBehaviourForm)
 
 function weightLabel(w) {
   if (w > 0) return '👍'.repeat(w)
@@ -212,7 +250,7 @@ async function loadBehaviours() {
       b.style.display = existingNames.has(b.dataset.quickBehaviour.toLowerCase()) ? 'none' : ''
     })
     const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
-    document.getElementById('quick-add-behaviour-details').style.display = anyVisible ? '' : 'none'
+    document.getElementById('quick-behaviour-suggestions').style.display = anyVisible ? '' : 'none'
 
     if (behaviourSortable) behaviourSortable.destroy()
     behaviourSortable = Sortable.create(list, {
@@ -312,8 +350,7 @@ document.getElementById('add-behaviour-btn').addEventListener('click', async () 
   }
   try {
     await api.addBehaviour(name, weight)
-    nameInput.value = ''
-    weightInput.value = '1'
+    resetBehaviourForm()
     showFeedback('behaviour-feedback', `"${name}" added.`)
     clearCache('behaviours'); loadBehaviours()
   } catch (err) {
@@ -326,6 +363,13 @@ document.getElementById('new-behaviour').addEventListener('keydown', (e) => {
     e.preventDefault()
     document.getElementById('add-behaviour-btn').click()
   }
+})
+
+document.getElementById('new-behaviour').addEventListener('input', (e) => {
+  const hasValue = !!e.target.value.trim()
+  document.getElementById('add-behaviour-btn').disabled = !hasValue
+  document.getElementById('cancel-behaviour-btn').disabled = !hasValue
+  if (!hasValue) document.querySelectorAll('[data-quick-behaviour]').forEach(b => { b.disabled = false })
 })
 
 document.getElementById('new-behaviour-weight').addEventListener('input', (e) => {
@@ -443,13 +487,19 @@ document.getElementById('momentum-delete-confirm-btn').addEventListener('click',
   }
 })
 
+function resetMomentumForm() {
+  document.getElementById('new-momentum-item').value = ''
+  document.getElementById('add-momentum-item-btn').disabled = true
+  document.getElementById('cancel-momentum-btn').disabled = true
+}
+
 document.getElementById('add-momentum-item-btn').addEventListener('click', async () => {
   const input = document.getElementById('new-momentum-item')
   const name = input.value.trim()
   if (!name) return
   try {
     await api.addMomentumItem(name)
-    input.value = ''
+    resetMomentumForm()
     showFeedback('momentum-item-feedback', `"${name}" added.`)
     clearCache('momentumItems'); loadMomentumItems()
   } catch (err) {
@@ -457,11 +507,19 @@ document.getElementById('add-momentum-item-btn').addEventListener('click', async
   }
 })
 
+document.getElementById('cancel-momentum-btn').addEventListener('click', resetMomentumForm)
+
 document.getElementById('new-momentum-item').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault()
     document.getElementById('add-momentum-item-btn').click()
   }
+})
+
+document.getElementById('new-momentum-item').addEventListener('input', (e) => {
+  const hasValue = !!e.target.value.trim()
+  document.getElementById('add-momentum-item-btn').disabled = !hasValue
+  document.getElementById('cancel-momentum-btn').disabled = !hasValue
 })
 
 // ── Supplements ──────────────────────────────────────────────
@@ -490,7 +548,7 @@ async function loadSupplements() {
       b.style.display = existingNames.has(b.dataset.quickSupplement.toLowerCase()) ? 'none' : ''
     })
     const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
-    document.getElementById('quick-add-supplement-details').style.display = anyVisible ? '' : 'none'
+    document.getElementById('quick-supplement-suggestions').style.display = anyVisible ? '' : 'none'
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load supplements.</li>'
   }
@@ -566,13 +624,22 @@ document.getElementById('add-supplement-btn').addEventListener('click', async ()
   if (!name) return
   try {
     await api.addSupplement(name)
-    input.value = ''
+    resetSupplementForm()
     showFeedback('supp-feedback', `"${name}" added.`)
     clearCache('supplements'); loadSupplements()
   } catch (err) {
     showFeedback('supp-feedback', `Error: ${err.message}`, true)
   }
 })
+
+function resetSupplementForm() {
+  document.getElementById('new-supplement').value = ''
+  document.getElementById('add-supplement-btn').disabled = true
+  document.getElementById('cancel-supplement-btn').disabled = true
+  document.querySelectorAll('[data-quick-supplement]').forEach(b => { b.disabled = false })
+}
+
+document.getElementById('cancel-supplement-btn').addEventListener('click', resetSupplementForm)
 
 document.getElementById('new-supplement').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -581,15 +648,20 @@ document.getElementById('new-supplement').addEventListener('keydown', (e) => {
   }
 })
 
+document.getElementById('new-supplement').addEventListener('input', (e) => {
+  const hasValue = !!e.target.value.trim()
+  document.getElementById('add-supplement-btn').disabled = !hasValue
+  document.getElementById('cancel-supplement-btn').disabled = !hasValue
+  if (!hasValue) document.querySelectorAll('[data-quick-supplement]').forEach(b => { b.disabled = false })
+})
+
 document.querySelectorAll('[data-quick-supplement]').forEach(b => {
-  b.addEventListener('click', async () => {
-    try {
-      await api.addSupplement(b.dataset.quickSupplement)
-      showFeedback('supp-feedback', `"${b.dataset.quickSupplement}" added.`)
-      clearCache('supplements'); loadSupplements()
-    } catch (err) {
-      showFeedback('supp-feedback', `Error: ${err.message}`, true)
-    }
+  b.addEventListener('click', () => {
+    document.getElementById('new-supplement').value = b.dataset.quickSupplement
+    document.getElementById('add-supplement-btn').disabled = false
+    document.getElementById('cancel-supplement-btn').disabled = false
+    b.disabled = true
+    document.getElementById('new-supplement').focus()
   })
 })
 
