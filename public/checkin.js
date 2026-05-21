@@ -58,7 +58,7 @@ document.getElementById('page-heading').innerHTML =
   `${isMorning ? 'Morning' : 'End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
 
 // Show/hide sections
-document.getElementById('sleep-section').style.display = isMorning ? '' : 'none'
+if (!isMorning) document.getElementById('sleep-section').style.display = 'none' // renderEodSleep shows it after data loads
 document.getElementById('events-section').style.display = isMorning ? 'none' : ''
 document.getElementById('notes-label').textContent = isMorning
   ? 'What would make today good?'
@@ -210,6 +210,61 @@ function populateForm(record) {
     setLocationLabel(currentLocation.label)
   } else if (record.weather_postcode) {
     document.getElementById('weather-location-input').value = record.weather_postcode
+  }
+}
+
+// --- EOD sleep summary ---
+const SLEEP_QUALITY_LABEL = { 1: 'Bad', 2: 'Average', 3: 'Good' }
+
+function renderEodSleep(morningRecord) {
+  if (isMorning) return
+
+  const section = document.getElementById('sleep-section')
+  const summaryDiv = document.getElementById('eod-sleep-summary')
+  const noneDiv = document.getElementById('eod-sleep-none')
+  const fields = document.getElementById('sleep-fields')
+
+  section.style.display = ''
+  fields.style.display = 'none'
+
+  // Prefer existing EOD record data, fall back to morning record
+  const src = (existingRecord?.hours_slept || existingRecord?.sleep_quality || existingRecord?.bedtime)
+    ? existingRecord
+    : (morningRecord?.hours_slept || morningRecord?.sleep_quality || morningRecord?.bedtime)
+      ? morningRecord
+      : null
+
+  if (src) {
+    const parts = []
+    if (src.hours_slept) {
+      const h = Math.floor(src.hours_slept)
+      const m = Math.round((src.hours_slept % 1) * 60)
+      if (h > 0) parts.push(`${h}h`)
+      if (m > 0) parts.push(`${m}m`)
+    }
+    const quality = src.sleep_quality ? SLEEP_QUALITY_LABEL[src.sleep_quality] : null
+    let text = parts.length ? `Slept ${parts.join(' ')}` : ''
+    if (quality) text += (text ? ` · ${quality}` : quality)
+    document.getElementById('eod-sleep-text').textContent = text || 'Sleep data recorded'
+
+    summaryDiv.style.display = ''
+    noneDiv.style.display = 'none'
+
+    document.getElementById('eod-sleep-edit-link').addEventListener('click', e => {
+      e.preventDefault()
+      const open = fields.style.display !== 'none'
+      fields.style.display = open ? 'none' : ''
+      e.target.textContent = open ? 'Edit sleep data' : 'Hide'
+    })
+  } else {
+    summaryDiv.style.display = 'none'
+    noneDiv.style.display = ''
+
+    document.getElementById('eod-sleep-add-link').addEventListener('click', e => {
+      e.preventDefault()
+      noneDiv.style.display = 'none'
+      fields.style.display = ''
+    })
   }
 }
 
@@ -750,6 +805,7 @@ async function init() {
 
 async function showForm(morningRecord = null, config = null, moodDims = []) {
   // Render secondary moods before dirty tracking is set up
+  renderEodSleep(morningRecord)
   renderSecondaryMoods(moodDims, morningRecord)
   renderMorningMood(morningRecord)
 

@@ -72,10 +72,28 @@
             </div>
 
             <form id="checkin-form" novalidate>
-              <!-- ══ Sleep (morning only) ═══════════════════════════════ -->
+              <!-- ══ Sleep ══════════════════════════════════════════════ -->
               <section class="app-section" id="sleep-section">
                 <h2 class="nhsuk-heading-l">Sleep</h2>
 
+                <!-- EOD: summary when data exists -->
+                <div id="eod-sleep-summary" style="display:none">
+                  <p class="nhsuk-body" id="eod-sleep-text"></p>
+                  <p class="nhsuk-body-s nhsuk-u-margin-bottom-3">
+                    <a href="#" id="eod-sleep-edit-link" class="nhsuk-link">Edit sleep data</a>
+                  </p>
+                </div>
+
+                <!-- EOD: no data message -->
+                <div id="eod-sleep-none" style="display:none">
+                  <p class="nhsuk-body">
+                    No sleep data recorded.
+                    <a href="#" id="eod-sleep-add-link" class="nhsuk-link">Add sleep data</a>
+                  </p>
+                </div>
+
+                <!-- Sleep form fields (always visible on morning; toggled on EOD) -->
+                <div id="sleep-fields">
                 <div class="nhsuk-form-group" id="bedtime-group">
                   <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
                   <p class="nhsuk-error-message" id="bedtime-error" style="display: none">
@@ -112,6 +130,7 @@
                     </div>
                   </fieldset>
                 </div>
+                </div><!-- /#sleep-fields -->
               </section>
 
               <!-- ══ Section A: Moods ══════════════════════════════════ -->
