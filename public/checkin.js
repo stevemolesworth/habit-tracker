@@ -496,7 +496,6 @@ function markDirty(fieldName) {
   if (cat) dirtyCategories.add(cat)
   if (isDirty) return
   isDirty = true
-  document.getElementById('submit-btn').disabled = false
 }
 
 function setupDirtyTracking() {
@@ -635,7 +634,6 @@ async function doSave(payload) {
     result = await api.submitCheckin(payload)
     existingRecord = result
     document.getElementById('delete-section').style.display = ''
-    document.getElementById('submit-btn').textContent = 'Save changes'
   }
   if (currentLocation) {
     api.updateWeights({ default_location_lat: currentLocation.lat, default_location_lng: currentLocation.lng, default_location_label: currentLocation.label }).catch(() => {})
@@ -657,7 +655,6 @@ async function autoSave() {
     dirtyCategories.clear()
     if (notesWasDirty) dirtyCategories.add('Notes')
     isDirty = notesWasDirty
-    if (!isDirty) document.getElementById('submit-btn').disabled = true
   } catch {
     clearTimeout(autoSaveToastTimer)
     showToast('Could not auto-save', 'error')
@@ -693,49 +690,6 @@ document.getElementById('save-notes-btn').addEventListener('click', async () => 
   }
 })
 
-// --- Form submission ---
-document.getElementById('checkin-form').addEventListener('submit', async (e) => {
-  e.preventDefault()
-  const btn = document.getElementById('submit-btn')
-  btn.disabled = true; btn.textContent = 'Saving…'
-  hideError()
-
-  if (isMorning) {
-    const bedtimeVal = document.getElementById('bedtime').value
-    const wakeVal = document.getElementById('wake_time').value
-    let sleepValid = true
-    if (!bedtimeVal) {
-      document.getElementById('bedtime-group').classList.add('nhsuk-form-group--error')
-      document.getElementById('bedtime-error').style.display = ''
-      sleepValid = false
-    }
-    if (!wakeVal) {
-      document.getElementById('wake-time-group').classList.add('nhsuk-form-group--error')
-      document.getElementById('wake-time-error').style.display = ''
-      sleepValid = false
-    }
-    if (!sleepValid) {
-      btn.disabled = false
-      btn.textContent = existingRecord ? 'Save changes' : 'Submit check-in'
-      document.getElementById('bedtime-group').scrollIntoView({ behavior: 'smooth', block: 'center' })
-      return
-    }
-  }
-
-  try {
-    clearTimeout(autoSaveTimer)
-    await doSave(buildPayload(true))
-    isDirty = false
-    dirtyCategories.clear()
-    btn.disabled = true
-    btn.textContent = 'Save changes'
-    showToast('Check-in saved')
-  } catch (err) {
-    showError(err.message)
-    btn.disabled = false
-    btn.textContent = existingRecord ? 'Save changes' : 'Submit check-in'
-  }
-})
 
 function showError(msg) {
   const banner = document.getElementById('error-banner')
@@ -803,10 +757,7 @@ async function init() {
 
   renderCheckinNav()
 
-  const submitBtn = document.getElementById('submit-btn')
-  submitBtn.disabled = true
   if (existingRecord) {
-    submitBtn.textContent = 'Save changes'
     populateForm(existingRecord)
     updateAlcoholCount()
     document.getElementById('delete-section').style.display = ''
