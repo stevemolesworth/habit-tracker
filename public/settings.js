@@ -15,17 +15,25 @@ async function loadMoodDimensions() {
     const dims = await api.getMoodDimensions()
     if (!dims.length) {
       list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No secondary moods yet.</li>'
-      return
+    } else {
+      list.innerHTML = dims.map(d => `
+        <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
+          <span>${d.name}</span>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}') `)}
+            ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}')`)}
+          </div>
+        </li>
+      `).join('')
     }
-    list.innerHTML = dims.map(d => `
-      <li style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px">
-        <span>${d.name}</span>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          ${btn('Edit', 'edit', 'nhsuk-button--secondary', `editMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}') `)}
-          ${btn('Remove', 'close', 'nhsuk-button--warning', `confirmDeleteMoodDimension('${d.id}', '${d.name.replace(/'/g, "\\'")}')`)}
-        </div>
-      </li>
-    `).join('')
+
+    const existingNames = new Set(dims.map(d => d.name.toLowerCase()))
+    const quickBtns = document.querySelectorAll('[data-quick-mood]')
+    quickBtns.forEach(btn => {
+      btn.style.display = existingNames.has(btn.dataset.quickMood.toLowerCase()) ? 'none' : ''
+    })
+    const anyVisible = [...quickBtns].some(b => b.style.display !== 'none')
+    document.getElementById('quick-add-details').style.display = anyVisible ? '' : 'none'
   } catch {
     list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load mood dimensions.</li>'
   }
