@@ -347,3 +347,52 @@ a.app-bool-dot:hover { opacity: 0.75; }
   .app-btn-icon { display: inline; }
   .app-btn-label { display: none; }
 }
+
+/* Alcohol stepper */
+.app-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 2px solid #4c6272;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.app-stepper__btn {
+  background: #f0f4f5;
+  border: none;
+  width: 44px;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  color: #212b32;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.app-stepper__btn:hover { background: #d8dde0; }
+.app-stepper__btn:active { background: #aeb7bd; }
+
+.app-stepper__input {
+  width: 52px;
+  border: none;
+  border-left: 2px solid #4c6272;
+  border-right: 2px solid #4c6272;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #212b32;
+  background: #fff;
+  padding: 10px 0;
+  margin: 0;
+  -moz-appearance: textfield;
+}
+
+.app-stepper__input::-webkit-outer-spin-button,
+.app-stepper__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

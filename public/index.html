@@ -203,18 +203,30 @@
               <!-- Alcohol -->
               <section class="app-section" id="alcohol-section">
                 <h2 class="nhsuk-heading-m">Alcohol (units)</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px">
-                  <div class="nhsuk-form-group">
-                    <label class="nhsuk-label" for="alcohol_spirits">Spirits</label>
-                    <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_spirits" name="alcohol_spirits" type="number" min="0" step="0.5" value="0" />
+                <div style="display: flex; gap: 24px; flex-wrap: wrap">
+                  <div>
+                    <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_spirits">Spirits</label>
+                    <div class="app-stepper">
+                      <button type="button" class="app-stepper__btn" data-target="alcohol_spirits" data-delta="-1" aria-label="Decrease spirits">−</button>
+                      <input class="app-stepper__input" id="alcohol_spirits" name="alcohol_spirits" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                      <button type="button" class="app-stepper__btn" data-target="alcohol_spirits" data-delta="1" aria-label="Increase spirits">+</button>
+                    </div>
                   </div>
-                  <div class="nhsuk-form-group">
-                    <label class="nhsuk-label" for="alcohol_beer">Beer</label>
-                    <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_beer" name="alcohol_beer" type="number" min="0" step="0.5" value="0" />
+                  <div>
+                    <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_beer">Beer</label>
+                    <div class="app-stepper">
+                      <button type="button" class="app-stepper__btn" data-target="alcohol_beer" data-delta="-1" aria-label="Decrease beer">−</button>
+                      <input class="app-stepper__input" id="alcohol_beer" name="alcohol_beer" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                      <button type="button" class="app-stepper__btn" data-target="alcohol_beer" data-delta="1" aria-label="Increase beer">+</button>
+                    </div>
                   </div>
-                  <div class="nhsuk-form-group">
-                    <label class="nhsuk-label" for="alcohol_wine">Wine</label>
-                    <input class="nhsuk-input nhsuk-input--width-3" id="alcohol_wine" name="alcohol_wine" type="number" min="0" step="0.5" value="0" />
+                  <div>
+                    <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_wine">Wine</label>
+                    <div class="app-stepper">
+                      <button type="button" class="app-stepper__btn" data-target="alcohol_wine" data-delta="-1" aria-label="Decrease wine">−</button>
+                      <input class="app-stepper__input" id="alcohol_wine" name="alcohol_wine" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                      <button type="button" class="app-stepper__btn" data-target="alcohol_wine" data-delta="1" aria-label="Increase wine">+</button>
+                    </div>
                   </div>
                 </div>
               </section>

@@ -728,8 +728,21 @@ async function init() {
   await showForm(morningRecord, config)
 }
 
+function setupSteppers() {
+  document.querySelectorAll('.app-stepper__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target)
+      if (!input) return
+      const delta = Number(btn.dataset.delta)
+      input.value = Math.max(0, (Number(input.value) || 0) + delta)
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+  })
+}
+
 async function showForm(morningRecord = null, config = null) {
   loadSupplements()
+  setupSteppers()
   if (!isMorning) {
     loadBehaviours()
     loadFocuses()
