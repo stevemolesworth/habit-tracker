@@ -2,6 +2,7 @@ import { api, clearCache } from '/api.js'
 import { authReady } from '/auth.js'
 import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weather.js'
 import { initDurationInput } from '/duration-input.js'
+import { showToast } from '/toast.js'
 
 // Splash background — random chicken image
 const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
@@ -549,29 +550,6 @@ window.addEventListener('beforeunload', (e) => {
   if (isDirty) { e.preventDefault(); e.returnValue = '' }
 })
 
-// --- Last updated display ---
-function showLastUpdated(submittedAt) {
-  const el = document.getElementById('last-updated')
-  if (!el || !submittedAt) return
-  const dt = new Date(submittedAt)
-  const dateStr = dt.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: userTZ })
-  const timeStr = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: userTZ })
-  el.textContent = `Last updated: ${dateStr} at ${timeStr} (${relativeTime(submittedAt)})`
-  el.style.display = ''
-}
-
-function relativeTime(isoStr) {
-  const diffMs = Date.now() - new Date(isoStr).getTime()
-  const mins = Math.floor(diffMs / 60000)
-  const hours = Math.floor(diffMs / 3600000)
-  const days = Math.floor(diffMs / 86400000)
-  if (mins < 2) return 'just now'
-  if (mins < 60) return `${mins} minutes ago`
-  if (hours < 2) return '1 hour ago'
-  if (hours < 24) return `${hours} hours ago`
-  if (days === 1) return 'yesterday'
-  return `${days} days ago`
-}
 
 // --- Delete ---
 document.getElementById('delete-btn').addEventListener('click', () => {
@@ -662,32 +640,26 @@ async function doSave(payload) {
   if (currentLocation) {
     api.updateWeights({ default_location_lat: currentLocation.lat, default_location_lng: currentLocation.lng, default_location_label: currentLocation.label }).catch(() => {})
   }
-  showLastUpdated(result.submitted_at)
   return result
 }
 
 // --- Auto-save ---
 let autoSaveTimer = null
-
-function setAutoSaveStatus(msg) {
-  const el = document.getElementById('autosave-status')
-  el.textContent = msg
-  el.style.display = msg ? '' : 'none'
-}
+let autoSaveToastTimer = null
 
 async function autoSave() {
   try {
-    setAutoSaveStatus('Saving…')
     const payload = buildPayload(false)
     await doSave(payload)
-    setAutoSaveStatus('Saved')
-    setTimeout(() => setAutoSaveStatus(''), 2000)
+    clearTimeout(autoSaveToastTimer)
+    autoSaveToastTimer = setTimeout(() => showToast('Saved'), 1500)
     const notesWasDirty = dirtyCategories.has('Notes')
     dirtyCategories.clear()
     if (notesWasDirty) dirtyCategories.add('Notes')
     isDirty = notesWasDirty
   } catch {
-    setAutoSaveStatus('Could not auto-save')
+    clearTimeout(autoSaveToastTimer)
+    showToast('Could not auto-save', 'error')
   }
 }
 
@@ -833,7 +805,6 @@ async function init() {
     btn.disabled = true
     populateForm(existingRecord)
     updateAlcoholCount()
-    showLastUpdated(existingRecord.submitted_at)
     document.getElementById('delete-section').style.display = ''
   }
 
