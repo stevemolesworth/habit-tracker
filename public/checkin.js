@@ -457,10 +457,6 @@ function setupDurationInput() {
   const inc = document.getElementById('exercise-duration-inc')
   if (!display || !hidden) return
   durationControl = initDurationInput(display, hidden, dec, inc)
-  hidden.addEventListener('change', () => {
-    markDirty('exercise_duration_minutes')
-    scheduleAutoSave()
-  })
 }
 
 // --- Alcohol unit count ---
