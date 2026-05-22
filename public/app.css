@@ -446,6 +446,7 @@ a.app-bool-dot:hover { opacity: 0.75; }
   font-size: 0.875rem;
   text-align: center;
   cursor: pointer;
+  color: transparent;
 }
 
 /* Drag-to-reorder */
