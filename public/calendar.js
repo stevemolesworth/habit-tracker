@@ -8,6 +8,8 @@ let viewMonth = today.getMonth() + 1 // 1-based
 
 let cachedCheckins = []
 let behaviourEmojiMap = {} // name → emoji string
+let moodDimMap = {}        // id → { name, five_is_good }
+let momentumItemMap = {}   // id → name
 
 async function loadMonth() {
   const monthStr = `${viewYear}-${String(viewMonth).padStart(2, '0')}`
@@ -15,9 +17,12 @@ async function loadMonth() {
     new Date(viewYear, viewMonth - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
 
   try {
-    const [checkins, behaviours] = await Promise.all([
+    const mapsLoaded = Object.keys(behaviourEmojiMap).length > 0
+    const [checkins, behaviours, moodDims, momentumItems] = await Promise.all([
       api.getCheckins(monthStr),
-      Object.keys(behaviourEmojiMap).length ? Promise.resolve(null) : api.getBehaviours()
+      mapsLoaded ? Promise.resolve(null) : api.getBehaviours(),
+      mapsLoaded ? Promise.resolve(null) : api.getMoodDimensions(),
+      mapsLoaded ? Promise.resolve(null) : api.getMomentumItems(),
     ])
     cachedCheckins = checkins
     if (behaviours) {
@@ -25,6 +30,8 @@ async function loadMonth() {
         behaviours.map(b => [b.name, b.weight > 0 ? '👍'.repeat(b.weight) : b.weight < 0 ? '💩'.repeat(-b.weight) : ''])
       )
     }
+    if (moodDims) moodDimMap = Object.fromEntries(moodDims.map(d => [String(d.id), d]))
+    if (momentumItems) momentumItemMap = Object.fromEntries(momentumItems.map(i => [String(i.id), i.name]))
     renderGrid(checkins, viewYear, viewMonth)
   } catch (err) {
     console.error('Failed to load month:', err)
@@ -158,7 +165,27 @@ function showDayDetail(dateStr, entries) {
   // Exercise
   let exerciseText = ''
   if (evening?.exercised) {
-    exerciseText = evening.exercise_types?.length ? evening.exercise_types.join(', ') : 'Yes'
+    const types = evening.exercise_types?.length ? evening.exercise_types.join(', ') : 'Yes'
+    const dur = evening.exercise_duration_minutes
+    const durStr = dur ? (() => { const h = Math.floor(dur / 60); const m = dur % 60; return [h > 0 ? `${h}h` : '', m > 0 ? `${m}m` : ''].filter(Boolean).join(' ') })() : ''
+    exerciseText = [types, durStr].filter(Boolean).join(' · ')
+  }
+
+  // Secondary moods (morning + evening combined)
+  let secondaryMoodsText = ''
+  const allSecondary = { ...(morning?.secondary_moods ?? {}), ...(evening?.secondary_moods ?? {}) }
+  const secondaryEntries = Object.entries(allSecondary)
+    .map(([id, score]) => moodDimMap[id] ? `${moodDimMap[id].name}: ${score}` : null)
+    .filter(Boolean)
+  if (secondaryEntries.length) secondaryMoodsText = secondaryEntries.join(', ')
+
+  // Momentum
+  let momentumText = ''
+  if (evening?.momentum_scores) {
+    const entries = Object.entries(evening.momentum_scores)
+      .map(([id, score]) => momentumItemMap[id] ? `${momentumItemMap[id]}: ${score}` : null)
+      .filter(Boolean)
+    if (entries.length) momentumText = entries.join(', ')
   }
 
   // Behaviours
@@ -195,6 +222,8 @@ function showDayDetail(dateStr, entries) {
         <hr class="nhsuk-section-break nhsuk-section-break--s nhsuk-section-break--visible" style="margin-bottom:10px" />
         ${row('Sleep', sleepText)}
         ${row('Exercise', exerciseText)}
+        ${row('Moods', secondaryMoodsText)}
+        ${row('Momentum', momentumText)}
         ${row('Events', behavioursText)}
         ${listBlock('What would make today great?', morning?.goals_today)}
         ${listBlock('Memorable moments', evening?.highlights)}
