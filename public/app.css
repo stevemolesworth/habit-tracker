@@ -500,7 +500,7 @@ a.app-bool-dot:hover { opacity: 0.75; }
 /* Toast notifications */
 #app-toast-container {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
   z-index: 10000;
   display: flex;
@@ -518,7 +518,7 @@ a.app-bool-dot:hover { opacity: 0.75; }
   max-width: 320px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(-8px);
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: auto;
 }
