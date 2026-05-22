@@ -10,6 +10,7 @@ let cachedCheckins = []
 let behaviourEmojiMap = {} // name → emoji string
 let moodDimMap = {}        // id → { name, five_is_good }
 let momentumItemMap = {}   // id → name
+let initialLoad = true
 
 async function loadMonth() {
   const monthStr = `${viewYear}-${String(viewMonth).padStart(2, '0')}`
@@ -33,6 +34,12 @@ async function loadMonth() {
     if (moodDims) moodDimMap = Object.fromEntries(moodDims.map(d => [String(d.id), d]))
     if (momentumItems) momentumItemMap = Object.fromEntries(momentumItems.map(i => [String(i.id), i.name]))
     renderGrid(checkins, viewYear, viewMonth)
+    if (initialLoad) {
+      initialLoad = false
+      const todayStr = today.toISOString().slice(0, 10)
+      const todayCell = document.querySelector(`[data-date="${todayStr}"]`)
+      if (todayCell) todayCell.click()
+    }
   } catch (err) {
     console.error('Failed to load month:', err)
   }
