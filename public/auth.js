@@ -42,11 +42,15 @@ export const authReady = (async () => {
 
 function wireNav() {
   if (_profile?.role === 'admin') {
-    const adminLink = document.getElementById('admin-nav-link')
-    if (adminLink) adminLink.style.display = ''
+    const adminFooterItem = document.getElementById('admin-footer-item')
+    if (adminFooterItem) adminFooterItem.style.display = ''
+    const accountRoleRow = document.getElementById('account-role-row')
+    if (accountRoleRow) {
+      const roleValue = document.getElementById('account-role-value')
+      if (roleValue) roleValue.innerHTML = '<a href="/admin.html" class="nhsuk-link">Admin</a>'
+      accountRoleRow.style.display = ''
+    }
   }
-
-  // settings link stays as "Settings" — no personalisation
 
   const logoutBtn = document.getElementById('nav-logout-btn')
   if (logoutBtn) {
@@ -61,7 +65,8 @@ function wireNav() {
 
   const navAccountLink = document.getElementById('nav-account-link')
   if (navAccountLink && _profile?.first_name) {
-    navAccountLink.textContent = _profile.first_name
+    const label = navAccountLink.querySelector('.app-btn-label')
+    if (label) label.textContent = _profile.first_name
     navAccountLink.style.display = ''
   }
 

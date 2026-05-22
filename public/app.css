@@ -115,9 +115,6 @@
   line-height: 1.2;
 }
 
-@media (max-width: 640px) {
-  .app-global-header__title-text { display: none; }
-}
 
 .app-global-header__nav {
   display: flex;
@@ -154,13 +151,6 @@
 }
 
 
-@media (max-width: 480px) {
-  .app-global-header__inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-}
 
 .app-section {
   margin-bottom: 32px;
@@ -361,8 +351,32 @@ a.app-bool-dot:hover { opacity: 0.75; }
 .app-btn-label { display: inline; }
 
 @media (max-width: 640px) {
-  .app-btn-icon { display: inline; }
+  .app-btn-icon { display: block; font-size: 22px; }
   .app-btn-label { display: none; }
+  .app-global-header__inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .app-global-header__title {
+    text-align: center;
+    padding-bottom: 8px;
+  }
+  .app-global-header__nav {
+    gap: 0;
+    flex-wrap: nowrap;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  .app-global-header__nav a,
+  .app-global-header__nav .app-nav-signout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    min-height: 44px;
+  }
 }
 
 /* Morning mood read-only hint on EOD check-in */

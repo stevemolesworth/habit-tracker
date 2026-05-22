@@ -9,6 +9,7 @@ const hide = id => { const el = document.getElementById(id); if (el) el.style.di
 
 if (session) {
   hide('nav-signin-link')
+  show('nav-checkin-link')
   show('nav-calendar-link')
   show('nav-reports-link')
   show('nav-settings-link')
@@ -23,10 +24,11 @@ if (session) {
     const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${session.access_token}` } })
     if (res.ok) {
       const profile = await res.json()
-      if (profile?.role === 'admin') show('admin-nav-link')
+      if (profile?.role === 'admin') show('admin-footer-item')
       const accountLink = document.getElementById('nav-account-link')
       if (accountLink && profile?.first_name) {
-        accountLink.textContent = profile.first_name
+        const label = accountLink.querySelector('.app-btn-label')
+        if (label) label.textContent = profile.first_name
         accountLink.style.display = ''
       }
     }

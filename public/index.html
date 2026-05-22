@@ -39,16 +39,12 @@
         <div class="app-global-header__inner">
           <a href="/" class="app-global-header__title">🐔 <span class="app-global-header__title-text">Chicken Check-In</span></a>
           <nav class="app-global-header__nav" aria-label="Main navigation">
-            <a href="/calendar.html"
-              ><span class="material-icons app-btn-icon" aria-hidden="true">calendar_today</span><span class="app-btn-label">Calendar</span></a
-            >
+            <a href="/"><span class="material-icons app-btn-icon" aria-hidden="true">add_circle</span><span class="app-btn-label">Check-in</span></a>
+            <a href="/calendar.html"><span class="material-icons app-btn-icon" aria-hidden="true">calendar_today</span><span class="app-btn-label">Calendar</span></a>
             <a href="/reports.html"><span class="material-icons app-btn-icon" aria-hidden="true">bar_chart</span><span class="app-btn-label">Reports</span></a>
-            <a href="/settings.html" id="nav-settings-link">Settings</a>
-            <a href="/account.html" id="nav-account-link" style="display: none">—</a>
-            <a href="/admin.html" id="admin-nav-link" style="display: none">Admin</a>
-            <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display: none">
-              <span class="material-icons app-btn-icon" aria-hidden="true">logout</span><span class="app-btn-label">Sign out</span>
-            </button>
+            <a href="/settings.html" id="nav-settings-link"><span class="material-icons app-btn-icon" aria-hidden="true">settings</span><span class="app-btn-label">Settings</span></a>
+            <a href="/account.html" id="nav-account-link" style="display:none"><span class="material-icons app-btn-icon" aria-hidden="true">person</span><span class="app-btn-label">—</span></a>
+            <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display:none"><span class="material-icons app-btn-icon" aria-hidden="true">logout</span><span class="app-btn-label">Sign out</span></button>
           </nav>
         </div>
       </div>
@@ -503,6 +499,7 @@
           <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/account.html">Manage account</a></li>
           <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/calendar.html">Calendar</a></li>
           <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/reports.html">Reports</a></li>
+          <li class="nhsuk-footer__list-item" id="admin-footer-item" style="display:none"><a class="nhsuk-footer__list-item-link" href="/admin.html">Admin</a></li>
         </ul>
         <p class="nhsuk-footer__copyright">&copy; Chicken Check-In 2026</p>
       </div>
