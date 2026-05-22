@@ -64,8 +64,8 @@
               <tr class="nhsuk-table__row">
                 <th class="nhsuk-table__header" scope="col" data-col="first_name" style="cursor:pointer">First name ↕</th>
                 <th class="nhsuk-table__header" scope="col" data-col="email" style="cursor:pointer">Email ↕</th>
-                <th class="nhsuk-table__header" scope="col" data-col="created_at" style="cursor:pointer">Joined ↕</th>
                 <th class="nhsuk-table__header" scope="col" data-col="last_checkin_date" style="cursor:pointer">Last check-in ↕</th>
+                <th class="nhsuk-table__header" scope="col" data-col="created_at" style="cursor:pointer">Joined ↕</th>
                 <th class="nhsuk-table__header" scope="col" data-col="behaviours_monitored" style="cursor:pointer">Behaviours ↕</th>
               </tr>
             </thead>
@@ -86,6 +86,9 @@
                 <button type="button" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" id="detail-close-btn" style="margin:0">Close</button>
               </div>
               <dl class="nhsuk-summary-list" id="detail-list"></dl>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid #d8dde0">
+                <button type="button" class="nhsuk-button nhsuk-button--warning nhsuk-button--small" id="detail-delete-btn" style="margin:0">Delete account</button>
+              </div>
             </div>
           </div>
         </div>
@@ -109,6 +112,25 @@
       <p class="nhsuk-footer__copyright">&copy; Chicken Check-In 2026</p>
     </div>
   </footer>
+
+  <!-- Delete user warning modal -->
+  <div id="delete-user-modal" style="display:none;position:fixed;inset:0;background:rgba(33,43,50,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#fff;padding:24px 24px 16px;border-radius:4px;max-width:460px;width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.2)">
+      <h2 class="nhsuk-heading-m" style="margin-bottom:8px">Delete <span id="delete-modal-name"></span>'s account?</h2>
+      <p class="nhsuk-body" style="margin-bottom:4px">This will permanently delete:</p>
+      <ul class="nhsuk-list nhsuk-list--bullet" style="margin-bottom:16px">
+        <li>All check-ins</li>
+        <li>All behaviours and supplements</li>
+        <li>Settings and profile data</li>
+        <li>The account itself</li>
+      </ul>
+      <p class="nhsuk-body nhsuk-u-font-weight-bold" style="margin-bottom:16px">This cannot be undone.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="nhsuk-button nhsuk-button--warning" id="delete-user-confirm-btn" style="margin:0">Delete account</button>
+        <button class="nhsuk-button nhsuk-button--secondary" id="delete-user-cancel-btn" style="margin:0">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="/admin.js"></script>
 </body>

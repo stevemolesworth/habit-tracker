@@ -3,6 +3,7 @@ import { authReady, profileReady, getProfile, getToken } from '/auth.js'
 let allUsers = []
 let sortCol = 'last_checkin_date'
 let sortAsc = false
+let pendingDeleteId = null
 
 function fmtDate(str) {
   if (!str) return '—'
@@ -25,8 +26,8 @@ function renderTable() {
     <tr class="nhsuk-table__row" style="cursor:pointer" data-id="${u.id}">
       <td class="nhsuk-table__cell">${u.first_name}</td>
       <td class="nhsuk-table__cell">${u.email}</td>
-      <td class="nhsuk-table__cell">${fmtDate(u.created_at)}</td>
       <td class="nhsuk-table__cell">${fmtDate(u.last_checkin_date)}</td>
+      <td class="nhsuk-table__cell">${fmtDate(u.created_at)}</td>
       <td class="nhsuk-table__cell">${u.behaviours_monitored ?? 0}</td>
     </tr>
   `).join('')
@@ -48,11 +49,52 @@ document.getElementById('detail-close-btn').addEventListener('click', () => {
   document.getElementById('user-detail-card').style.display = 'none'
 })
 
+document.getElementById('detail-delete-btn').addEventListener('click', () => {
+  const btn = document.getElementById('detail-delete-btn')
+  pendingDeleteId = btn.dataset.userId
+  document.getElementById('delete-modal-name').textContent = btn.dataset.userName || 'this user'
+  document.getElementById('delete-user-modal').style.display = 'flex'
+})
+
+document.getElementById('delete-user-cancel-btn').addEventListener('click', () => {
+  document.getElementById('delete-user-modal').style.display = 'none'
+  pendingDeleteId = null
+})
+
+document.getElementById('delete-user-confirm-btn').addEventListener('click', async () => {
+  if (!pendingDeleteId) return
+  const confirmBtn = document.getElementById('delete-user-confirm-btn')
+  confirmBtn.disabled = true
+  confirmBtn.textContent = 'Deleting…'
+  try {
+    const res = await fetch(`/api/admin-delete-user?id=${pendingDeleteId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${getToken()}` }
+    })
+    if (!res.ok) {
+      const { error } = await res.json()
+      throw new Error(error || 'Delete failed')
+    }
+    allUsers = allUsers.filter(u => u.id !== pendingDeleteId)
+    renderTable()
+    document.getElementById('user-detail-card').style.display = 'none'
+    document.getElementById('delete-user-modal').style.display = 'none'
+    document.getElementById('stat-users').textContent = allUsers.length
+    pendingDeleteId = null
+  } catch (err) {
+    alert(err.message || 'Could not delete account.')
+  } finally {
+    confirmBtn.disabled = false
+    confirmBtn.textContent = 'Delete account'
+  }
+})
+
 async function loadUserDetail(id) {
   const card = document.getElementById('user-detail-card')
   const list = document.getElementById('detail-list')
   card.style.display = ''
   list.innerHTML = '<dd class="nhsuk-summary-list__value">Loading…</dd>'
+  document.getElementById('detail-delete-btn').dataset.userId = id
 
   try {
     const res = await fetch(`/api/admin-user-detail?id=${id}`, {
@@ -61,6 +103,7 @@ async function loadUserDetail(id) {
     const d = await res.json()
 
     document.getElementById('detail-name').textContent = d.first_name
+    document.getElementById('detail-delete-btn').dataset.userName = d.first_name
 
     const rows = [
       ['Email', d.email],
