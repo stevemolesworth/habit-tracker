@@ -43,7 +43,7 @@ const FIELD_CATEGORY = {
   alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
   behaviour: 'Events',
-  notes: 'Notes',
+  goals_today_: 'Reflections', highlights_: 'Reflections', goals_tomorrow_: 'Reflections',
   weather: 'Weather'
 }
 let bypassGuard = false
@@ -66,9 +66,8 @@ if (!isMorning) document.getElementById('sleep-section').style.display = 'none' 
 document.getElementById('events-section').style.display = isMorning ? 'none' : ''
 document.getElementById('momentum-section').style.display = 'none' // renderMomentum shows it if items exist
 document.getElementById('checkin-inpage-nav').style.display = isMorning ? 'none' : ''
-document.getElementById('notes-label').textContent = isMorning
-  ? 'What would make today good?'
-  : "What made today good? Anything you'd like to achieve tomorrow?"
+document.getElementById('goals-today-section').style.display = isMorning ? '' : 'none'
+document.getElementById('reflections-section').style.display = isMorning ? 'none' : ''
 
 // --- Weather ---
 function setLocationLabel(label) {
@@ -207,8 +206,12 @@ function populateForm(record) {
   setVal('alcohol_beer', record.alcohol_beer ?? 0)
   setVal('alcohol_wine', record.alcohol_wine ?? 0)
 
-  setVal('notes', record.notes)
-  savedNotesValue = record.notes || null
+  ;['goals_today', 'highlights', 'goals_tomorrow'].forEach(field => {
+    record[field]?.forEach((v, i) => {
+      const el = document.getElementById(`${field}_${i + 1}`)
+      if (el && v) el.value = v
+    })
+  })
 
   if (record.weather_lat) {
     currentLocation = { lat: record.weather_lat, lng: record.weather_lng, label: record.weather_location_label || '' }
@@ -490,6 +493,8 @@ function setupSteppers() {
 // --- Dirty tracking ---
 function markDirty(fieldName) {
   if (fieldName?.startsWith('secondary_mood_')) dirtyCategories.add('Mood')
+  if (fieldName?.startsWith('momentum_')) dirtyCategories.add('Momentum')
+  if (fieldName?.startsWith('goals_today_') || fieldName?.startsWith('highlights_') || fieldName?.startsWith('goals_tomorrow_')) dirtyCategories.add('Reflections')
   const cat = FIELD_CATEGORY[fieldName]
   if (cat) dirtyCategories.add(cat)
   if (isDirty) return
@@ -498,14 +503,8 @@ function markDirty(fieldName) {
 
 function setupDirtyTracking() {
   const form = document.getElementById('checkin-form')
-  form.addEventListener('input', e => {
-    markDirty(e.target.name || e.target.id)
-    if (e.target.name !== 'notes' && e.target.id !== 'notes') scheduleAutoSave()
-  })
-  form.addEventListener('change', e => {
-    markDirty(e.target.name || e.target.id)
-    if (e.target.name !== 'notes' && e.target.id !== 'notes') scheduleAutoSave()
-  })
+  form.addEventListener('input', e => { markDirty(e.target.name || e.target.id); scheduleAutoSave() })
+  form.addEventListener('change', e => { markDirty(e.target.name || e.target.id); scheduleAutoSave() })
 }
 
 // --- Navigation guard ---
@@ -570,7 +569,7 @@ document.getElementById('delete-confirm-btn').addEventListener('click', async ()
 })
 
 // --- Payload builder ---
-function buildPayload(includeNotes = true) {
+function buildPayload() {
   const form = document.getElementById('checkin-form')
   const get = (name) => form.elements[name]?.value || null
 
@@ -612,7 +611,9 @@ function buildPayload(includeNotes = true) {
     alcohol_wine: Number(get('alcohol_wine') || 0),
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
     behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
-    notes: includeNotes ? (get('notes') || null) : (existingRecord?.notes ?? null),
+    goals_today: [1,2,3].map(n => document.getElementById(`goals_today_${n}`)?.value.trim() || null).filter(Boolean) || null,
+    highlights: [1,2,3].map(n => document.getElementById(`highlights_${n}`)?.value.trim() || null).filter(Boolean) || null,
+    goals_tomorrow: [1,2,3].map(n => document.getElementById(`goals_tomorrow_${n}`)?.value.trim() || null).filter(Boolean) || null,
     bedtime: get('bedtime') || null,
     wake_time: get('wake_time') || null,
     sleep_quality: get('sleep_quality') ? Number(get('sleep_quality')) : null,
@@ -645,14 +646,12 @@ let autoSaveToastTimer = null
 
 async function autoSave() {
   try {
-    const payload = buildPayload(false)
+    const payload = buildPayload()
     await doSave(payload)
     clearTimeout(autoSaveToastTimer)
     autoSaveToastTimer = setTimeout(() => showToast('Saved'), 1500)
-    const notesWasDirty = dirtyCategories.has('Notes')
     dirtyCategories.clear()
-    if (notesWasDirty) dirtyCategories.add('Notes')
-    isDirty = notesWasDirty
+    isDirty = false
   } catch {
     clearTimeout(autoSaveToastTimer)
     showToast('Could not auto-save', 'error')
@@ -664,29 +663,6 @@ function scheduleAutoSave() {
   autoSaveTimer = setTimeout(autoSave, 1200)
 }
 
-// --- Notes save button ---
-let savedNotesValue = null
-
-function updateNotesBtnState() {
-  const current = document.getElementById('notes').value
-  document.getElementById('save-notes-btn').disabled = current === savedNotesValue || (!current && !savedNotesValue)
-}
-
-document.getElementById('notes').addEventListener('input', updateNotesBtnState)
-
-document.getElementById('save-notes-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('save-notes-btn')
-  btn.disabled = true; btn.textContent = 'Saving…'
-  try {
-    const payload = buildPayload(true)
-    await doSave(payload)
-    savedNotesValue = document.getElementById('notes').value || null
-    btn.textContent = 'Save notes'
-    updateNotesBtnState()
-  } catch {
-    btn.disabled = false; btn.textContent = 'Save notes'
-  }
-})
 
 
 function showError(msg) {
@@ -709,6 +685,23 @@ document.getElementById('splash-skip-btn')?.addEventListener('click', (e) => {
   e.preventDefault()
   showForm(null, null, [], [])
 })
+
+// --- Carry-forward display ---
+function renderCarryForward(yesterdayEveningRecord, morningRecord) {
+  if (isMorning) {
+    const goals = yesterdayEveningRecord?.goals_tomorrow?.filter(Boolean)
+    if (goals?.length) {
+      document.getElementById('goals-carry-forward-list').innerHTML = goals.map(g => `<li>${g}</li>`).join('')
+      document.getElementById('goals-carry-forward').style.display = ''
+    }
+  } else {
+    const goals = morningRecord?.goals_today?.filter(Boolean)
+    if (goals?.length) {
+      document.getElementById('morning-goals-list').innerHTML = goals.map(g => `<li>${g}</li>`).join('')
+      document.getElementById('morning-goals-display').style.display = ''
+    }
+  }
+}
 
 // --- Init ---
 function renderCheckinNav() {
@@ -737,9 +730,11 @@ async function init() {
 
   const fetchExisting = api.getTodayCheckin(type, today)
   const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
-  const [existingRes, morningRes, configRes, behavioursRes, moodDimsRes, momentumRes] = await Promise.allSettled([
+  const fetchYesterdayEvening = isMorning ? api.getTodayCheckin('evening', yesterday) : Promise.resolve(null)
+  const [existingRes, morningRes, yesterdayEveningRes, configRes, behavioursRes, moodDimsRes, momentumRes] = await Promise.allSettled([
     fetchExisting,
     fetchMorning,
+    fetchYesterdayEvening,
     api.getWeights(),
     api.getBehaviours(),
     api.getMoodDimensions(),
@@ -748,6 +743,7 @@ async function init() {
 
   existingRecord = existingRes.status === 'fulfilled' ? existingRes.value : null
   const morningRecord = morningRes.status === 'fulfilled' ? morningRes.value : null
+  const yesterdayEveningRecord = yesterdayEveningRes.status === 'fulfilled' ? yesterdayEveningRes.value : null
   const config = configRes.status === 'fulfilled' ? configRes.value : null
   const behaviours = behavioursRes.status === 'fulfilled' ? (behavioursRes.value ?? []) : []
   const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
@@ -781,15 +777,16 @@ async function init() {
     return
   }
 
-  await showForm(morningRecord, config, moodDims, momentumItems)
+  await showForm(morningRecord, config, moodDims, momentumItems, yesterdayEveningRecord)
 }
 
-async function showForm(morningRecord = null, config = null, moodDims = [], momentumItems = []) {
+async function showForm(morningRecord = null, config = null, moodDims = [], momentumItems = [], yesterdayEveningRecord = null) {
   // Render dynamic sections before dirty tracking is set up
   renderEodSleep(morningRecord)
   renderMomentum(momentumItems)
   renderSecondaryMoods(moodDims, morningRecord)
   renderMorningMood(morningRecord)
+  renderCarryForward(yesterdayEveningRecord, morningRecord)
 
   // Re-populate secondary mood values if editing existing record
   if (existingRecord?.secondary_moods) {
