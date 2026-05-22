@@ -1,4 +1,5 @@
 import { authReady, profileReady, getProfile, getToken } from '/auth.js'
+import { showToast } from '/toast.js'
 
 let allUsers = []
 let sortCol = 'last_checkin_date'
@@ -80,9 +81,10 @@ document.getElementById('delete-user-confirm-btn').addEventListener('click', asy
     document.getElementById('user-detail-card').style.display = 'none'
     document.getElementById('delete-user-modal').style.display = 'none'
     document.getElementById('stat-users').textContent = allUsers.length
+    showToast(`Account deleted.`)
     pendingDeleteId = null
   } catch (err) {
-    alert(err.message || 'Could not delete account.')
+    showToast(err.message || 'Could not delete account.', 'error')
   } finally {
     confirmBtn.disabled = false
     confirmBtn.textContent = 'Delete account'
