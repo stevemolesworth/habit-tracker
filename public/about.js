@@ -1,6 +1,15 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const { supabaseUrl, supabaseAnonKey } = await fetch('/api/auth-config').then(r => r.json())
+let authConfig
+try {
+  const cached = sessionStorage.getItem('cci-auth-config')
+  authConfig = cached ? JSON.parse(cached) : null
+} catch { /* sessionStorage unavailable */ }
+if (!authConfig) {
+  authConfig = await fetch('/api/auth-config').then(r => r.json())
+  try { sessionStorage.setItem('cci-auth-config', JSON.stringify(authConfig)) } catch { /* ignore */ }
+}
+const { supabaseUrl, supabaseAnonKey } = authConfig
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 const { data: { session } } = await supabase.auth.getSession()
 

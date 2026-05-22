@@ -7,7 +7,16 @@ document.getElementById('login-page').style.backgroundImage =
 let supabase = null
 
 async function init() {
-  const { supabaseUrl, supabaseAnonKey } = await fetch('/api/auth-config').then(r => r.json())
+  let authConfig
+  try {
+    const cached = sessionStorage.getItem('cci-auth-config')
+    authConfig = cached ? JSON.parse(cached) : null
+  } catch { /* sessionStorage unavailable */ }
+  if (!authConfig) {
+    authConfig = await fetch('/api/auth-config').then(r => r.json())
+    try { sessionStorage.setItem('cci-auth-config', JSON.stringify(authConfig)) } catch { /* ignore */ }
+  }
+  const { supabaseUrl, supabaseAnonKey } = authConfig
   supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   if (new URLSearchParams(location.search).get('logout') === '1') {
@@ -83,22 +92,12 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
   btn.disabled = true
   btn.textContent = 'Creating account…'
   try {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { first_name: firstName } }
+    })
     if (error) throw error
-
-    // Create profile row
-    const token = data.session?.access_token
-    if (token) {
-      const res = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ first_name: firstName })
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || 'Could not create profile')
-      }
-    }
 
     location.href = '/'
   } catch (err) {

@@ -11,7 +11,16 @@ function fetchWithTimeout(url, ms = 10000) {
 }
 
 export const authReady = (async () => {
-  const { supabaseUrl, supabaseAnonKey } = await fetchWithTimeout('/api/auth-config').then(r => r.json())
+  let authConfig
+  try {
+    const cached = sessionStorage.getItem('cci-auth-config')
+    authConfig = cached ? JSON.parse(cached) : null
+  } catch { /* sessionStorage unavailable */ }
+  if (!authConfig) {
+    authConfig = await fetchWithTimeout('/api/auth-config').then(r => r.json())
+    try { sessionStorage.setItem('cci-auth-config', JSON.stringify(authConfig)) } catch { /* ignore */ }
+  }
+  const { supabaseUrl, supabaseAnonKey } = authConfig
   _supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   const { data: { session } } = await _supabase.auth.getSession()
