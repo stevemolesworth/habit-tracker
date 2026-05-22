@@ -7,6 +7,7 @@ let viewYear = today.getFullYear()
 let viewMonth = today.getMonth() + 1 // 1-based
 
 let cachedCheckins = []
+let behaviourEmojiMap = {} // name → emoji string
 
 async function loadMonth() {
   const monthStr = `${viewYear}-${String(viewMonth).padStart(2, '0')}`
@@ -14,8 +15,16 @@ async function loadMonth() {
     new Date(viewYear, viewMonth - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
 
   try {
-    const checkins = await api.getCheckins(monthStr)
+    const [checkins, behaviours] = await Promise.all([
+      api.getCheckins(monthStr),
+      Object.keys(behaviourEmojiMap).length ? Promise.resolve(null) : api.getBehaviours()
+    ])
     cachedCheckins = checkins
+    if (behaviours) {
+      behaviourEmojiMap = Object.fromEntries(
+        behaviours.map(b => [b.name, b.weight > 0 ? '👍'.repeat(b.weight) : b.weight < 0 ? '💩'.repeat(-b.weight) : ''])
+      )
+    }
     renderGrid(checkins, viewYear, viewMonth)
   } catch (err) {
     console.error('Failed to load month:', err)
@@ -155,7 +164,9 @@ function showDayDetail(dateStr, entries) {
   // Behaviours
   let behavioursText = ''
   if (evening?.behaviours) {
-    const checked = Object.entries(evening.behaviours).filter(([, v]) => v).map(([k]) => k)
+    const checked = Object.entries(evening.behaviours)
+      .filter(([, v]) => v)
+      .map(([k]) => { const emoji = behaviourEmojiMap[k]; return emoji ? `${k} ${emoji}` : k })
     if (checked.length) behavioursText = checked.join(', ')
   }
 
