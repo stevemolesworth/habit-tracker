@@ -60,7 +60,6 @@ document.getElementById('page-heading').innerHTML =
   `${isMorning ? '☀️ Morning' : '🌙 End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
 
 const yesterday = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date(Date.now() - 86400000))
-document.getElementById('edit-yesterday-btn').href = `/?type=evening&date=${yesterday}`
 
 // Show/hide sections
 if (!isMorning) document.getElementById('sleep-section').style.display = 'none' // renderEodSleep shows it after data loads
@@ -713,13 +712,18 @@ document.getElementById('splash-skip-btn')?.addEventListener('click', (e) => {
 
 // --- Init ---
 function renderCheckinNav() {
-  const el = document.getElementById('checkin-nav')
+  const el = document.getElementById('checkin-quick-nav')
   if (!el) return
-  const dateParam = today !== todayLocal ? `&date=${today}` : ''
+  const btn = (label, href) =>
+    `<a href="${href}" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin: 0; width: 100%">${label}</a>`
   if (isMorning) {
-    el.innerHTML = `<a href="/?type=evening${dateParam}" class="nhsuk-link" style="font-size:0.875rem">End of day check-in →</a>`
+    el.innerHTML =
+      btn('Yesterday', `/?type=evening&date=${yesterday}`) +
+      btn('End of today', `/?type=evening`)
   } else {
-    el.innerHTML = `<a href="/?type=morning${dateParam}" class="nhsuk-link" style="font-size:0.875rem">← Morning check-in</a>`
+    el.innerHTML =
+      btn('This morning', `/?type=morning`) +
+      btn('Yesterday', `/?type=evening&date=${yesterday}`)
   }
 }
 
