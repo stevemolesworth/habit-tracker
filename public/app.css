@@ -223,6 +223,19 @@
   background: #f0f4f5;
 }
 
+.app-calendar__day--selected {
+  background: #005eb8;
+  color: #fff;
+}
+
+.app-calendar__day--selected:hover {
+  background: #003d78;
+}
+
+.app-calendar__day--selected .app-badge {
+  opacity: 0.85;
+}
+
 .app-calendar__day-number {
   display: block;
   font-size: 1rem;

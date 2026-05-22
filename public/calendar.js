@@ -112,7 +112,11 @@ function renderGrid(checkins, year, month) {
     }
 
     if (dateStr <= todayStr) {
-      cell.addEventListener('click', () => showDayDetail(dateStr, entries))
+      cell.addEventListener('click', () => {
+        grid.querySelectorAll('.app-calendar__day--selected').forEach(c => c.classList.remove('app-calendar__day--selected'))
+        cell.classList.add('app-calendar__day--selected')
+        showDayDetail(dateStr, entries)
+      })
       cell.style.cursor = 'pointer'
     }
 
