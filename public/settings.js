@@ -386,7 +386,7 @@ async function loadMomentumItems() {
   try {
     const items = await api.getMomentumItemsAll()
     if (!items.length) {
-      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No momentum items yet.</li>'
+      list.innerHTML = '<li class="nhsuk-u-secondary-text-color">No projects yet.</li>'
     } else {
       list.innerHTML = items.map(m => `
         <li data-id="${m.id}" style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:8px${m.paused ? ';opacity:0.55' : ''}">
@@ -411,7 +411,7 @@ async function loadMomentumItems() {
       }
     })
   } catch {
-    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load momentum items.</li>'
+    list.innerHTML = '<li class="nhsuk-body nhsuk-u-secondary-text-color">Could not load projects.</li>'
   }
 }
 
@@ -438,7 +438,7 @@ document.getElementById('momentum-edit-save-btn').addEventListener('click', asyn
     await api.updateMomentumItem(editingMomentumId, { name })
     document.getElementById('momentum-edit-modal').style.display = 'none'
     editingMomentumId = null
-    showToast( 'Momentum item updated.')
+    showToast('Project updated.')
     clearCache('momentumItems'); loadMomentumItems()
   } catch (err) {
     showToast( `Error: ${err.message}`, true)
@@ -461,7 +461,7 @@ let deletingMomentumId = null
 
 window.confirmDeleteMomentumItem = function(id, name) {
   deletingMomentumId = id
-  document.getElementById('momentum-delete-summary').textContent = `Remove "${name}" from your momentum items?`
+  document.getElementById('momentum-delete-summary').textContent = `Remove "${name}" from your projects?`
   document.getElementById('momentum-delete-modal').style.display = 'flex'
 }
 

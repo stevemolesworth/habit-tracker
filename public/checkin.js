@@ -38,7 +38,7 @@ const dirtyCategories = new Set()
 const FIELD_CATEGORY = {
   bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
   primary_mood: 'Mood', secondary_mood_: 'Mood',
-  momentum_: 'Momentum',
+  momentum_: 'Projects',
   exercise_types: 'Exercise', exercise_sessions: 'Exercise', exercise_duration_minutes: 'Exercise',
   alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
@@ -489,7 +489,7 @@ function setupSteppers() {
 // --- Dirty tracking ---
 function markDirty(fieldName) {
   if (fieldName?.startsWith('secondary_mood_')) dirtyCategories.add('Mood')
-  if (fieldName?.startsWith('momentum_')) dirtyCategories.add('Momentum')
+  if (fieldName?.startsWith('momentum_')) dirtyCategories.add('Projects')
   if (fieldName?.startsWith('goals_today_') || fieldName?.startsWith('highlights_') || fieldName?.startsWith('goals_tomorrow_')) dirtyCategories.add('Reflections')
   const cat = FIELD_CATEGORY[fieldName]
   if (cat) dirtyCategories.add(cat)

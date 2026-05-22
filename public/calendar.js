@@ -243,7 +243,7 @@ function showDayDetail(dateStr, entries) {
         ${row('Sleep', sleepText)}
         ${row('Exercise', exerciseText)}
         ${row('Moods', secondaryMoodsText)}
-        ${row('Momentum', momentumText)}
+        ${row('Projects', momentumText)}
         ${row('Events', behavioursText)}
         ${listBlock('What would make today great?', morning?.goals_today)}
         ${listBlock('Memorable moments', evening?.highlights)}
