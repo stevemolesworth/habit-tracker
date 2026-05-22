@@ -331,13 +331,13 @@ function renderMomentum(items) {
           <strong>${item.name}</strong>
         </legend>
         <div class="app-mood-scale-row">
-          <span class="app-mood-anchor" aria-hidden="true">😢</span>
+          <span class="app-mood-anchor" aria-hidden="true">👎</span>
           ${[1,2,3,4,5].map(n => `
             <div class="nhsuk-radios__item">
               <input class="nhsuk-radios__input" id="mom-${item.id}-${n}" name="momentum_${item.id}" type="radio" value="${n}" />
               <label class="nhsuk-label nhsuk-radios__label" for="mom-${item.id}-${n}">${n}</label>
             </div>`).join('')}
-          <span class="app-mood-anchor" aria-hidden="true">😊</span>
+          <span class="app-mood-anchor" aria-hidden="true">👍</span>
         </div>
       </fieldset>
     </div>`).join('')
