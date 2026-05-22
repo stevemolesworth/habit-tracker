@@ -200,6 +200,11 @@ function showDayDetail(dateStr, entries) {
   // Moods
   const mMorning = morning?.primary_mood_morning ?? '—'
   const mEvening = evening?.primary_mood_eod ?? '—'
+  const mChange = (morning?.primary_mood_morning != null && evening?.primary_mood_eod != null)
+    ? evening.primary_mood_eod - morning.primary_mood_morning
+    : null
+  const mChangeStr = mChange === null ? '—' : mChange > 0 ? `+${mChange}` : String(mChange)
+  const mChangeColor = mChange === null ? 'inherit' : mChange > 0 ? '#00703c' : mChange < 0 ? '#d5281b' : 'inherit'
 
   const addButtons = [
     !morning ? `<a href="/?type=morning&date=${dateStr}" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin:0">Add morning check-in</a>` : '',
@@ -217,6 +222,10 @@ function showDayDetail(dateStr, entries) {
           <div style="flex:1">
             <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:2px">Evening mood</p>
             <p class="nhsuk-heading-s" style="margin:0">${mEvening}</p>
+          </div>
+          <div style="flex:1">
+            <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:2px">Change</p>
+            <p class="nhsuk-heading-s" style="margin:0;color:${mChangeColor}">${mChangeStr}</p>
           </div>
         </div>
         <hr class="nhsuk-section-break nhsuk-section-break--s nhsuk-section-break--visible" style="margin-bottom:10px" />
