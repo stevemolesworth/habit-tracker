@@ -533,4 +533,4 @@ a.app-bool-dot:hover { opacity: 0.75; }
 
 #quick-mood-suggestions .nhsuk-button,
 #quick-behaviour-suggestions .nhsuk-button,
-#quick-supplement-suggestions .nhsuk-button { margin-bottom: 8px; }
+#quick-supplement-suggestions .nhsuk-button { margin-bottom: 8px !important; }
