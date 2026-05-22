@@ -220,11 +220,11 @@ function showDayDetail(dateStr, entries) {
       <div class="nhsuk-card__content">
         <div style="display:flex;gap:16px;margin-bottom:12px">
           <div style="flex:1">
-            <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:2px">Morning mood</p>
+            <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:2px">Morning mood ☀️</p>
             <p class="nhsuk-heading-s" style="margin:0">${mMorning}</p>
           </div>
           <div style="flex:1">
-            <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:2px">Evening mood</p>
+            <p class="nhsuk-body-s nhsuk-u-secondary-text-color" style="margin-bottom:2px">Evening mood 🌙</p>
             <p class="nhsuk-heading-s" style="margin:0">${mEvening}</p>
           </div>
           <div style="flex:1">

@@ -57,7 +57,7 @@ const dateCaption = isPastDate
   ? new Date(today + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   : `Today (${dateStr})`
 document.getElementById('page-heading').innerHTML =
-  `${isMorning ? '☀️ Morning' : '🌙 End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
+  `${isMorning ? 'Morning check-in ☀️' : 'End of day check-in 🌙'}<span class="nhsuk-caption-l">${dateCaption}</span>`
 
 const yesterday = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date(Date.now() - 86400000))
 
