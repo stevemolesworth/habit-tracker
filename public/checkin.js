@@ -723,7 +723,21 @@ function renderCheckinNav() {
 }
 
 async function init() {
-  await authReady
+  const stallTimer = setTimeout(() => {
+    document.querySelector('.app-splash__text').textContent = 'Taking longer than expected…'
+    document.querySelector('.app-splash__subtext').innerHTML =
+      '<a href="javascript:location.reload()" style="color:#fff">Tap to retry</a>'
+  }, 12000)
+
+  try {
+    await authReady
+  } catch {
+    clearTimeout(stallTimer)
+    document.querySelector('.app-splash__text').textContent = 'Could not connect'
+    document.querySelector('.app-splash__subtext').innerHTML =
+      '<a href="javascript:location.reload()" style="color:#fff">Tap to retry</a>'
+    return
+  }
 
   if (!params.get('type') && !isPastDate && localHour >= 17 && type !== 'evening') {
     location.replace('/?type=evening')
@@ -756,6 +770,7 @@ async function init() {
     return
   }
 
+  clearTimeout(stallTimer)
   renderCheckinNav()
 
   if (existingRecord) {

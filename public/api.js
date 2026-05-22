@@ -21,20 +21,29 @@ export function clearCache(...keys) {
 
 async function request(path, options = {}) {
   const token = getToken()
-  const res = await fetch(path, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers
-    },
-    ...options
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error(err.error || res.statusText)
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 10000)
+  try {
+    const res = await fetch(path, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers
+      },
+      ...options
+    })
+    clearTimeout(timer)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }))
+      throw new Error(err.error || res.statusText)
+    }
+    if (res.status === 204) return null
+    return res.json()
+  } catch (err) {
+    clearTimeout(timer)
+    throw err
   }
-  if (res.status === 204) return null
-  return res.json()
 }
 
 export const api = {

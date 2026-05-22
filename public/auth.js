@@ -4,8 +4,14 @@ let _supabase = null
 let _token = null
 let _profile = null
 
+function fetchWithTimeout(url, ms = 10000) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), ms)
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer))
+}
+
 export const authReady = (async () => {
-  const { supabaseUrl, supabaseAnonKey } = await fetch('/api/auth-config').then(r => r.json())
+  const { supabaseUrl, supabaseAnonKey } = await fetchWithTimeout('/api/auth-config').then(r => r.json())
   _supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   const { data: { session } } = await _supabase.auth.getSession()
