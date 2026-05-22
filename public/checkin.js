@@ -648,10 +648,12 @@ async function autoSave() {
   try {
     const payload = buildPayload()
     await doSave(payload)
-    clearTimeout(autoSaveToastTimer)
-    autoSaveToastTimer = setTimeout(() => showToast('Saved'), 1500)
+    const saved = [...dirtyCategories]
     dirtyCategories.clear()
     isDirty = false
+    clearTimeout(autoSaveToastTimer)
+    const label = saved.length ? `Saved · ${saved.join(', ')}` : 'Saved'
+    autoSaveToastTimer = setTimeout(() => showToast(label), 1500)
   } catch {
     clearTimeout(autoSaveToastTimer)
     showToast('Could not auto-save', 'error')
