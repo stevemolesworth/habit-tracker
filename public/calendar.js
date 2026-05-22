@@ -114,22 +114,27 @@ function showDayDetail(dateStr, entries) {
   const hasMorning = entries.some(e => e.check_in_type === 'morning')
   const hasEvening = entries.some(e => e.check_in_type === 'evening')
 
+  const chevron = `<svg class="nhsuk-icon nhsuk-icon__chevron-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" height="34" width="34"><path d="M15.5 12a1 1 0 0 1-.29.71l-5 5a1 1 0 0 1-1.42-1.42l4.3-4.29-4.3-4.29a1 1 0 0 1 1.42-1.42l5 5a1 1 0 0 1 .29.71z"></path></svg>`
+
   const cards = entries.map(entry => {
     const typeLabel = entry.check_in_type === 'morning' ? 'Morning' : 'End of day'
     const badge = entry.check_in_type === 'morning'
-      ? '<span class="app-badge app-badge--morning" style="font-size:0.75rem;padding:2px 6px">M</span>'
-      : '<span class="app-badge app-badge--evening" style="font-size:0.75rem;padding:2px 6px">E</span>'
+      ? '<span class="app-badge app-badge--morning" style="font-size:0.75rem;padding:2px 6px;vertical-align:middle">M</span>'
+      : '<span class="app-badge app-badge--evening" style="font-size:0.75rem;padding:2px 6px;vertical-align:middle">E</span>'
+    const details = [
+      entry.global_mood ? `Mood: ${entry.global_mood}` : '',
+      entry.exercised ? 'Exercised ✓' : '',
+      entry.notes ? `"${entry.notes}"` : ''
+    ].filter(Boolean).join(' · ')
 
     return `
-      <div class="nhsuk-card" style="margin-bottom:16px">
+      <div class="nhsuk-card nhsuk-card--clickable" style="margin-bottom:16px">
         <div class="nhsuk-card__content">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-            <h3 class="nhsuk-heading-s" style="margin:0">${badge} ${typeLabel}</h3>
-            <a href="/?type=${entry.check_in_type}&date=${entry.check_in_date}" class="nhsuk-link">Edit</a>
-          </div>
-          ${entry.global_mood ? `<p class="nhsuk-body-s" style="margin:0">Mood: ${entry.global_mood}</p>` : ''}
-          ${entry.exercised ? `<p class="nhsuk-body-s" style="margin:0">Exercised ✓</p>` : ''}
-          ${entry.notes ? `<p class="nhsuk-body-s" style="margin:4px 0 0;color:#4c6272">"${entry.notes}"</p>` : ''}
+          <h3 class="nhsuk-card__heading nhsuk-heading-s" style="margin-bottom:${details ? '4px' : '0'}">
+            <a class="nhsuk-card__link" href="/edit.html?id=${entry.id}">${badge} ${typeLabel}</a>
+          </h3>
+          ${details ? `<p class="nhsuk-card__description nhsuk-body-s" style="margin:0;color:#4c6272">${details}</p>` : ''}
+          ${chevron}
         </div>
       </div>
     `
