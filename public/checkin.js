@@ -57,7 +57,10 @@ const dateCaption = isPastDate
   ? new Date(today + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   : `Today (${dateStr})`
 document.getElementById('page-heading').innerHTML =
-  `${isMorning ? 'Morning' : 'End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
+  `${isMorning ? '☀️ Morning' : '🌙 End of day'} check-in<span class="nhsuk-caption-l">${dateCaption}</span>`
+
+const yesterday = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date(Date.now() - 86400000))
+document.getElementById('edit-yesterday-btn').href = `/?type=evening&date=${yesterday}`
 
 // Show/hide sections
 if (!isMorning) document.getElementById('sleep-section').style.display = 'none' // renderEodSleep shows it after data loads
@@ -74,7 +77,7 @@ function setLocationLabel(label) {
   const btn = document.getElementById('weather-toggle-location-btn')
   if (label) {
     el.textContent = `📍 ${label}`
-    btn.textContent = 'Change location'
+    btn.textContent = 'Change'
     document.getElementById('weather-location-form').style.display = 'none'
   } else {
     el.textContent = ''
@@ -302,13 +305,11 @@ function renderSecondaryMoods(dims, morningRecord) {
           </legend>
           <div class="app-mood-scale-row">
             <span class="app-mood-anchor" aria-hidden="true">${emoji1}</span>
-            <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
-              ${[1,2,3,4,5].map(n => `
-                <div class="nhsuk-radios__item">
-                  <input class="nhsuk-radios__input" id="sm-${dim.id}-${n}" name="secondary_mood_${dim.id}" type="radio" value="${n}" />
-                  <label class="nhsuk-label nhsuk-radios__label" for="sm-${dim.id}-${n}">${n}</label>
-                </div>`).join('')}
-            </div>
+            ${[1,2,3,4,5].map(n => `
+              <div class="nhsuk-radios__item">
+                <input class="nhsuk-radios__input" id="sm-${dim.id}-${n}" name="secondary_mood_${dim.id}" type="radio" value="${n}" />
+                <label class="nhsuk-label nhsuk-radios__label" for="sm-${dim.id}-${n}">${n}</label>
+              </div>`).join('')}
             <span class="app-mood-anchor" aria-hidden="true">${emoji5}</span>
           </div>
         </fieldset>
@@ -329,13 +330,11 @@ function renderMomentum(items) {
         </legend>
         <div class="app-mood-scale-row">
           <span class="app-mood-anchor" aria-hidden="true">😢</span>
-          <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
-            ${[1,2,3,4,5].map(n => `
-              <div class="nhsuk-radios__item">
-                <input class="nhsuk-radios__input" id="mom-${item.id}-${n}" name="momentum_${item.id}" type="radio" value="${n}" />
-                <label class="nhsuk-label nhsuk-radios__label" for="mom-${item.id}-${n}">${n}</label>
-              </div>`).join('')}
-          </div>
+          ${[1,2,3,4,5].map(n => `
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="mom-${item.id}-${n}" name="momentum_${item.id}" type="radio" value="${n}" />
+              <label class="nhsuk-label nhsuk-radios__label" for="mom-${item.id}-${n}">${n}</label>
+            </div>`).join('')}
           <span class="app-mood-anchor" aria-hidden="true">😊</span>
         </div>
       </fieldset>
@@ -750,7 +749,7 @@ async function init() {
   const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
   const momentumItems = momentumRes.status === 'fulfilled' ? (momentumRes.value ?? []) : []
 
-  if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord && type !== 'evening') {
+  if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord?.sleep_quality && type !== 'evening') {
     location.replace('/?type=evening')
     return
   }

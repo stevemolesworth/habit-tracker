@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Check in — 🐔 Chicken Check-In</title>
+    <title>🐔 Chicken Check-In</title>
     <link rel="icon" href="/gfx/cci-favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/gfx/cci-favicon.png" />
     <meta property="og:image" content="https://chickencheckin.netlify.app/gfx/cci-favicon.png" />
@@ -37,7 +37,7 @@
     <header class="app-global-header">
       <div class="nhsuk-width-container">
         <div class="app-global-header__inner">
-          <a href="/" class="app-global-header__title">🐔 Chicken Check-In</a>
+          <a href="/" class="app-global-header__title">🐔 <span class="app-global-header__title-text">Chicken Check-In</span></a>
           <nav class="app-global-header__nav" aria-label="Main navigation">
             <a href="/calendar.html"
               ><span class="material-icons app-btn-icon" aria-hidden="true">calendar_today</span><span class="app-btn-label">Calendar</span></a
@@ -77,11 +77,13 @@
             </div>
 
             <!-- In-page nav (EOD only, shown by JS) -->
-            <nav class="nhsuk-contents-list" id="checkin-inpage-nav" aria-label="Sections" style="display:none">
+            <nav class="nhsuk-contents-list" id="checkin-inpage-nav" aria-label="Sections" style="display: none">
               <h2 class="nhsuk-u-visually-hidden">Contents</h2>
               <ol class="nhsuk-contents-list__list">
-                <li class="nhsuk-contents-list__item"><a class="nhsuk-contents-list__link" href="#section-behaviours">Behaviours</a></li>
-                <li class="nhsuk-contents-list__item" id="nav-momentum-item" style="display:none"><a class="nhsuk-contents-list__link" href="#section-momentum">Momentum</a></li>
+                <li class="nhsuk-contents-list__item"><a class="nhsuk-contents-list__link" href="#section-behaviours">Events</a></li>
+                <li class="nhsuk-contents-list__item" id="nav-momentum-item" style="display: none">
+                  <a class="nhsuk-contents-list__link" href="#section-momentum">Momentum</a>
+                </li>
                 <li class="nhsuk-contents-list__item"><a class="nhsuk-contents-list__link" href="#section-mood">Mood</a></li>
               </ol>
             </nav>
@@ -92,12 +94,14 @@
                 <h2 class="nhsuk-heading-l">Sleep</h2>
 
                 <!-- EOD: summary when data exists -->
-                <div id="eod-sleep-summary" style="display:none">
-                  <p class="nhsuk-body nhsuk-u-margin-bottom-3"><span id="eod-sleep-text"></span> · <a href="#" id="eod-sleep-edit-link" class="nhsuk-link">Edit</a></p>
+                <div id="eod-sleep-summary" style="display: none">
+                  <p class="nhsuk-body nhsuk-u-margin-bottom-3">
+                    <span id="eod-sleep-text"></span> · <a href="#" id="eod-sleep-edit-link" class="nhsuk-link">Edit</a>
+                  </p>
                 </div>
 
                 <!-- EOD: no data message -->
-                <div id="eod-sleep-none" style="display:none">
+                <div id="eod-sleep-none" style="display: none">
                   <p class="nhsuk-body">
                     No sleep data recorded.
                     <a href="#" id="eod-sleep-add-link" class="nhsuk-link">Add sleep data</a>
@@ -106,52 +110,53 @@
 
                 <!-- Sleep form fields (always visible on morning; toggled on EOD) -->
                 <div id="sleep-fields">
-                <div class="nhsuk-form-group" id="bedtime-group">
-                  <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
-                  <p class="nhsuk-error-message" id="bedtime-error" style="display: none">
-                    <span class="nhsuk-u-visually-hidden">Error:</span> Enter a bedtime
-                  </p>
-                  <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time" value="21:00" />
-                </div>
+                  <div class="nhsuk-form-group" id="bedtime-group">
+                    <label class="nhsuk-label" for="bedtime">Bedtime (last night)</label>
+                    <p class="nhsuk-error-message" id="bedtime-error" style="display: none">
+                      <span class="nhsuk-u-visually-hidden">Error:</span> Enter a bedtime
+                    </p>
+                    <input class="nhsuk-input nhsuk-input--width-5" id="bedtime" name="bedtime" type="time" value="21:00" />
+                  </div>
 
-                <div class="nhsuk-form-group" id="wake-time-group">
-                  <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
-                  <p class="nhsuk-error-message" id="wake-time-error" style="display: none">
-                    <span class="nhsuk-u-visually-hidden">Error:</span> Enter a wake time
-                  </p>
-                  <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00" />
-                  <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-1" style="display: none"></p>
-                </div>
+                  <div class="nhsuk-form-group" id="wake-time-group">
+                    <label class="nhsuk-label" for="wake_time">Wake time (this morning)</label>
+                    <p class="nhsuk-error-message" id="wake-time-error" style="display: none">
+                      <span class="nhsuk-u-visually-hidden">Error:</span> Enter a wake time
+                    </p>
+                    <input class="nhsuk-input nhsuk-input--width-5" id="wake_time" name="wake_time" type="time" value="06:00" />
+                    <p id="sleep-duration" class="nhsuk-body-s nhsuk-u-secondary-text-color nhsuk-u-margin-top-1" style="display: none"></p>
+                  </div>
 
-                <div class="nhsuk-form-group">
-                  <fieldset class="nhsuk-fieldset">
-                    <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
-                    <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small" id="sleep_quality">
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0" />
-                        <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
+                  <div class="nhsuk-form-group">
+                    <fieldset class="nhsuk-fieldset">
+                      <legend class="nhsuk-fieldset__legend nhsuk-label">Sleep quality</legend>
+                      <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small" id="sleep_quality">
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="sq-1" name="sleep_quality" type="radio" value="1" tabindex="0" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="sq-1">Bad</label>
+                        </div>
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="sq-2" name="sleep_quality" type="radio" value="2" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="sq-2">Average</label>
+                        </div>
+                        <div class="nhsuk-radios__item">
+                          <input class="nhsuk-radios__input" id="sq-3" name="sleep_quality" type="radio" value="3" />
+                          <label class="nhsuk-label nhsuk-radios__label" for="sq-3">Good</label>
+                        </div>
                       </div>
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="sq-2" name="sleep_quality" type="radio" value="2" />
-                        <label class="nhsuk-label nhsuk-radios__label" for="sq-2">Average</label>
-                      </div>
-                      <div class="nhsuk-radios__item">
-                        <input class="nhsuk-radios__input" id="sq-3" name="sleep_quality" type="radio" value="3" />
-                        <label class="nhsuk-label nhsuk-radios__label" for="sq-3">Good</label>
-                      </div>
-                    </div>
-                  </fieldset>
+                    </fieldset>
+                  </div>
                 </div>
-                </div><!-- /#sleep-fields -->
+                <!-- /#sleep-fields -->
               </section>
 
               <!-- ══ Section B: Events (EOD only) ══════════════════════ -->
               <section class="app-section" id="events-section">
-                <h2 class="nhsuk-heading-l" id="section-behaviours">Events</h2>
+                <h2 class="nhsuk-heading-l nhsuk-u-visually-hidden" id="section-behaviours">Events</h2>
 
                 <!-- Alcohol -->
                 <div id="alcohol-section">
-                  <h3 class="nhsuk-heading-s">
+                  <h3 class="nhsuk-heading-l">
                     Alcohol <span id="alcohol-unit-count" class="nhsuk-u-secondary-text-color" style="font-weight: 400">(units)</span>
                   </h3>
                   <div style="display: flex; gap: 24px; flex-wrap: wrap">
@@ -192,25 +197,48 @@
                 </div>
 
                 <!-- Exercise -->
+                <hr class="nhsuk-section-break nhsuk-section-break--l nhsuk-section-break--visible" />
                 <div id="exercise-section" class="nhsuk-u-margin-top-4">
-                  <h3 class="nhsuk-heading-s">Exercise</h3>
+                  <h3 class="nhsuk-heading-l">Exercise</h3>
 
                   <div class="nhsuk-form-group">
                     <fieldset class="nhsuk-fieldset">
                       <legend class="nhsuk-fieldset__legend nhsuk-label nhsuk-u-visually-hidden">Type(s)</legend>
                       <div class="nhsuk-checkboxes nhsuk-checkboxes--small">
                         <div class="nhsuk-checkboxes__item">
-                          <input class="nhsuk-checkboxes__input" id="ex-aerobic" name="exercise_types" type="checkbox" value="aerobic" tabindex="0" aria-describedby="ex-aerobic-hint" />
+                          <input
+                            class="nhsuk-checkboxes__input"
+                            id="ex-aerobic"
+                            name="exercise_types"
+                            type="checkbox"
+                            value="aerobic"
+                            tabindex="0"
+                            aria-describedby="ex-aerobic-hint"
+                          />
                           <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-aerobic">Aerobic</label>
                           <div id="ex-aerobic-hint" class="nhsuk-hint nhsuk-checkboxes__hint">Running, spinning, swimming, tennis</div>
                         </div>
                         <div class="nhsuk-checkboxes__item">
-                          <input class="nhsuk-checkboxes__input" id="ex-strength" name="exercise_types" type="checkbox" value="strength" aria-describedby="ex-strength-hint" />
+                          <input
+                            class="nhsuk-checkboxes__input"
+                            id="ex-strength"
+                            name="exercise_types"
+                            type="checkbox"
+                            value="strength"
+                            aria-describedby="ex-strength-hint"
+                          />
                           <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-strength">Strength</label>
                           <div id="ex-strength-hint" class="nhsuk-hint nhsuk-checkboxes__hint">Gym, pilates</div>
                         </div>
                         <div class="nhsuk-checkboxes__item">
-                          <input class="nhsuk-checkboxes__input" id="ex-walking" name="exercise_types" type="checkbox" value="walking" aria-describedby="ex-walking-hint" />
+                          <input
+                            class="nhsuk-checkboxes__input"
+                            id="ex-walking"
+                            name="exercise_types"
+                            type="checkbox"
+                            value="walking"
+                            aria-describedby="ex-walking-hint"
+                          />
                           <label class="nhsuk-label nhsuk-checkboxes__label" for="ex-walking">Strenuous walk</label>
                           <div id="ex-walking-hint" class="nhsuk-hint nhsuk-checkboxes__hint">A brisk walk, hiking, etc.</div>
                         </div>
@@ -219,7 +247,7 @@
                   </div>
 
                   <div class="nhsuk-form-group">
-                    <label class="nhsuk-label" for="exercise_sessions_display">Sessions</label>
+                    <label class="nhsuk-label" for="exercise_sessions_display">Exercise sessions</label>
                     <div class="app-stepper">
                       <button type="button" class="app-stepper__btn" data-target="exercise_sessions" data-delta="-1" aria-label="Decrease sessions">−</button>
                       <input
@@ -237,7 +265,7 @@
                   </div>
 
                   <div class="nhsuk-form-group">
-                    <label class="nhsuk-label" for="exercise-duration-display">Duration</label>
+                    <label class="nhsuk-label" for="exercise-duration-display">Exercise duration</label>
                     <div class="app-stepper">
                       <button type="button" id="exercise-duration-dec" class="app-stepper__btn" aria-label="Decrease duration">−</button>
                       <input
@@ -255,9 +283,10 @@
                   </div>
                 </div>
 
-                <!-- One-off Events (behaviours) -->
+                <!-- One-off Events (events / behaviour) -->
+                <hr class="nhsuk-section-break nhsuk-section-break--l nhsuk-section-break--visible" />
                 <div id="behaviours-section" class="nhsuk-u-margin-top-4">
-                  <h3 class="nhsuk-heading-s">One-off events</h3>
+                  <h3 class="nhsuk-heading-l">Events</h3>
                   <div class="nhsuk-checkboxes nhsuk-checkboxes--small" id="behaviours-list">
                     <p class="nhsuk-body nhsuk-u-secondary-text-color">Loading…</p>
                   </div>
@@ -273,7 +302,7 @@
               </section>
 
               <!-- ══ Momentum (EOD only) ═══════════════════════════════ -->
-              <section class="app-section" id="momentum-section" style="display:none">
+              <section class="app-section" id="momentum-section" style="display: none">
                 <h2 class="nhsuk-heading-l" id="section-momentum">Momentum</h2>
                 <div id="momentum-list"></div>
               </section>
@@ -286,32 +315,33 @@
                 <div class="nhsuk-form-group nhsuk-u-margin-top-3">
                   <fieldset class="nhsuk-fieldset">
                     <legend class="nhsuk-fieldset__legend nhsuk-label">
-                      <strong>Overall mood</strong><span id="morning-mood-display" class="app-mood-morning-hint" style="display: none"> — this morning: <span id="morning-mood-value"></span></span>
+                      <strong>Overall mood</strong
+                      ><span id="morning-mood-display" class="app-mood-morning-hint" style="display: none">
+                        — this morning: <span id="morning-mood-value"></span
+                      ></span>
                     </legend>
                     <p class="nhsuk-hint nhsuk-u-margin-bottom-2 nhsuk-u-visually-hidden">1 = Poor, 5 = Excellent</p>
                     <div class="app-mood-scale-row">
                       <span class="app-mood-anchor" aria-hidden="true">😢</span>
-                      <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
-                        <div class="nhsuk-radios__item">
-                          <input class="nhsuk-radios__input" id="gm-1" name="primary_mood" type="radio" value="1" tabindex="0" />
-                          <label class="nhsuk-label nhsuk-radios__label" for="gm-1">1</label>
-                        </div>
-                        <div class="nhsuk-radios__item">
-                          <input class="nhsuk-radios__input" id="gm-2" name="primary_mood" type="radio" value="2" />
-                          <label class="nhsuk-label nhsuk-radios__label" for="gm-2">2</label>
-                        </div>
-                        <div class="nhsuk-radios__item">
-                          <input class="nhsuk-radios__input" id="gm-3" name="primary_mood" type="radio" value="3" />
-                          <label class="nhsuk-label nhsuk-radios__label" for="gm-3">3</label>
-                        </div>
-                        <div class="nhsuk-radios__item">
-                          <input class="nhsuk-radios__input" id="gm-4" name="primary_mood" type="radio" value="4" />
-                          <label class="nhsuk-label nhsuk-radios__label" for="gm-4">4</label>
-                        </div>
-                        <div class="nhsuk-radios__item">
-                          <input class="nhsuk-radios__input" id="gm-5" name="primary_mood" type="radio" value="5" />
-                          <label class="nhsuk-label nhsuk-radios__label" for="gm-5">5</label>
-                        </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-1" name="primary_mood" type="radio" value="1" tabindex="0" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="gm-1">1</label>
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-2" name="primary_mood" type="radio" value="2" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="gm-2">2</label>
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-3" name="primary_mood" type="radio" value="3" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="gm-3">3</label>
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-4" name="primary_mood" type="radio" value="4" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="gm-4">4</label>
+                      </div>
+                      <div class="nhsuk-radios__item">
+                        <input class="nhsuk-radios__input" id="gm-5" name="primary_mood" type="radio" value="5" />
+                        <label class="nhsuk-label nhsuk-radios__label" for="gm-5">5</label>
                       </div>
                       <span class="app-mood-anchor" aria-hidden="true">😊</span>
                     </div>
@@ -341,6 +371,9 @@
           </div>
 
           <div class="nhsuk-grid-column-one-third">
+            <a id="edit-yesterday-btn" href="#" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="width: 100%; margin-bottom: 16px"
+              >Edit yesterday</a
+            >
             <div id="weather-widget">
               <div id="weather-strip">
                 <span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>

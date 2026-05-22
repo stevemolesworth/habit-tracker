@@ -115,6 +115,10 @@
   line-height: 1.2;
 }
 
+@media (max-width: 640px) {
+  .app-global-header__title-text { display: none; }
+}
+
 .app-global-header__nav {
   display: flex;
   gap: 24px;
@@ -407,14 +411,41 @@ a.app-bool-dot:hover { opacity: 0.75; }
 
 /* Mood scale emoji anchors */
 .app-mood-scale-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   align-items: center;
-  gap: 8px;
 }
 
-.app-mood-anchor {
+.app-mood-scale-row .app-mood-anchor {
+  text-align: center;
   font-size: 1.25rem;
+  line-height: 1;
+}
+
+.app-mood-scale-row .nhsuk-radios__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+
+.app-mood-scale-row .nhsuk-radios__input {
+  position: static;
+  float: none;
+  width: 24px;
+  height: 24px;
+  margin: 0 0 4px;
+  cursor: pointer;
   flex-shrink: 0;
+}
+
+.app-mood-scale-row .nhsuk-radios__label {
+  padding: 0;
+  font-size: 0.875rem;
+  text-align: center;
+  cursor: pointer;
 }
 
 /* Drag-to-reorder */
