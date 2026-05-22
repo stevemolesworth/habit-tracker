@@ -715,7 +715,7 @@ function renderCheckinNav() {
   const el = document.getElementById('checkin-quick-nav')
   if (!el) return
   const btn = (label, href) =>
-    `<a href="${href}" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin: 0; width: 100%">${label}</a>`
+    `<a href="${href}" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin: 0">${label}</a>`
   if (isMorning) {
     el.innerHTML =
       btn('Yesterday', `/?type=evening&date=${yesterday}`) +
