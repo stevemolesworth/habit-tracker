@@ -3,6 +3,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 let _supabase = null
 let _token = null
 let _profile = null
+let _resolveProfile
+export const profileReady = new Promise(resolve => { _resolveProfile = resolve })
 
 function fetchWithTimeout(url, ms = 10000, options = {}) {
   const controller = new AbortController()
@@ -52,6 +54,7 @@ export const authReady = (async () => {
       }
     })
     .catch(() => { /* non-fatal */ })
+    .finally(() => _resolveProfile(_profile))
 })()
 
 function wireNav() {

@@ -1,4 +1,4 @@
-import { authReady, getProfile, getToken } from '/auth.js'
+import { authReady, profileReady, getProfile, getToken } from '/auth.js'
 
 let allUsers = []
 let sortCol = 'last_checkin_date'
@@ -87,6 +87,7 @@ async function loadUserDetail(id) {
 
 async function init() {
   await authReady
+  await profileReady
 
   const profile = getProfile()
   if (profile?.role !== 'admin') {
