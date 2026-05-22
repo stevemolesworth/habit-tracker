@@ -713,12 +713,12 @@ function renderCheckinNav() {
     `<a href="${href}" class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" style="margin: 0">${label}</a>`
   if (isMorning) {
     el.innerHTML =
-      btn('View Yesterday', `/?type=evening&date=${yesterday}`) +
-      btn('View End of today', `/?type=evening`)
+      btn('View yesterday', `/?type=evening&date=${yesterday}`) +
+      btn('View end of today', `/?type=evening`)
   } else {
     el.innerHTML =
-      btn('View This morning', `/?type=morning`) +
-      btn('View Yesterday', `/?type=evening&date=${yesterday}`)
+      btn('View this morning', `/?type=morning`) +
+      btn('View yesterday', `/?type=evening&date=${yesterday}`)
   }
 }
 
