@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
+    <script>
+      const _si=['/gfx/chicken001.avif','/gfx/chicken002.avif','/gfx/chicken003.avif']
+      document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('app-splash');if(el)el.style.backgroundImage=`url('${_si[Math.floor(Math.random()*_si.length)]}')`})
+    </script>
     <!-- Splash screen — hidden by checkin.js once init() completes -->
     <div id="app-splash" class="app-splash">
       <div class="app-splash__overlay" id="splash-loading">
@@ -412,6 +416,9 @@
               </section>
 
             </form>
+            <div style="margin-top: 16px; padding-bottom: 8px">
+              <button type="button" id="checkin-save-btn" class="nhsuk-button" disabled>Save</button>
+            </div>
           </div>
 
           <div class="nhsuk-grid-column-one-third">

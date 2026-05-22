@@ -1,13 +1,13 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
 let _supabase = null
 let _token = null
 let _profile = null
 
-function fetchWithTimeout(url, ms = 10000) {
+function fetchWithTimeout(url, ms = 10000, options = {}) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), ms)
-  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer))
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer))
 }
 
 export const authReady = (async () => {
@@ -41,12 +41,17 @@ export const authReady = (async () => {
     }
   })
 
-  try {
-    const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${_token}` } })
-    if (res.ok) _profile = await res.json()
-  } catch { /* profile fetch failure is non-fatal */ }
+  wireNav() // wire logout button immediately — no profile needed
 
-  wireNav()
+  // Profile fetch is non-blocking; updates nav when it arrives
+  fetchWithTimeout('/api/profile', 8000, { headers: { Authorization: `Bearer ${_token}` } })
+    .then(async res => {
+      if (res.ok) {
+        _profile = await res.json()
+        wireNav()
+      }
+    })
+    .catch(() => { /* non-fatal */ })
 })()
 
 function wireNav() {

@@ -499,6 +499,8 @@ function markDirty(fieldName) {
   if (cat) dirtyCategories.add(cat)
   if (isDirty) return
   isDirty = true
+  const btn = document.getElementById('checkin-save-btn')
+  if (btn) btn.disabled = false
 }
 
 function setupDirtyTracking() {
@@ -651,6 +653,8 @@ async function autoSave() {
     const saved = [...dirtyCategories]
     dirtyCategories.clear()
     isDirty = false
+    const btn = document.getElementById('checkin-save-btn')
+    if (btn) btn.disabled = true
     clearTimeout(autoSaveToastTimer)
     const label = saved.length ? `Saved · ${saved.join(', ')}` : 'Saved'
     autoSaveToastTimer = setTimeout(() => showToast(label), 1500)
@@ -659,6 +663,11 @@ async function autoSave() {
     showToast('Could not auto-save', 'error')
   }
 }
+
+document.getElementById('checkin-save-btn')?.addEventListener('click', () => {
+  clearTimeout(autoSaveTimer)
+  autoSave()
+})
 
 function scheduleAutoSave() {
   clearTimeout(autoSaveTimer)

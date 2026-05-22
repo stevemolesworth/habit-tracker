@@ -681,29 +681,45 @@ document.querySelectorAll('[data-quick-supplement]').forEach(b => {
 
 // ── Default location ──────────────────────────────────────────
 
-async function loadLocation() {
+function setLocationLabel(text) {
   const label = document.getElementById('location-current-label')
+  const changeLink = document.getElementById('location-change-link')
+  label.textContent = text ? `📍 ${text}` : 'No default location set.'
+  if (changeLink) changeLink.style.display = ''
+}
+
+async function loadLocation() {
   try {
     const config = await api.getWeights()
-    label.textContent = config?.default_location_label
-      ? `Current: ${config.default_location_label}`
-      : 'No default location set.'
+    setLocationLabel(config?.default_location_label || '')
   } catch {
-    label.textContent = 'Could not load current location.'
+    document.getElementById('location-current-label').textContent = 'Could not load current location.'
   }
 }
 
+document.getElementById('location-change-link').addEventListener('click', (e) => {
+  e.preventDefault()
+  document.getElementById('location-form').style.display = ''
+  document.getElementById('location-input').focus()
+})
+
+document.getElementById('location-cancel-link').addEventListener('click', (e) => {
+  e.preventDefault()
+  document.getElementById('location-form').style.display = 'none'
+  document.getElementById('location-input').value = ''
+})
+
 document.getElementById('location-save-btn').addEventListener('click', async () => {
   const input = document.getElementById('location-input')
-  const label = document.getElementById('location-current-label')
   const query = input.value.trim()
   if (!query) return
   try {
     const loc = await geocode(query)
     await api.updateWeights({ default_location_lat: loc.lat, default_location_lng: loc.lng, default_location_label: loc.label })
     clearCache('weights')
-    label.textContent = `Current: ${loc.label}`
+    setLocationLabel(loc.label)
     input.value = ''
+    document.getElementById('location-form').style.display = 'none'
     showToast('Location saved.')
   } catch (err) {
     showToast(err.message || 'Could not save location.', 'error')
