@@ -751,6 +751,9 @@ async function init() {
     return
   }
 
+  document.querySelector('.app-splash__text').textContent = 'Loading your check-in'
+  document.querySelector('.app-splash__subtext').textContent = 'Almost there…'
+
   const fetchExisting = api.getTodayCheckin(type, today)
   const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
   const fetchYesterdayEvening = isMorning ? api.getTodayCheckin('evening', yesterday) : Promise.resolve(null)
