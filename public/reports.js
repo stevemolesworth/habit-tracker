@@ -63,6 +63,7 @@ function mergeDay(date, morning, evening) {
   return {
     date,
     mood: evening?.primary_mood_eod ?? morning?.primary_mood_morning ?? evening?.global_mood ?? morning?.global_mood ?? null,
+    secondary_moods: { ...(morning?.secondary_moods ?? {}), ...(evening?.secondary_moods ?? {}) },
     bedtime: morning?.bedtime ?? null,
     wake_time: morning?.wake_time ?? null,
     hours_slept: morning?.hours_slept ?? null,
@@ -89,6 +90,9 @@ const GREEN  = '#007f3b'
 const RED    = '#d5281b'
 const PURPLE = '#330072'
 const ORANGE = '#e8850c'
+const TEAL   = '#00838a'
+
+const DIM_COLOURS = [ORANGE, GREEN, PURPLE, RED, TEAL]
 
 const charts = {}
 
@@ -99,6 +103,7 @@ function mkChart(id, config) {
     config.options = { ...config.options, animation: false }
     charts[id] = new Chart(canvas.getContext('2d'), config)  // eslint-disable-line no-undef
   }
+  return charts[id]
 }
 
 function xAxis(labels) {
@@ -132,10 +137,40 @@ function chartOnClick(days) {
 
 // ── Mood ──────────────────────────────────────────────────────
 
-function renderMood(days, labels) {
-  mkChart('chart-mood', {
+function renderMoodToggles(chart) {
+  const container = document.getElementById('mood-toggles')
+  if (!container) return
+  container.innerHTML = chart.data.datasets.map((ds, i) => `
+    <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:14px">
+      <input type="checkbox" checked data-idx="${i}" style="margin:0">
+      <span style="display:inline-block;width:18px;height:3px;background:${ds.borderColor};border-radius:2px;flex-shrink:0"></span>
+      ${ds.label}
+    </label>
+  `).join('')
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const meta = chart.getDatasetMeta(Number(cb.dataset.idx))
+      meta.hidden = !cb.checked
+      chart.update()
+    })
+  })
+}
+
+function renderMood(days, labels, moodDims) {
+  const datasets = [
+    { ...LINE, tension: 0.4, spanGaps: true, label: 'Overall mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE },
+    ...moodDims.map((dim, i) => ({
+      ...LINE, tension: 0.4, spanGaps: true,
+      label: dim.name,
+      data: days.map(d => d.secondary_moods?.[dim.id] ?? null),
+      borderColor: DIM_COLOURS[i % DIM_COLOURS.length],
+      backgroundColor: DIM_COLOURS[i % DIM_COLOURS.length],
+    }))
+  ]
+
+  const chart = mkChart('chart-mood', {
     type: 'line',
-    data: { labels, datasets: [{ ...LINE, tension: 0.4, spanGaps: true, label: 'Mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE }] },
+    data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1, callback: v => { if (v === 1) return '1 😢'; if (v === 5) return '5 😁'; return v } }, grid: { color: '#f0f4f5' } } },
@@ -143,6 +178,8 @@ function renderMood(days, labels) {
       onClick: chartOnClick(days)
     }
   })
+
+  if (chart) renderMoodToggles(chart)
 }
 
 // ── Sleep ─────────────────────────────────────────────────────
@@ -234,34 +271,91 @@ function renderAlcohol(days, labels) {
   })
 }
 
-// ── Boolean rows ──────────────────────────────────────────────
+// ── Habits chart ──────────────────────────────────────────────
 
-function habitCell(value, weight, title, href) {
-  const done = value !== null && value !== undefined && value !== false
-  if (done) {
-    const emoji = weight < 0 ? '💩' : '👍'
-    const cls = weight < 0 ? 'app-bool-dot--negative' : 'app-bool-dot--positive'
-    if (href) return `<a href="${href}" class="app-bool-dot ${cls}" title="${title}">${emoji}</a>`
-    return `<span class="app-bool-dot ${cls}" title="${title}">${emoji}</span>`
+function habitDone(value) {
+  return value !== null && value !== undefined && value !== false
+}
+
+function renderHabitsChart(days, labels, behaviourDefs) {
+  const suppNames = []
+  const suppSet = new Set()
+  days.forEach(d => {
+    if (d.supplements) Object.keys(d.supplements).forEach(k => { if (!suppSet.has(k)) { suppSet.add(k); suppNames.push(k) } })
+  })
+
+  const habits = [
+    { name: 'Exercise', fn: d => d.exercised, weight: 1 },
+    ...suppNames.map(name => ({ name, fn: d => d.supplements?.[name] ?? null, weight: 1 })),
+    ...behaviourDefs.map(b => ({ name: b.name, fn: d => d.behaviours?.[b.name] ?? null, weight: b.weight })),
+  ]
+
+  const wrap = document.getElementById('habits-chart-wrap')
+  if (!wrap) return
+
+  if (!habits.length) {
+    wrap.innerHTML = '<p class="nhsuk-hint">No habits tracked yet.</p>'
+    return
   }
-  if (href) return `<a href="${href}" class="app-bool-dot app-bool-dot--null" title="${title}"></a>`
-  return `<span class="app-bool-dot app-bool-dot--null" title="${title}"></span>`
-}
 
-function boolRow(label, days, fn, weight = 1) {
-  const dots = days.map(d => habitCell(fn(d), weight, fmtShort(d.date), dayHref(d))).join('')
-  return `<div class="app-bool-row"><span class="app-bool-label">${label}</span><div class="app-bool-dots">${dots}</div></div>`
-}
+  wrap.innerHTML = '<canvas id="chart-habits"></canvas>'
+  wrap.style.height = `${Math.max(150, habits.length * 38 + 50)}px`
 
-function renderBoolRows(days, behaviourDefs) {
-  const suppNames = new Set()
-  days.forEach(d => { if (d.supplements) Object.keys(d.supplements).forEach(k => suppNames.add(k)) })
+  const datasets = habits.map((habit, i) => ({
+    label: habit.name,
+    data: days.map(d => habitDone(habit.fn(d)) ? i : null),
+    showLine: false,
+    spanGaps: false,
+    pointRadius: 7,
+    pointHoverRadius: 9,
+    borderColor: habit.weight < 0 ? RED : GREEN,
+    backgroundColor: habit.weight < 0 ? RED : GREEN,
+  }))
 
-  let html = boolRow('Exercise', days, d => d.exercised, 1)
-  suppNames.forEach(name => { html += boolRow(name, days, d => d.supplements?.[name] ?? null, 1) })
-  behaviourDefs.forEach(b => { html += boolRow(b.name, days, d => d.behaviours?.[b.name] ?? null, b.weight) })
-
-  document.getElementById('bool-rows').innerHTML = html
+  mkChart('chart-habits', {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: xAxis(labels),
+        y: {
+          type: 'linear',
+          reverse: true,
+          min: -0.5,
+          max: habits.length - 0.5,
+          ticks: {
+            stepSize: 1,
+            callback: v => {
+              const i = Math.round(v)
+              if (i < 0 || i >= habits.length || v !== i) return ''
+              const name = habits[i].name
+              return name.length > 16 ? name.slice(0, 15) + '…' : name
+            },
+          },
+          grid: { color: '#f0f4f5' },
+          afterFit: ctx => { ctx.width = Math.max(ctx.width, 90) },
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: items => fmtLong(days[items[0].dataIndex].date),
+            label: item => {
+              const i = Math.round(item.parsed.y)
+              return i >= 0 && i < habits.length ? habits[i].name : ''
+            },
+          }
+        }
+      },
+      onClick: (evt, elements) => {
+        if (!elements.length) return
+        const href = dayHref(days[elements[0].index])
+        if (href) location.href = href
+      }
+    }
+  })
 }
 
 // ── Load & render ─────────────────────────────────────────────
@@ -277,9 +371,10 @@ async function loadReport() {
   document.getElementById('report-error').style.display = 'none'
 
   try {
-    const [checkins, behaviourDefs] = await Promise.all([
+    const [checkins, behaviourDefs, moodDims] = await Promise.all([
       api.getReport(from, to),
       api.getBehaviours(),
+      api.getMoodDimensions(),
     ])
     document.getElementById('report-loading').style.display = 'none'
 
@@ -294,10 +389,10 @@ async function loadReport() {
     const labels = dates.map(fmtShort)
 
     document.getElementById('report-content').style.display = ''
-    renderMood(days, labels)
+    renderMood(days, labels, moodDims)
     renderSleep(days, labels)
     renderAlcohol(days, labels)
-    renderBoolRows(days, behaviourDefs)
+    renderHabitsChart(days, labels, behaviourDefs)
   } catch (err) {
     document.getElementById('report-loading').style.display = 'none'
     document.getElementById('report-error').style.display = ''

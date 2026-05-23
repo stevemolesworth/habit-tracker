@@ -55,12 +55,8 @@ export default async function handler(req) {
     delete body.id
     delete body.created_at
     delete body.user_id
-    // Remove legacy fields that are no longer written by the UI
     delete body.global_mood
     delete body.focuses
-    delete body.focus_financial
-    delete body.focus_consulting
-    delete body.focus_opiner
     body.submitted_at = new Date().toISOString()
 
     const { data, error } = await supabase

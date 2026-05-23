@@ -541,8 +541,10 @@ window.addEventListener('popstate', () => {
 })
 
 window.addEventListener('beforeunload', (e) => {
-  if (isDirty) { e.preventDefault(); e.returnValue = '' }
+  if (isDirty && !bypassGuard) { e.preventDefault(); e.returnValue = '' }
 })
+
+document.getElementById('nav-logout-btn')?.addEventListener('click', () => { bypassGuard = true })
 
 
 // --- Delete ---
@@ -731,7 +733,7 @@ async function init() {
   const stallTimer = setTimeout(() => {
     document.querySelector('.app-splash__text').textContent = 'Taking longer than expected…'
     document.querySelector('.app-splash__subtext').innerHTML =
-      '<a href="javascript:location.reload()" style="color:#fff">Tap to retry</a>'
+      '<button onclick="location.reload()" class="nhsuk-button nhsuk-button--reverse" style="margin-top:12px">Tap to retry</button>'
   }, 12000)
 
   try {
@@ -740,7 +742,7 @@ async function init() {
     clearTimeout(stallTimer)
     document.querySelector('.app-splash__text').textContent = 'Could not connect'
     document.querySelector('.app-splash__subtext').innerHTML =
-      '<a href="javascript:location.reload()" style="color:#fff">Tap to retry</a>'
+      '<button onclick="location.reload()" class="nhsuk-button nhsuk-button--reverse" style="margin-top:12px">Tap to retry</button>'
     return
   }
 

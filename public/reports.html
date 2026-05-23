@@ -84,6 +84,7 @@
             <details class="nhsuk-details app-section" open data-charts="chart-mood">
               <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Mood</span></summary>
               <div class="nhsuk-details__text">
+                <div id="mood-toggles" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:12px"></div>
                 <div style="height:200px"><canvas id="chart-mood"></canvas></div>
               </div>
             </details>
@@ -109,10 +110,10 @@
             </details>
 
             <!-- Habits & behaviours -->
-            <details class="nhsuk-details app-section">
+            <details class="nhsuk-details app-section" data-charts="chart-habits">
               <summary class="nhsuk-details__summary"><span class="nhsuk-details__summary-text nhsuk-heading-m" style="margin:0">Habits &amp; behaviours</span></summary>
               <div class="nhsuk-details__text">
-                <div id="bool-rows"></div>
+                <div id="habits-chart-wrap" style="height:200px"></div>
               </div>
             </details>
 
