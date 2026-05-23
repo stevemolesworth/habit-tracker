@@ -142,6 +142,10 @@ function chartOnClick(days) {
 function renderMoodToggles(chart) {
   const container = document.getElementById('mood-toggles')
   if (!container) return
+
+  const dimStart = 3 // 0=Morning, 1=Evening, 2=Trend, 3+=secondary dims
+  const hasDims = chart.data.datasets.length > dimStart
+
   container.innerHTML = chart.data.datasets.map((ds, i) => {
     const swatch = ds.showLine === false
       ? `<span style="display:inline-block;width:10px;height:10px;background:${ds.backgroundColor};border-radius:50%;flex-shrink:0"></span>`
@@ -152,6 +156,26 @@ function renderMoodToggles(chart) {
       ${ds.label}
     </label>`
   }).join('')
+
+  if (hasDims) {
+    let dimsVisible = true
+    const btn = document.createElement('button')
+    btn.className = 'nhsuk-button nhsuk-button--secondary nhsuk-button--small'
+    btn.style.cssText = 'margin:0 0 0 4px;padding:2px 10px;font-size:13px;height:auto;line-height:1.4'
+    btn.textContent = 'Hide secondary moods'
+    btn.addEventListener('click', () => {
+      dimsVisible = !dimsVisible
+      btn.textContent = dimsVisible ? 'Hide secondary moods' : 'Show secondary moods'
+      for (let i = dimStart; i < chart.data.datasets.length; i++) {
+        chart.getDatasetMeta(i).hidden = !dimsVisible
+        const cb = container.querySelector(`input[data-idx="${i}"]`)
+        if (cb) cb.checked = dimsVisible
+      }
+      chart.update()
+    })
+    container.appendChild(btn)
+  }
+
   container.querySelectorAll('input[type=checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
       const meta = chart.getDatasetMeta(Number(cb.dataset.idx))
