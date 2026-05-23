@@ -146,7 +146,7 @@ function renderMoodToggles(chart) {
   const dimStart = 3 // 0=Morning, 1=Evening, 2=Trend, 3+=secondary dims
   const hasDims = chart.data.datasets.length > dimStart
 
-  container.innerHTML = chart.data.datasets.map((ds, i) => {
+  const checkboxesHtml = chart.data.datasets.map((ds, i) => {
     const swatch = ds.showLine === false
       ? `<span style="display:inline-block;width:10px;height:10px;background:${ds.backgroundColor};border-radius:50%;flex-shrink:0"></span>`
       : `<span style="display:inline-block;width:18px;height:3px;background:${ds.borderColor};border-radius:2px;flex-shrink:0"></span>`
@@ -157,7 +157,14 @@ function renderMoodToggles(chart) {
     </label>`
   }).join('')
 
-  const btnStyle = 'margin:0 0 0 4px;padding:2px 10px;font-size:13px;height:auto;line-height:1.4'
+  container.style.cssText = 'margin-bottom:10px'
+  container.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:8px">${checkboxesHtml}</div>
+    <div id="mood-btn-group" class="nhsuk-button-group" style="margin-bottom:0"></div>
+  `
+
+  const btnGroup = container.querySelector('#mood-btn-group')
+  const btnStyle = 'margin:0;padding:3px 12px;font-size:13px;height:auto;line-height:1.5'
 
   const mkBtn = (label, onClick) => {
     const btn = document.createElement('button')
@@ -165,7 +172,7 @@ function renderMoodToggles(chart) {
     btn.style.cssText = btnStyle
     btn.textContent = label
     btn.addEventListener('click', onClick)
-    container.appendChild(btn)
+    btnGroup.appendChild(btn)
     return btn
   }
 
