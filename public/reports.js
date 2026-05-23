@@ -157,15 +157,37 @@ function renderMoodToggles(chart) {
     </label>`
   }).join('')
 
-  if (hasDims) {
-    let dimsVisible = true
+  const btnStyle = 'margin:0 0 0 4px;padding:2px 10px;font-size:13px;height:auto;line-height:1.4'
+
+  const mkBtn = (label, onClick) => {
     const btn = document.createElement('button')
     btn.className = 'nhsuk-button nhsuk-button--secondary nhsuk-button--small'
-    btn.style.cssText = 'margin:0 0 0 4px;padding:2px 10px;font-size:13px;height:auto;line-height:1.4'
-    btn.textContent = 'Hide secondary moods'
-    btn.addEventListener('click', () => {
+    btn.style.cssText = btnStyle
+    btn.textContent = label
+    btn.addEventListener('click', onClick)
+    container.appendChild(btn)
+    return btn
+  }
+
+  const setAll = (visible) => {
+    for (let i = 0; i < chart.data.datasets.length; i++) {
+      chart.getDatasetMeta(i).hidden = !visible
+      const cb = container.querySelector(`input[data-idx="${i}"]`)
+      if (cb) cb.checked = visible
+    }
+    if (hasDims) dimsBtn.textContent = visible ? 'Hide secondary moods' : 'Show secondary moods'
+    chart.update()
+  }
+
+  mkBtn('Show all', () => setAll(true))
+  mkBtn('Hide all', () => setAll(false))
+
+  let dimsBtn
+  if (hasDims) {
+    let dimsVisible = true
+    dimsBtn = mkBtn('Hide secondary moods', () => {
       dimsVisible = !dimsVisible
-      btn.textContent = dimsVisible ? 'Hide secondary moods' : 'Show secondary moods'
+      dimsBtn.textContent = dimsVisible ? 'Hide secondary moods' : 'Show secondary moods'
       for (let i = dimStart; i < chart.data.datasets.length; i++) {
         chart.getDatasetMeta(i).hidden = !dimsVisible
         const cb = container.querySelector(`input[data-idx="${i}"]`)
@@ -173,7 +195,6 @@ function renderMoodToggles(chart) {
       }
       chart.update()
     })
-    container.appendChild(btn)
   }
 
   container.querySelectorAll('input[type=checkbox]').forEach(cb => {
