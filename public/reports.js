@@ -63,6 +63,8 @@ function mergeDay(date, morning, evening) {
   return {
     date,
     mood: evening?.primary_mood_eod ?? morning?.primary_mood_morning ?? evening?.global_mood ?? morning?.global_mood ?? null,
+    mood_morning: morning?.primary_mood_morning ?? morning?.global_mood ?? null,
+    mood_evening: evening?.primary_mood_eod ?? evening?.global_mood ?? null,
     secondary_moods: { ...(morning?.secondary_moods ?? {}), ...(evening?.secondary_moods ?? {}) },
     bedtime: morning?.bedtime ?? null,
     wake_time: morning?.wake_time ?? null,
@@ -140,13 +142,16 @@ function chartOnClick(days) {
 function renderMoodToggles(chart) {
   const container = document.getElementById('mood-toggles')
   if (!container) return
-  container.innerHTML = chart.data.datasets.map((ds, i) => `
-    <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:14px">
+  container.innerHTML = chart.data.datasets.map((ds, i) => {
+    const swatch = ds.showLine === false
+      ? `<span style="display:inline-block;width:10px;height:10px;background:${ds.backgroundColor};border-radius:50%;flex-shrink:0"></span>`
+      : `<span style="display:inline-block;width:18px;height:3px;background:${ds.borderColor};border-radius:2px;flex-shrink:0"></span>`
+    return `<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:14px">
       <input type="checkbox" checked data-idx="${i}" style="margin:0">
-      <span style="display:inline-block;width:18px;height:3px;background:${ds.borderColor};border-radius:2px;flex-shrink:0"></span>
+      ${swatch}
       ${ds.label}
-    </label>
-  `).join('')
+    </label>`
+  }).join('')
   container.querySelectorAll('input[type=checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
       const meta = chart.getDatasetMeta(Number(cb.dataset.idx))
@@ -157,26 +162,95 @@ function renderMoodToggles(chart) {
 }
 
 function renderMood(days, labels, moodDims) {
+  const avgMood = days.map(d => {
+    const vals = [d.mood_morning, d.mood_evening].filter(v => v !== null)
+    return vals.length === 2 ? (vals[0] + vals[1]) / 2 : vals[0] ?? null
+  })
+
   const datasets = [
-    { ...LINE, tension: 0.4, spanGaps: true, label: 'Overall mood', data: days.map(d => d.mood), borderColor: BLUE, backgroundColor: BLUE },
+    {
+      label: 'Morning',
+      data: days.map(d => d.mood_morning),
+      showLine: false, spanGaps: false,
+      pointRadius: 7, pointHoverRadius: 9,
+      borderColor: BLUE, backgroundColor: BLUE,
+    },
+    {
+      label: 'Evening',
+      data: days.map(d => d.mood_evening),
+      showLine: false, spanGaps: false,
+      pointRadius: 7, pointHoverRadius: 9,
+      borderColor: PURPLE, backgroundColor: PURPLE,
+    },
+    {
+      label: 'Trend',
+      data: avgMood,
+      showLine: true, spanGaps: true, tension: 0.4,
+      pointRadius: 0, pointHoverRadius: 0,
+      borderColor: 'rgba(120,120,120,0.5)', backgroundColor: 'rgba(120,120,120,0.5)',
+      borderDash: [5, 4], borderWidth: 1.5,
+    },
     ...moodDims.map((dim, i) => ({
-      ...LINE, tension: 0.4, spanGaps: true,
       label: dim.name,
       data: days.map(d => d.secondary_moods?.[dim.id] ?? null),
+      showLine: true, spanGaps: true, tension: 0.4,
+      pointRadius: 4, pointHoverRadius: 6,
       borderColor: DIM_COLOURS[i % DIM_COLOURS.length],
       backgroundColor: DIM_COLOURS[i % DIM_COLOURS.length],
     }))
   ]
+
+  const dumbbellPlugin = {
+    id: 'dumbbell-connectors',
+    afterDatasetsDraw(chart) {
+      const { ctx, scales: { y } } = chart
+      const morningMeta = chart.getDatasetMeta(0)
+      const eveningMeta = chart.getDatasetMeta(1)
+      if (morningMeta.hidden || eveningMeta.hidden) return
+      ctx.save()
+      ctx.strokeStyle = 'rgba(150,150,150,0.4)'
+      ctx.lineWidth = 2
+      days.forEach((d, i) => {
+        if (d.mood_morning === null || d.mood_evening === null) return
+        const el = morningMeta.data[i]
+        if (!el) return
+        const y1 = y.getPixelForValue(d.mood_morning)
+        const y2 = y.getPixelForValue(d.mood_evening)
+        ctx.beginPath()
+        ctx.moveTo(el.x, y1)
+        ctx.lineTo(el.x, y2)
+        ctx.stroke()
+      })
+      ctx.restore()
+    }
+  }
 
   const chart = mkChart('chart-mood', {
     type: 'line',
     data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { x: xAxis(labels), y: { min: 1, max: 5, ticks: { stepSize: 1, callback: v => { if (v === 1) return '1 😢'; if (v === 5) return '5 😁'; return v } }, grid: { color: '#f0f4f5' } } },
-      plugins: { legend: { display: false }, tooltip: tooltipTitle(days) },
+      scales: {
+        x: xAxis(labels),
+        y: {
+          min: 0.5, max: 5.5,
+          ticks: { stepSize: 1, callback: v => { if (v === 1) return '1 😢'; if (v === 5) return '5 😁'; return Number.isInteger(v) ? v : '' } },
+          grid: { color: '#f0f4f5' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: items => fmtLong(days[items[0].dataIndex].date),
+            label: item => item.parsed.y !== null ? `${item.dataset.label}: ${item.parsed.y}` : '',
+          },
+          filter: item => item.dataset.label !== 'Trend' && item.parsed.y !== null,
+        }
+      },
       onClick: chartOnClick(days)
-    }
+    },
+    plugins: [dumbbellPlugin]
   })
 
   if (chart) renderMoodToggles(chart)
