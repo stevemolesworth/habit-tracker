@@ -160,7 +160,7 @@ function renderMoodToggles(chart) {
   container.style.cssText = 'margin-bottom:10px'
   container.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:8px">${checkboxesHtml}</div>
-    <div id="mood-btn-group" class="nhsuk-button-group" style="margin-bottom:0"></div>
+    <div id="mood-btn-group" class="nhsuk-button-group" style="margin-bottom:0;gap:8px"></div>
   `
 
   const btnGroup = container.querySelector('#mood-btn-group')
