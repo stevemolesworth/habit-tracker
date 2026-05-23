@@ -358,10 +358,12 @@ function renderHabitsChart(days, labels, behaviourDefs) {
     if (d.supplements) Object.keys(d.supplements).forEach(k => { if (!suppSet.has(k)) { suppSet.add(k); suppNames.push(k) } })
   })
 
+  const weightEmoji = w => w > 0 ? ' 👍' : w < 0 ? ' 💩' : ''
+
   const habits = [
-    { name: 'Exercise', fn: d => d.exercised, weight: 1 },
-    ...suppNames.map(name => ({ name, fn: d => d.supplements?.[name] ?? null, weight: 1 })),
-    ...behaviourDefs.map(b => ({ name: b.name, fn: d => d.behaviours?.[b.name] ?? null, weight: b.weight })),
+    { name: 'Exercise', label: '🏃 Exercise', fn: d => d.exercised, weight: 1 },
+    ...suppNames.map(name => ({ name, label: `💊 ${name}`, fn: d => d.supplements?.[name] ?? null, weight: 1 })),
+    ...behaviourDefs.map(b => ({ name: b.name, label: `${b.name}${weightEmoji(b.weight)}`, fn: d => d.behaviours?.[b.name] ?? null, weight: b.weight })),
   ]
 
   const wrap = document.getElementById('habits-chart-wrap')
@@ -400,15 +402,16 @@ function renderHabitsChart(days, labels, behaviourDefs) {
           max: habits.length - 0.5,
           ticks: {
             stepSize: 1,
+            font: { size: 12 },
             callback: v => {
               const i = Math.round(v)
-              if (i < 0 || i >= habits.length || v !== i) return ''
-              const name = habits[i].name
-              return name.length > 16 ? name.slice(0, 15) + '…' : name
+              if (i < 0 || i >= habits.length) return ''
+              const lbl = habits[i].label
+              return lbl.length > 24 ? lbl.slice(0, 23) + '…' : lbl
             },
           },
           grid: { color: '#f0f4f5' },
-          afterFit: ctx => { ctx.width = Math.max(ctx.width, 90) },
+          afterFit: ctx => { ctx.width = Math.max(ctx.width, 160) },
         }
       },
       plugins: {
@@ -418,7 +421,7 @@ function renderHabitsChart(days, labels, behaviourDefs) {
             title: items => fmtLong(days[items[0].dataIndex].date),
             label: item => {
               const i = Math.round(item.parsed.y)
-              return i >= 0 && i < habits.length ? habits[i].name : ''
+              return i >= 0 && i < habits.length ? habits[i].label : ''
             },
           }
         }
