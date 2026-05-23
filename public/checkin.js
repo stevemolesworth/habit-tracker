@@ -525,6 +525,7 @@ document.getElementById('nav-guard-continue').addEventListener('click', () => {
 
 document.querySelectorAll('a[href]').forEach(link => {
   if (link.closest('#app-splash')) return
+  if (link.getAttribute('href').startsWith('#')) return
   link.addEventListener('click', (e) => {
     if (!isDirty) return
     e.preventDefault()
