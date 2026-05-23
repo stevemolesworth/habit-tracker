@@ -712,6 +712,21 @@ function renderCarryForward(yesterdayEveningRecord, morningRecord) {
   }
 }
 
+function fetchAllData() {
+  const fetchExisting = api.getTodayCheckin(type, today)
+  const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
+  const fetchYesterdayEvening = isMorning ? api.getTodayCheckin('evening', yesterday) : Promise.resolve(null)
+  return Promise.allSettled([
+    fetchExisting,
+    fetchMorning,
+    fetchYesterdayEvening,
+    api.getWeights(),
+    api.getBehaviours(),
+    api.getMoodDimensions(),
+    api.getMomentumItems(),
+  ])
+}
+
 // --- Init ---
 function renderCheckinNav() {
   const el = document.getElementById('checkin-quick-nav')
@@ -754,18 +769,15 @@ async function init() {
   document.querySelector('.app-splash__text').textContent = 'Loading your check-in'
   document.querySelector('.app-splash__subtext').textContent = 'Almost there…'
 
-  const fetchExisting = api.getTodayCheckin(type, today)
-  const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
-  const fetchYesterdayEvening = isMorning ? api.getTodayCheckin('evening', yesterday) : Promise.resolve(null)
-  const [existingRes, morningRes, yesterdayEveningRes, configRes, behavioursRes, moodDimsRes, momentumRes] = await Promise.allSettled([
-    fetchExisting,
-    fetchMorning,
-    fetchYesterdayEvening,
-    api.getWeights(),
-    api.getBehaviours(),
-    api.getMoodDimensions(),
-    api.getMomentumItems(),
-  ])
+  let results = await fetchAllData()
+  const failCount = results.filter(r => r.status === 'rejected').length
+  if (failCount >= 2) {
+    clearTimeout(stallTimer)
+    document.querySelector('.app-splash__subtext').textContent = 'Retrying…'
+    await new Promise(r => setTimeout(r, 1000))
+    results = await fetchAllData()
+  }
+  const [existingRes, morningRes, yesterdayEveningRes, configRes, behavioursRes, moodDimsRes, momentumRes] = results
 
   existingRecord = existingRes.status === 'fulfilled' ? existingRes.value : null
   const morningRecord = morningRes.status === 'fulfilled' ? morningRes.value : null

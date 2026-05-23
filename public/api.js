@@ -22,18 +22,30 @@ export function clearCache(...keys) {
 async function request(path, options = {}) {
   const token = getToken()
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 10000)
+
+  // Promise.race guarantees rejection at 8 s even when Netlify's CDN holds
+  // the TCP connection open during a cold-start (AbortController alone can't
+  // force the browser to drop a connection that the network layer is still
+  // trying to establish).
+  let timerId
+  const timeout = new Promise((_, reject) => {
+    timerId = setTimeout(() => { controller.abort(); reject(new Error('timeout')) }, 8000)
+  })
+
   try {
-    const res = await fetch(path, {
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers
-      },
-      ...options
-    })
-    clearTimeout(timer)
+    const res = await Promise.race([
+      fetch(path, {
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...options.headers
+        },
+        ...options
+      }),
+      timeout,
+    ])
+    clearTimeout(timerId)
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: res.statusText }))
       throw new Error(err.error || res.statusText)
@@ -41,7 +53,7 @@ async function request(path, options = {}) {
     if (res.status === 204) return null
     return res.json()
   } catch (err) {
-    clearTimeout(timer)
+    clearTimeout(timerId)
     throw err
   }
 }
