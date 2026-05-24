@@ -42,6 +42,7 @@ function timeToDecimal(t) {
 
 function totalUnits(ci) {
   if (!ci) return null
+  if (ci.alcohol_spirits == null && ci.alcohol_beer == null && ci.alcohol_wine == null) return null
   return Math.round((Number(ci.alcohol_spirits || 0) + Number(ci.alcohol_beer || 0) + Number(ci.alcohol_wine || 0)) * 10) / 10
 }
 
@@ -379,10 +380,13 @@ function renderSleep(days, labels) {
 function renderAlcohol(days, labels) {
   const val = (d, key) => d.alcohol === null ? null : d[key]
 
-  const totalUnitsAll = Math.round(days.reduce((sum, d) => sum + (d.alcohol ?? 0), 0) * 10) / 10
-  const avg = Math.round((totalUnitsAll / days.length) * 10) / 10
+  const loggedDays = days.filter(d => d.alcohol !== null)
+  const totalUnitsAll = Math.round(loggedDays.reduce((sum, d) => sum + d.alcohol, 0) * 10) / 10
+  const avg = loggedDays.length ? Math.round((totalUnitsAll / loggedDays.length) * 10) / 10 : 0
   const avgEl = document.getElementById('alcohol-avg')
-  if (avgEl) avgEl.textContent = `${totalUnitsAll} units total · ${avg} units/day average over this period.`
+  if (avgEl) avgEl.textContent = loggedDays.length
+    ? `${totalUnitsAll} units total · ${avg} units/day average over ${loggedDays.length} logged day${loggedDays.length === 1 ? '' : 's'}.`
+    : 'No alcohol logged in this period.'
 
   mkChart('chart-alcohol', {
     type: 'bar',

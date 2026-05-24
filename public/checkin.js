@@ -33,6 +33,7 @@ let currentLocation = null
 let currentWeatherData = null
 let isDirty = false
 const dirtyCategories = new Set()
+let alcoholActivated = false
 
 const FIELD_CATEGORY = {
   bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
@@ -200,10 +201,13 @@ function populateForm(record) {
     })
   }
 
-  // Alcohol
-  setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
-  setVal('alcohol_beer', record.alcohol_beer ?? 0)
-  setVal('alcohol_wine', record.alcohol_wine ?? 0)
+  // Alcohol — only activate if any field was explicitly recorded
+  if (record.alcohol_spirits !== null || record.alcohol_beer !== null || record.alcohol_wine !== null) {
+    activateAlcohol()
+    setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
+    setVal('alcohol_beer', record.alcohol_beer ?? 0)
+    setVal('alcohol_wine', record.alcohol_wine ?? 0)
+  }
 
   ;['goals_today', 'highlights', 'goals_tomorrow'].forEach(field => {
     record[field]?.forEach((v, i) => {
@@ -457,21 +461,31 @@ function setupDurationInput() {
   durationControl = initDurationInput(display, hidden, dec, inc)
 }
 
-// --- Alcohol unit count ---
+// --- Alcohol activation + unit count ---
+function activateAlcohol() {
+  if (alcoholActivated) return
+  alcoholActivated = true
+  updateAlcoholCount()
+}
+
 function updateAlcoholCount() {
-  const total = ['alcohol_spirits', 'alcohol_beer', 'alcohol_wine']
-    .reduce((sum, id) => sum + (Number(document.getElementById(id)?.value) || 0), 0)
   const el = document.getElementById('alcohol-unit-count')
   if (!el) return
-  el.textContent = total > 0 ? `(${total} unit${total === 1 ? '' : 's'})` : '(units)'
+  if (!alcoholActivated) { el.textContent = '— not logged'; return }
+  const total = ['alcohol_spirits', 'alcohol_beer', 'alcohol_wine']
+    .reduce((sum, id) => sum + (Number(document.getElementById(id)?.value) || 0), 0)
+  el.textContent = total > 0 ? `(${total} unit${total === 1 ? '' : 's'})` : '(0 units)'
 }
 
 // --- Steppers ---
+const ALCOHOL_IDS = new Set(['alcohol_spirits', 'alcohol_beer', 'alcohol_wine'])
+
 function setupSteppers() {
   document.querySelectorAll('.app-stepper__btn[data-target]').forEach(btn => {
     btn.addEventListener('click', () => {
       const input = document.getElementById(btn.dataset.target)
       if (!input) return
+      if (ALCOHOL_IDS.has(btn.dataset.target)) activateAlcohol()
       const delta = Number(btn.dataset.delta)
       input.value = Math.max(0, (Number(input.value) || 0) + delta)
       input.dispatchEvent(new Event('change', { bubbles: true }))
@@ -479,8 +493,8 @@ function setupSteppers() {
   })
   // Also update alcohol count when inputs change directly
   ;['alcohol_spirits', 'alcohol_beer', 'alcohol_wine'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', updateAlcoholCount)
-    document.getElementById(id)?.addEventListener('input', updateAlcoholCount)
+    document.getElementById(id)?.addEventListener('change', () => { activateAlcohol(); updateAlcoholCount() })
+    document.getElementById(id)?.addEventListener('input', () => { activateAlcohol(); updateAlcoholCount() })
   })
 }
 
@@ -605,9 +619,9 @@ function buildPayload() {
     exercise_types: exerciseTypes.length ? exerciseTypes : null,
     exercise_sessions: Number(get('exercise_sessions') || 0) || null,
     exercise_duration_minutes: durationControl ? (durationControl.getValue() || null) : null,
-    alcohol_spirits: Number(get('alcohol_spirits') || 0),
-    alcohol_beer: Number(get('alcohol_beer') || 0),
-    alcohol_wine: Number(get('alcohol_wine') || 0),
+    alcohol_spirits: alcoholActivated ? Number(get('alcohol_spirits') || 0) : null,
+    alcohol_beer: alcoholActivated ? Number(get('alcohol_beer') || 0) : null,
+    alcohol_wine: alcoholActivated ? Number(get('alcohol_wine') || 0) : null,
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
     behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
     goals_today: [1,2,3].map(n => document.getElementById(`goals_today_${n}`)?.value.trim() || null).filter(Boolean) || null,
