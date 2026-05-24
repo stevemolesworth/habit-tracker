@@ -23,8 +23,7 @@ const params = new URLSearchParams(location.search)
 const today = params.get('date') || todayLocal
 const isPastDate = today !== todayLocal
 
-let type = params.get('type') || (!isPastDate && sessionStorage.getItem('checkin_type')) || (localHour < 17 ? 'morning' : 'evening')
-if (params.get('type')) sessionStorage.setItem('checkin_type', type)
+let type = params.get('type') || (localHour < 17 ? 'morning' : 'evening')
 
 const isMorning = type === 'morning'
 
