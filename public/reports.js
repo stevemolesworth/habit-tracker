@@ -379,10 +379,10 @@ function renderSleep(days, labels) {
 function renderAlcohol(days, labels) {
   const val = (d, key) => d.alcohol === null ? null : d[key]
 
-  const totalUnitsAll = days.reduce((sum, d) => sum + (d.alcohol ?? 0), 0)
-  const avg = totalUnitsAll / days.length
+  const totalUnitsAll = Math.round(days.reduce((sum, d) => sum + (d.alcohol ?? 0), 0) * 10) / 10
+  const avg = Math.round((totalUnitsAll / days.length) * 10) / 10
   const avgEl = document.getElementById('alcohol-avg')
-  if (avgEl) avgEl.textContent = `Average ${avg.toFixed(1)} units per day over this period.`
+  if (avgEl) avgEl.textContent = `${totalUnitsAll} units total · ${avg} units/day average over this period.`
 
   mkChart('chart-alcohol', {
     type: 'bar',
