@@ -79,6 +79,75 @@ async function downloadExport(format) {
 document.getElementById('export-csv-btn').addEventListener('click', () => downloadExport('csv'))
 document.getElementById('export-json-btn').addEventListener('click', () => downloadExport('json'))
 
+// ── Demo data ─────────────────────────────────────────────────
+
+document.getElementById('download-template-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('download-template-btn')
+  btn.disabled = true
+  btn.textContent = 'Downloading…'
+  try {
+    const token = getToken()
+    const res = await fetch('/api/data-template', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    if (!res.ok) throw new Error(`Server returned ${res.status}`)
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `cci-starter-kit-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    showToast(`Download failed: ${err.message}`, 'error')
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Download starter kit'
+  }
+})
+
+document.getElementById('import-btn').addEventListener('click', async () => {
+  const file = document.getElementById('import-file').files[0]
+  if (!file) { showToast('Please choose a JSON file first.', 'error'); return }
+
+  const btn = document.getElementById('import-btn')
+  const resultEl = document.getElementById('import-result')
+  btn.disabled = true
+  btn.textContent = 'Importing…'
+  resultEl.style.display = 'none'
+
+  try {
+    const text = await file.text()
+    const body = JSON.parse(text)
+    const token = getToken()
+    const res = await fetch('/api/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(body)
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || `Server returned ${res.status}`)
+    }
+    const data = await res.json()
+    const lines = [`Check-ins: ${data.checkins.inserted} imported, ${data.checkins.skipped} skipped.`]
+    if (data.config) {
+      const labels = { supplements: 'Supplements', behaviours: 'Behaviours', mood_dimensions: 'Mood dimensions', momentum_items: 'Projects' }
+      for (const [key, count] of Object.entries(data.config)) {
+        if (count > 0) lines.push(`${labels[key] ?? key}: ${count} added.`)
+      }
+    }
+    resultEl.textContent = lines.join(' ')
+    resultEl.style.display = ''
+  } catch (err) {
+    resultEl.textContent = `Import failed: ${err.message}`
+    resultEl.style.display = ''
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Import data'
+  }
+})
+
 // ── Delete range ─────────────────────────────────────────────
 
 function fmtDate(str) {

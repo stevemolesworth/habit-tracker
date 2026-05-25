@@ -1,0 +1,87 @@
+import { supabase } from './_shared/supabase.js'
+import { getAuthUser } from './_shared/auth.js'
+
+const IMPORT_LIMIT = 500
+const json = (data, status = 200) =>
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
+
+export default async function handler(req) {
+  if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 })
+
+  const user = await getAuthUser(req)
+  if (!user) return json({ error: 'Unauthorized' }, 401)
+
+  let body
+  try { body = await req.json() } catch {
+    return json({ error: 'Invalid JSON' }, 400)
+  }
+
+  // Accept bare array (same format as JSON export) or { checkins, config? }
+  const checkins = Array.isArray(body) ? body : body?.checkins
+  const configToImport = Array.isArray(body) ? null : body?.config
+
+  if (!Array.isArray(checkins)) return json({ error: '"checkins" must be an array' }, 400)
+  if (checkins.length > IMPORT_LIMIT) return json({ error: `Maximum ${IMPORT_LIMIT} check-ins per import` }, 400)
+
+  const result = { checkins: { inserted: 0, skipped: 0 }, config: null }
+
+  // ── Config import ─────────────────────────────────────────────
+  if (configToImport) {
+    const configResult = {}
+
+    const importConfigTable = async (table, items, allowedFields) => {
+      if (!Array.isArray(items) || !items.length) { configResult[table] = 0; return }
+      const { data: existing } = await supabase.from(table).select('name').eq('user_id', user.id).eq('active', true)
+      const existingNames = new Set((existing ?? []).map(r => r.name))
+      const toInsert = items
+        .filter(item => item.name && !existingNames.has(item.name))
+        .map((item, i) => {
+          const row = { user_id: user.id }
+          for (const f of allowedFields) if (item[f] !== undefined) row[f] = item[f]
+          if (row.sort_order === undefined) row.sort_order = i
+          return row
+        })
+      if (!toInsert.length) { configResult[table] = 0; return }
+      const { error } = await supabase.from(table).insert(toInsert)
+      configResult[table] = error ? 0 : toInsert.length
+    }
+
+    await Promise.all([
+      importConfigTable('supplements', configToImport.supplements, ['name', 'sort_order']),
+      importConfigTable('behaviours', configToImport.behaviours, ['name', 'weight', 'sort_order']),
+      importConfigTable('mood_dimensions', configToImport.mood_dimensions, ['name', 'five_is_good', 'paused', 'sort_order']),
+      importConfigTable('momentum_items', configToImport.momentum_items, ['name', 'paused', 'sort_order']),
+    ])
+
+    result.config = configResult
+  }
+
+  // ── Check-ins import ──────────────────────────────────────────
+  if (checkins.length) {
+    const { data: existing } = await supabase
+      .from('check_ins')
+      .select('check_in_date, check_in_type')
+      .eq('user_id', user.id)
+
+    const existingSet = new Set((existing ?? []).map(r => `${r.check_in_date}|${r.check_in_type}`))
+
+    const toInsert = checkins
+      .filter(c => c.check_in_date && c.check_in_type)
+      .filter(c => !existingSet.has(`${c.check_in_date}|${c.check_in_type}`))
+      .map(c => {
+        const { id, user_id, ...rest } = c
+        return { ...rest, user_id: user.id }
+      })
+
+    result.checkins.skipped = checkins.length - toInsert.length
+
+    const BATCH = 100
+    for (let i = 0; i < toInsert.length; i += BATCH) {
+      const batch = toInsert.slice(i, i + BATCH)
+      const { error } = await supabase.from('check_ins').insert(batch)
+      if (!error) result.checkins.inserted += batch.length
+    }
+  }
+
+  return json(result)
+}

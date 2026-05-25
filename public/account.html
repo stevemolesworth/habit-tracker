@@ -86,6 +86,21 @@
               </div>
             </section>
 
+            <!-- Demo data -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Demo data</h2>
+              <p class="nhsuk-body">Create realistic fictional data for training videos or demos. Download the starter kit, paste it into an AI with a persona description, then import the result here.</p>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+                <button type="button" class="nhsuk-button nhsuk-button--secondary" style="margin:0" id="download-template-btn">Download starter kit</button>
+              </div>
+              <div class="nhsuk-form-group" style="margin-bottom:8px">
+                <label class="nhsuk-label" for="import-file">Import check-ins from JSON</label>
+                <input type="file" id="import-file" accept=".json" style="display:block;margin-top:4px" />
+              </div>
+              <button type="button" class="nhsuk-button nhsuk-button--secondary" style="margin:0" id="import-btn">Import data</button>
+              <p id="import-result" class="nhsuk-body-s nhsuk-u-secondary-text-color" style="display:none;margin-top:12px"></p>
+            </section>
+
             <!-- Delete range -->
             <section class="app-section" id="delete-data-section">
               <h2 class="nhsuk-heading-m">Delete data</h2>
