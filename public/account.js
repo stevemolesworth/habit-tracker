@@ -235,4 +235,7 @@ document.getElementById('delete-account-confirm-btn').addEventListener('click', 
 
 // ── Init ──────────────────────────────────────────────────────
 
-authReady.then(() => { /* auth.js wireNav() handles name/email display */ })
+authReady.then(() => {
+  document.getElementById('delete-from').value = '2000-01-01'
+  document.getElementById('delete-to').value = new Date().toISOString().slice(0, 10)
+})
