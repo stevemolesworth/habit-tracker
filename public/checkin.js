@@ -833,6 +833,18 @@ async function init() {
 }
 
 async function showForm(morningRecord = null, config = null, moodDims = [], momentumItems = [], yesterdayEveningRecord = null) {
+  // Yesterday's alcohol hint (morning only)
+  if (isMorning && yesterdayEveningRecord) {
+    const s = yesterdayEveningRecord.alcohol_spirits, b = yesterdayEveningRecord.alcohol_beer, w = yesterdayEveningRecord.alcohol_wine
+    if (s !== null || b !== null || w !== null) {
+      const total = Math.round(((s || 0) + (b || 0) + (w || 0)) * 10) / 10
+      if (total > 0) {
+        const el = document.getElementById('yesterday-alcohol')
+        if (el) { el.textContent = `Alcohol last night: ${total} unit${total === 1 ? '' : 's'}`; el.style.display = '' }
+      }
+    }
+  }
+
   // Render dynamic sections before dirty tracking is set up
   renderEodSleep(morningRecord)
   renderMomentum(momentumItems)
