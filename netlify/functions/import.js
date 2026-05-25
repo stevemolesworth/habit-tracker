@@ -65,12 +65,21 @@ export default async function handler(req) {
 
     const existingSet = new Set((existing ?? []).map(r => `${r.check_in_date}|${r.check_in_type}`))
 
+    // goals_today/tomorrow/highlights are text[] in the DB — normalise strings → arrays
+    const toArray = v => v == null ? null : Array.isArray(v) ? v : [v]
+
     const toInsert = checkins
       .filter(c => c.check_in_date && c.check_in_type)
       .filter(c => !existingSet.has(`${c.check_in_date}|${c.check_in_type}`))
       .map(c => {
         const { id, user_id, ...rest } = c
-        return { ...rest, user_id: user.id }
+        return {
+          ...rest,
+          user_id: user.id,
+          goals_today: toArray(rest.goals_today),
+          goals_tomorrow: toArray(rest.goals_tomorrow),
+          highlights: toArray(rest.highlights),
+        }
       })
 
     result.checkins.skipped = checkins.length - toInsert.length
@@ -79,7 +88,8 @@ export default async function handler(req) {
     for (let i = 0; i < toInsert.length; i += BATCH) {
       const batch = toInsert.slice(i, i + BATCH)
       const { error } = await supabase.from('check_ins').insert(batch)
-      if (!error) result.checkins.inserted += batch.length
+      if (error) { result.error = error.message; break }
+      result.checkins.inserted += batch.length
     }
   }
 

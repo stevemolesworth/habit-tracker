@@ -23,9 +23,9 @@ const SCHEMA = {
   mindfulness_yoga: "boolean | null",
   outside_time: "boolean | null — true if spent time outside",
   social_media: "boolean | null — true means AVOIDED social media",
-  goals_today: "string | null — morning only, what would make today good",
-  goals_tomorrow: "string | null — evening only, goals for tomorrow",
-  highlights: "string | null — evening only, what made today good",
+  goals_today: "string[] | null — morning only, up to 3 goals (e.g. ['Finish the report', 'Go for a run'])",
+  goals_tomorrow: "string[] | null — evening only, goals for tomorrow",
+  highlights: "string[] | null — evening only, what made today good",
 }
 
 const EXAMPLES = {
@@ -51,7 +51,7 @@ const EXAMPLES = {
     mindfulness_yoga: null,
     outside_time: null,
     social_media: null,
-    goals_today: 'Finish the project proposal and get outside for a walk.',
+    goals_today: ['Finish the project proposal', 'Get outside for a walk'],
     goals_tomorrow: null,
     highlights: null,
   },
@@ -78,8 +78,8 @@ const EXAMPLES = {
     outside_time: true,
     social_media: true,
     goals_today: null,
-    goals_tomorrow: 'Wake up early and finish the proposal.',
-    highlights: 'Good walk in the afternoon. Productive morning.',
+    goals_tomorrow: ['Wake up early', 'Finish the proposal'],
+    highlights: ['Good walk in the afternoon', 'Productive morning'],
   },
 }
 
@@ -106,6 +106,7 @@ Return a single JSON object in this exact format:
 The config in the response should reflect the persona's actual tracked items — keep, modify, or create items appropriate for this person. The checkins array must use the correct field structure from schema and examples above.
 
 Important rules for realistic data:
+- goals_today, goals_tomorrow, highlights must be arrays of strings (or null) — e.g. ["Finish report", "Go for a run"]. Never plain strings.
 - Alcohol: null on days with no alcohol logged. Only set a number if the persona actually drank that type on that day.
 - Sleep: bedtime 22:00–01:00, wake time 06:00–08:30. hours_slept should match the difference.
 - Moods: vary naturally — include low days (1–2), average days (3), and good days (4–5). Don't make every day a 4 or 5.
