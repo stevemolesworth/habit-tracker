@@ -83,10 +83,20 @@ function mergeDay(date, morning, evening) {
     behaviours: mergeSupplements(morning?.behaviours, evening?.behaviours),
     morning_notes: morning?.notes ?? null,
     evening_notes: evening?.notes ?? null,
+    weather_snapshot: evening?.weather_snapshot ?? morning?.weather_snapshot ?? null,
   }
 }
 
 // ── Chart setup ───────────────────────────────────────────────
+
+const WMO_EMOJI = {
+  0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+  45: '🌫️', 48: '🌫️', 51: '🌦️', 53: '🌦️', 55: '🌦️',
+  61: '🌧️', 63: '🌧️', 65: '🌧️',
+  71: '🌨️', 73: '🌨️', 75: '🌨️', 77: '🌨️',
+  80: '🌦️', 81: '🌦️', 82: '🌦️', 85: '🌨️', 86: '🌨️',
+  95: '⛈️', 96: '⛈️', 99: '⛈️',
+}
 
 const BLUE   = '#005eb8'
 const GREEN  = '#007f3b'
@@ -214,6 +224,38 @@ function renderMoodToggles(chart) {
   })
 }
 
+function renderMoodContext(days, chart) {
+  const container = document.getElementById('mood-context')
+  if (!container || !chart) return
+
+  const { left: chartLeft, right: chartRight } = chart.chartArea
+  const paddingRight = chart.canvas.offsetWidth - chartRight
+
+  const weatherCells = days.map(d => {
+    if (!d.weather_snapshot) return ''
+    const snap = d.weather_snapshot
+    const code = snap.current?.code
+    const hourlyTemps = (snap.hourly ?? []).map(h => h.temp).filter(t => t != null)
+    const high = hourlyTemps.length ? Math.max(...hourlyTemps) : (snap.current?.temp ?? null)
+    const emoji = WMO_EMOJI[code] ?? '🌡️'
+    return high !== null ? `${emoji}&thinsp;${Math.round(high)}°` : emoji
+  })
+
+  const exerciseCells = days.map(d => d.exercised === true ? '🏃' : '')
+
+  const alcoholCells = days.map(d => {
+    if (!d.alcohol || d.alcohol <= 0) return ''
+    return `🍷&thinsp;${d.alcohol}`
+  })
+
+  const cellStyle = 'flex:1;min-width:0;text-align:left;font-size:11px;color:#4c6272;line-height:1.5;white-space:nowrap;overflow:hidden'
+  const rowStyle = `display:flex;padding-left:${chartLeft}px;padding-right:${paddingRight}px`
+  const makeRow = cells =>
+    `<div style="${rowStyle}">${cells.map(c => `<div style="${cellStyle}">${c}</div>`).join('')}</div>`
+
+  container.innerHTML = makeRow(weatherCells) + makeRow(exerciseCells) + makeRow(alcoholCells)
+}
+
 function renderMood(days, labels, moodDims) {
   const avgMood = days.map(d => {
     const vals = [d.mood_morning, d.mood_evening].filter(v => v !== null)
@@ -306,7 +348,10 @@ function renderMood(days, labels, moodDims) {
     plugins: [dumbbellPlugin]
   })
 
-  if (chart) renderMoodToggles(chart)
+  if (chart) {
+    renderMoodToggles(chart)
+    renderMoodContext(days, chart)
+  }
 }
 
 // ── Sleep ─────────────────────────────────────────────────────
