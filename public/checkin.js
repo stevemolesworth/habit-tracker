@@ -800,7 +800,7 @@ async function init() {
   const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
   const momentumItems = momentumRes.status === 'fulfilled' ? (momentumRes.value ?? []) : []
 
-  if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord?.sleep_quality && type !== 'evening') {
+  if (!params.get('type') && !isPastDate && localHour < 17 && morningRecord?.sleep_quality && morningRecord?.primary_mood_morning && type !== 'evening') {
     location.replace('/?type=evening')
     return
   }
