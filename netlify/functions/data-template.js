@@ -103,17 +103,49 @@ Return a single JSON object in this exact format:
   "checkins": [ ...array of check-in objects matching the schema and examples... ]
 }
 
-The config in the response should reflect the persona's actual tracked items — keep, modify, or create items appropriate for this person. The checkins array must use the correct field structure from schema and examples above.
+The config in the response should reflect the persona's actual tracked items. If the config arrays above are empty, invent appropriate ones for the persona — see the example config below for the expected structure and format.
 
-Important rules for realistic data:
+Example config (for reference — replace with persona-appropriate values):
+{
+  "supplements": [
+    { "name": "Vitamin D" },
+    { "name": "Magnesium" },
+    { "name": "Omega 3" }
+  ],
+  "behaviours": [
+    { "name": "Read before bed" },
+    { "name": "No phone after 9pm" },
+    { "name": "Packed lunch" },
+    { "name": "Journalled" }
+  ],
+  "mood_dimensions": [
+    { "id": "energy", "name": "Energy" },
+    { "id": "stress", "name": "Stress" },
+    { "id": "focus", "name": "Focus" },
+    { "id": "motivation", "name": "Motivation" }
+  ],
+  "momentum_items": [
+    { "id": "project_a", "name": "Side project" },
+    { "id": "fitness_goal", "name": "Fitness goal" },
+    { "id": "learning", "name": "Learning / study" }
+  ]
+}
+
+Important — config field names:
+- supplements and behaviours: objects with a "name" field only
+- mood_dimensions: objects with both "id" (short snake_case, unique) and "name" (display label)
+- momentum_items: objects with both "id" (short snake_case, unique) and "name" (display label)
+- The id values you choose for mood_dimensions and momentum_items must be used as keys in secondary_moods and momentum_scores in every check-in
+
+Important rules for realistic check-in data:
 - goals_today, goals_tomorrow, highlights must be arrays of strings (or null) — e.g. ["Finish report", "Go for a run"]. Never plain strings.
 - Alcohol: null on days with no alcohol logged. Only set a number if the persona actually drank that type on that day.
 - Sleep: bedtime 22:00–01:00, wake time 06:00–08:30. hours_slept should match the difference.
 - Moods: vary naturally — include low days (1–2), average days (3), and good days (4–5). Don't make every day a 4 or 5.
-- behaviours keys must exactly match names in the config
-- supplements keys must exactly match names in the config
-- secondary_moods keys must exactly match the id values from config.mood_dimensions
-- momentum_scores keys must exactly match the id values from config.momentum_items
+- behaviours keys must exactly match the "name" values from config.behaviours
+- supplements keys must exactly match the "name" values from config.supplements
+- secondary_moods keys must exactly match the "id" values from config.mood_dimensions
+- momentum_scores keys must exactly match the "id" values from config.momentum_items
 - Include realistic missed check-ins (roughly 15–20% of evenings, 5–10% of mornings)
 - The date range should be approximately the 35 days ending yesterday
 
