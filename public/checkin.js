@@ -728,7 +728,7 @@ function renderCarryForward(yesterdayEveningRecord, morningRecord) {
 function fetchAllData() {
   const fetchExisting = api.getTodayCheckin(type, today)
   const fetchMorning = type === 'morning' ? fetchExisting : api.getTodayCheckin('morning', today)
-  const fetchYesterdayEvening = isMorning ? api.getTodayCheckin('evening', yesterday) : Promise.resolve(null)
+  const fetchYesterdayEvening = api.getTodayCheckin('evening', yesterday)
   return Promise.allSettled([
     fetchExisting,
     fetchMorning,
@@ -833,14 +833,14 @@ async function init() {
 }
 
 async function showForm(morningRecord = null, config = null, moodDims = [], momentumItems = [], yesterdayEveningRecord = null) {
-  // Yesterday's alcohol hint (morning only)
-  if (isMorning && yesterdayEveningRecord) {
+  // Yesterday's alcohol hint
+  if (yesterdayEveningRecord) {
     const s = yesterdayEveningRecord.alcohol_spirits, b = yesterdayEveningRecord.alcohol_beer, w = yesterdayEveningRecord.alcohol_wine
     if (s !== null || b !== null || w !== null) {
       const total = Math.round(((s || 0) + (b || 0) + (w || 0)) * 10) / 10
       if (total > 0) {
         const el = document.getElementById('yesterday-alcohol')
-        if (el) { el.textContent = `Alcohol last night: ${total} unit${total === 1 ? '' : 's'}`; el.style.display = '' }
+        if (el) { el.textContent = `Alcohol yesterday: ${total} unit${total === 1 ? '' : 's'}`; el.style.display = '' }
       }
     }
   }
