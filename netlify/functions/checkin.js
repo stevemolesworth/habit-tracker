@@ -33,7 +33,7 @@ export default async function handler(req) {
     alcohol_spirits, alcohol_beer, alcohol_wine,
     supplements,
     behaviours,
-    goals_today, highlights, goals_tomorrow,
+    goals_today, goals_today_completed, highlights, goals_tomorrow,
     weather_postcode, weather_lat, weather_lng, weather_location_label, weather_snapshot
   } = body
 
@@ -55,7 +55,7 @@ export default async function handler(req) {
       alcohol_spirits, alcohol_beer, alcohol_wine,
       supplements,
       behaviours,
-      goals_today, highlights, goals_tomorrow,
+      goals_today, goals_today_completed, highlights, goals_tomorrow,
       weather_postcode, weather_lat, weather_lng, weather_location_label, weather_snapshot
     }])
     .select()

@@ -625,6 +625,11 @@ function buildPayload() {
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
     behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
     goals_today: [1,2,3].map(n => document.getElementById(`goals_today_${n}`)?.value.trim() || null).filter(Boolean) || null,
+    goals_today_completed: isMorning ? null : (() => {
+      const divs = document.querySelectorAll('#morning-goals-list .app-goal-completion')
+      if (!divs.length) return null
+      return Array.from(divs).map((_, i) => document.querySelector(`input[name="goal_completed_${i}"]:checked`)?.value ?? null)
+    })(),
     highlights: [1,2,3].map(n => document.getElementById(`highlights_${n}`)?.value.trim() || null).filter(Boolean) || null,
     goals_tomorrow: [1,2,3].map(n => document.getElementById(`goals_tomorrow_${n}`)?.value.trim() || null).filter(Boolean) || null,
     bedtime: get('bedtime') || null,
@@ -717,9 +722,30 @@ function renderCarryForward(yesterdayEveningRecord, morningRecord) {
       document.getElementById('goals-carry-forward').style.display = ''
     }
   } else {
-    const goals = morningRecord?.goals_today?.filter(Boolean)
-    if (goals?.length) {
-      document.getElementById('morning-goals-list').innerHTML = goals.map(g => `<li>${g}</li>`).join('')
+    const goals = morningRecord?.goals_today?.filter(Boolean) ?? []
+    if (goals.length) {
+      const saved = existingRecord?.goals_today_completed ?? []
+      document.getElementById('morning-goals-list').innerHTML = goals.map((g, i) => `
+        <div class="app-goal-completion nhsuk-u-margin-bottom-3" data-idx="${i}">
+          <p class="nhsuk-body-s nhsuk-u-margin-bottom-1">${g}</p>
+          <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="gc-${i}-achieved" name="goal_completed_${i}" type="radio" value="achieved" ${saved[i] === 'achieved' ? 'checked' : ''} />
+              <label class="nhsuk-label nhsuk-radios__label" for="gc-${i}-achieved">Did it ✓</label>
+            </div>
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="gc-${i}-not" name="goal_completed_${i}" type="radio" value="not_achieved" ${saved[i] === 'not_achieved' ? 'checked' : ''} />
+              <label class="nhsuk-label nhsuk-radios__label" for="gc-${i}-not">Didn't do it</label>
+            </div>
+          </div>
+        </div>
+      `).join('')
+      goals.forEach((_, i) => {
+        document.getElementById(`gc-${i}-achieved`)?.addEventListener('change', () => {
+          // eslint-disable-next-line no-undef
+          if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } })
+        })
+      })
       document.getElementById('morning-goals-display').style.display = ''
     }
   }
