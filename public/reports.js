@@ -357,7 +357,7 @@ function renderMood(days, labels, moodDims) {
 // ── Sleep ─────────────────────────────────────────────────────
 
 function renderSleep(days, labels) {
-  const qualColor = q => q === 1 ? `rgba(213,40,27,0.65)` : q === 2 ? `rgba(232,133,12,0.65)` : q === 3 ? `rgba(0,127,59,0.65)` : `rgba(0,94,184,0.5)`
+  const qualColor = q => q === 5 ? `rgba(0,127,59,0.65)` : q === 1 ? `rgba(213,40,27,0.65)` : `rgba(232,133,12,0.65)`
 
   const barData = days.map(d => {
     if (!d.bedtime || !d.wake_time) return null

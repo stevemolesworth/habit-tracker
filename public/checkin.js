@@ -226,7 +226,7 @@ function populateForm(record) {
 }
 
 // --- EOD sleep summary ---
-const SLEEP_QUALITY_LABEL = { 1: 'Bad', 2: 'Average', 3: 'Good' }
+const SLEEP_QUALITY_LABEL = { 1: '1', 2: '2', 3: '3', 4: '4', 5: '5' }
 
 function renderEodSleep(morningRecord) {
   if (isMorning) return
