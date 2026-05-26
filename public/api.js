@@ -1,22 +1,55 @@
 import { getToken } from '/auth.js'
 
-// In-memory cache for data that rarely changes within a session
+// ── Cache helpers ─────────────────────────────────────────────
 const _cache = {}
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const MEM_TTL = 5 * 60 * 1000    // 5 min in-memory
+const LS_CFG_TTL = 60 * 60 * 1000  // 1 hour for config tables
+const LS_CI_TTL  = 5 * 60 * 1000   // 5 min for check-in records
 
+function lsGet(key) {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return undefined
+    const { data, exp } = JSON.parse(raw)
+    if (exp > Date.now()) return data
+    localStorage.removeItem(key)
+  } catch {}
+  return undefined
+}
+
+function lsSet(key, data, ttl) {
+  try { localStorage.setItem(key, JSON.stringify({ data, exp: Date.now() + ttl })) } catch {}
+}
+
+function lsDel(key) {
+  try { localStorage.removeItem(key) } catch {}
+}
+
+// Config cache: memory (5 min) → localStorage (1 hr) → network
 function cached(key, fn) {
   return async () => {
-    const entry = _cache[key]
-    if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data
+    const mem = _cache[key]
+    if (mem && Date.now() - mem.ts < MEM_TTL) return mem.data
+    const lsKey = `cci-cfg-${key}`
+    const ls = lsGet(lsKey)
+    if (ls !== undefined) { _cache[key] = { ts: Date.now(), data: ls }; return ls }
     const data = await fn()
     _cache[key] = { ts: Date.now(), data }
+    lsSet(lsKey, data, LS_CFG_TTL)
     return data
   }
 }
 
 export function clearCache(...keys) {
   const targets = keys.length ? keys : Object.keys(_cache)
-  targets.forEach(k => delete _cache[k])
+  targets.forEach(k => { delete _cache[k]; lsDel(`cci-cfg-${k}`) })
+}
+
+// Check-in cache helpers
+function ciKey(type, date) { return `cci-ci-${type}-${date}` }
+
+function clearAllCheckinCache() {
+  try { Object.keys(localStorage).filter(k => k.startsWith('cci-ci-')).forEach(k => localStorage.removeItem(k)) } catch {}
 }
 
 async function request(path, options = {}) {
@@ -59,10 +92,13 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  submitCheckin: (data) => request('/api/checkin', { method: 'POST', body: JSON.stringify(data) }),
+  submitCheckin: (data) => request('/api/checkin', { method: 'POST', body: JSON.stringify(data) })
+    .then(r => { lsSet(ciKey(r.check_in_type, r.check_in_date), r, LS_CI_TTL); return r }),
   getCheckin: (id) => request(`/api/checkin/${id}`),
-  updateCheckin: (id, data) => request(`/api/checkin/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteCheckin: (id) => request(`/api/checkin/${id}`, { method: 'DELETE' }),
+  updateCheckin: (id, data) => request(`/api/checkin/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+    .then(r => { lsSet(ciKey(r.check_in_type, r.check_in_date), r, LS_CI_TTL); return r }),
+  deleteCheckin: (id) => request(`/api/checkin/${id}`, { method: 'DELETE' })
+    .then(() => clearAllCheckinCache()),
   getCheckins: (month) => request(`/api/checkins${month ? `?month=${month}` : ''}`),
   getSupplements: cached('supplements', () => request('/api/supplements')),
   addSupplement: (name) => request('/api/supplements', { method: 'POST', body: JSON.stringify({ name }) }),
@@ -89,7 +125,13 @@ export const api = {
   getWeights: cached('weights', () => request('/api/weights')),
   updateWeights: (data) => request('/api/weights', { method: 'PUT', body: JSON.stringify(data) }),
   getRandomQuote: () => request('/api/quote-random'),
-  getTodayCheckin: (type, date) => request(`/api/today-checkin?type=${type}&date=${date}`),
+  getTodayCheckin: (type, date) => {
+    const key = ciKey(type, date)
+    const hit = lsGet(key)
+    if (hit !== undefined) return Promise.resolve(hit)
+    return request(`/api/today-checkin?type=${type}&date=${date}`)
+      .then(data => { lsSet(key, data, LS_CI_TTL); return data })
+  },
   getReport: (from, to) => request(`/api/report?from=${from}&to=${to}`),
   deleteRange: (from, to) => request(`/api/delete-range?from=${from}&to=${to}`, { method: 'DELETE' }),
   deleteAccount: () => request('/api/delete-account', { method: 'DELETE' }),
