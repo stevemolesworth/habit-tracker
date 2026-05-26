@@ -256,7 +256,7 @@ function renderEodSleep(morningRecord) {
     }
     const quality = src.sleep_quality ? SLEEP_QUALITY_LABEL[src.sleep_quality] : null
     let text = parts.length ? `Slept ${parts.join(' ')}` : ''
-    if (quality) text += (text ? ` · ${quality}` : quality)
+    if (quality) text += (text ? ` · Quality: ${quality}` : `Quality: ${quality}`)
     document.getElementById('eod-sleep-text').textContent = text || 'Sleep data recorded'
 
     summaryDiv.style.display = ''
