@@ -226,7 +226,7 @@ function populateForm(record) {
 }
 
 // --- EOD sleep summary ---
-const SLEEP_QUALITY_LABEL = { 1: '1', 2: '2', 3: '3', 4: '4', 5: '5' }
+const SLEEP_QUALITY_LABEL = { 1: 'Bad', 2: 'Not great', 3: 'Okay', 4: 'Good', 5: 'Excellent' }
 
 function renderEodSleep(morningRecord) {
   if (isMorning) return
@@ -731,11 +731,11 @@ function renderCarryForward(yesterdayEveningRecord, morningRecord) {
           <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small">
             <div class="nhsuk-radios__item">
               <input class="nhsuk-radios__input" id="gc-${i}-achieved" name="goal_completed_${i}" type="radio" value="achieved" ${saved[i] === 'achieved' ? 'checked' : ''} />
-              <label class="nhsuk-label nhsuk-radios__label" for="gc-${i}-achieved">Did it ✓</label>
+              <label class="nhsuk-label nhsuk-radios__label" style="white-space:nowrap" for="gc-${i}-achieved">Did it</label>
             </div>
             <div class="nhsuk-radios__item">
               <input class="nhsuk-radios__input" id="gc-${i}-not" name="goal_completed_${i}" type="radio" value="not_achieved" ${saved[i] === 'not_achieved' ? 'checked' : ''} />
-              <label class="nhsuk-label nhsuk-radios__label" for="gc-${i}-not">Didn't do it</label>
+              <label class="nhsuk-label nhsuk-radios__label" style="white-space:nowrap" for="gc-${i}-not">Didn't do it</label>
             </div>
           </div>
         </div>
