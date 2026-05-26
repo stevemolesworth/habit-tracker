@@ -104,7 +104,10 @@ async function loadWeather() {
   }
   strip.innerHTML = '<span class="nhsuk-u-secondary-text-color nhsuk-body-s">Loading weather…</span>'
   try {
-    currentWeatherData = await fetchWeather(currentLocation, today)
+    currentWeatherData = await fetchWeather(currentLocation, today, (fresh) => {
+      currentWeatherData = fresh
+      strip.innerHTML = buildWeatherStrip(fresh, type)
+    })
     strip.innerHTML = buildWeatherStrip(currentWeatherData, type)
     if (existingRecord) {
       const locationChanged = currentLocation.lat !== existingRecord.weather_lat || currentLocation.lng !== existingRecord.weather_lng

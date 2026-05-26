@@ -1,3 +1,32 @@
+const WX_FORECAST_TTL  = 12 * 60 * 60 * 1000  // 12 hr (date in key prevents cross-day hits)
+const WX_HISTORICAL_TTL = 7 * 24 * 60 * 60 * 1000 // 7 days
+
+function wxLsGet(key) {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return undefined
+    const { data, exp } = JSON.parse(raw)
+    if (exp > Date.now()) return data
+    localStorage.removeItem(key)
+  } catch {}
+  return undefined
+}
+
+function wxLsSet(key, data, ttl) {
+  try { localStorage.setItem(key, JSON.stringify({ data, exp: Date.now() + ttl })) } catch {}
+}
+
+function wxCacheKey(lat, lng, date) {
+  return `cci-wx-${date}-${lat.toFixed(4)}-${lng.toFixed(4)}`
+}
+
+async function withRetry(fn) {
+  try { return await fn() } catch {
+    await new Promise(r => setTimeout(r, 1500))
+    return fn()
+  }
+}
+
 const WMO_EMOJI = {
   0: '☀️',
   1: '🌤️',
@@ -68,18 +97,34 @@ export async function reverseGeocode(lat, lng) {
   return { label: nominatimLabel(data.address) || `${lat.toFixed(3)}, ${lng.toFixed(3)}` };
 }
 
-export async function fetchWeather(location, date = null) {
+export async function fetchWeather(location, date = null, onRefresh = null) {
   const { lat, lng, label } = location;
 
   const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date());
   const targetDate = date || todayStr;
   const isPast = targetDate < todayStr;
+  const cacheKey = wxCacheKey(lat, lng, targetDate);
 
   if (isPast) {
-    return fetchHistoricalWeather(lat, lng, targetDate, label);
-  } else {
-    return fetchForecastWeather(lat, lng, label);
+    const cached = wxLsGet(cacheKey);
+    if (cached !== undefined) return cached;
+    const data = await withRetry(() => fetchHistoricalWeather(lat, lng, targetDate, label));
+    wxLsSet(cacheKey, data, WX_HISTORICAL_TTL);
+    return data;
   }
+
+  // Today: serve cache instantly, refresh in background
+  const cached = wxLsGet(cacheKey);
+  if (cached !== undefined) {
+    withRetry(() => fetchForecastWeather(lat, lng, label))
+      .then(fresh => { wxLsSet(cacheKey, fresh, WX_FORECAST_TTL); if (onRefresh) onRefresh(fresh); })
+      .catch(() => {});
+    return cached;
+  }
+
+  const data = await withRetry(() => fetchForecastWeather(lat, lng, label));
+  wxLsSet(cacheKey, data, WX_FORECAST_TTL);
+  return data;
 }
 
 async function fetchForecastWeather(lat, lng, label) {
