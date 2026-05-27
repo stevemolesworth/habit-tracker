@@ -245,15 +245,13 @@ function renderMoodContext(days, chart) {
     return `🍷&thinsp;${d.alcohol}`
   })
 
-  const xScale = chart.scales.x
+  const { left, right } = chart.chartArea
+  const n = days.length
+  const xPx = i => n <= 1 ? left : left + i * (right - left) / (n - 1)
   const cellStyle = 'position:absolute;transform:translateX(-50%);font-size:11px;color:#4c6272;white-space:nowrap'
   const makeRow = cells =>
     `<div style="position:relative;height:1.6em">${
-      cells.map((c, i) => {
-        if (!c) return ''
-        const px = xScale.getPixelForIndex(i)
-        return `<span style="${cellStyle};left:${px}px">${c}</span>`
-      }).join('')
+      cells.map((c, i) => c ? `<span style="${cellStyle};left:${xPx(i)}px">${c}</span>` : '').join('')
     }</div>`
 
   container.innerHTML = makeRow(weatherCells) + makeRow(exerciseCells) + makeRow(alcoholCells)
