@@ -283,12 +283,17 @@ function renderEodSleep(morningRecord) {
   }
 }
 
+function moodDots(val) {
+  const dots = Array.from({ length: 5 }, (_, i) => i < val ? '●' : '○').join('')
+  return `<span aria-hidden="true">${dots}</span><span class="nhsuk-u-visually-hidden">${val} out of 5</span>`
+}
+
 // --- Morning mood shown on EOD check-in ---
 function renderMorningMood(morningRecord) {
   const display = document.getElementById('morning-mood-display')
   const value = document.getElementById('morning-mood-value')
   if (!isMorning && morningRecord?.primary_mood_morning) {
-    value.textContent = morningRecord.primary_mood_morning
+    value.innerHTML = moodDots(morningRecord.primary_mood_morning)
     display.style.display = ''
   }
 }
@@ -301,7 +306,7 @@ function renderSecondaryMoods(dims, morningRecord) {
   container.innerHTML = dims.map(dim => {
     const morningVal = !isMorning ? (morningRecord?.secondary_moods?.[dim.id] ?? null) : null
     const morningHint = morningVal !== null
-      ? `<span class="app-mood-morning-hint"> — this morning: ${morningVal}</span>`
+      ? `<span class="app-mood-morning-hint"> — this morning: ${moodDots(morningVal)}</span>`
       : ''
     const emoji1 = dim.five_is_good !== false ? '😢' : '😊'
     const emoji5 = dim.five_is_good !== false ? '😊' : '😢'
