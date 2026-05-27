@@ -4,10 +4,11 @@ import { geocode, reverseGeocode, fetchWeather, buildWeatherStrip } from '/weath
 import { initDurationInput } from '/duration-input.js'
 import { showToast } from '/toast.js'
 
-// Splash background — random chicken image
-const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
+// Splash background — responsive random image
+const _bgIdx = Math.floor(Math.random() * 3) + 1
+const _bgSize = window.innerWidth < 768 ? 'sm' : 'lg'
 document.getElementById('app-splash').style.backgroundImage =
-  `url('${splashImages[Math.floor(Math.random() * splashImages.length)]}')`
+  `url('/gfx/bg${String(_bgIdx).padStart(3, '0')}-${_bgSize}@1x.jpg')`
 function hideSplash() {
   document.getElementById('app-splash').style.display = 'none'
 }

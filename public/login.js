@@ -1,8 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-const splashImages = ['/gfx/chicken001.avif', '/gfx/chicken002.avif', '/gfx/chicken003.avif']
+const _bgIdx = Math.floor(Math.random() * 3) + 1
+const _bgSize = window.innerWidth < 768 ? 'sm' : 'lg'
 document.getElementById('login-page').style.backgroundImage =
-  `url('${splashImages[Math.floor(Math.random() * splashImages.length)]}')`
+  `url('/gfx/bg${String(_bgIdx).padStart(3, '0')}-${_bgSize}@1x.jpg')`
 
 let supabase = null
 
