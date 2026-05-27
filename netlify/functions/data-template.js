@@ -8,7 +8,7 @@ const SCHEMA = {
   primary_mood_eod: "integer 1–5 | null — evening check-in only",
   secondary_moods: "{ [dimension_id]: integer 1–5 } | null — use IDs from config.mood_dimensions",
   momentum_scores: "{ [item_id]: integer 1–5 } | null — use IDs from config.momentum_items. Evening only.",
-  sleep_quality: "1 | 2 | 3 | null — morning only. 1=bad, 2=average, 3=good",
+  sleep_quality: "integer 1–5 | null — morning only. 1=bad, 2=not great, 3=okay, 4=good, 5=excellent",
   bedtime: "'HH:MM' | null — morning only, time the previous night (e.g. '23:30')",
   wake_time: "'HH:MM' | null — morning only (e.g. '07:15')",
   hours_slept: "number | null — morning only, decimal hours (e.g. 7.75)",
@@ -24,6 +24,7 @@ const SCHEMA = {
   outside_time: "boolean | null — true if spent time outside",
   social_media: "boolean | null — true means AVOIDED social media",
   goals_today: "string[] | null — morning only, up to 3 goals (e.g. ['Finish the report', 'Go for a run'])",
+  goals_today_completed: "string[] | null — evening only. Parallel array to the morning's goals_today. Each entry: 'achieved' | 'not_achieved' | null (null = not answered, excluded from analytics)",
   goals_tomorrow: "string[] | null — evening only, goals for tomorrow",
   highlights: "string[] | null — evening only, what made today good",
 }
@@ -36,7 +37,7 @@ const EXAMPLES = {
     primary_mood_eod: null,
     secondary_moods: null,
     momentum_scores: null,
-    sleep_quality: 3,
+    sleep_quality: 4,
     bedtime: '23:00',
     wake_time: '07:00',
     hours_slept: 8,
@@ -78,6 +79,7 @@ const EXAMPLES = {
     outside_time: true,
     social_media: true,
     goals_today: null,
+    goals_today_completed: ['achieved', 'not_achieved'],
     goals_tomorrow: ['Wake up early', 'Finish the proposal'],
     highlights: ['Good walk in the afternoon', 'Productive morning'],
   },
@@ -140,7 +142,7 @@ Important — config field names:
 Important rules for realistic check-in data:
 - goals_today, goals_tomorrow, highlights must be arrays of strings (or null) — e.g. ["Finish report", "Go for a run"]. Never plain strings.
 - Alcohol: null on days with no alcohol logged. Only set a number if the persona actually drank that type on that day.
-- Sleep: bedtime 22:00–01:00, wake time 06:00–08:30. hours_slept should match the difference.
+- Sleep: bedtime 22:00–01:00, wake time 06:00–08:30. hours_slept should match the difference. sleep_quality is 1–5 (1=bad, 5=excellent).
 - Moods: vary naturally — include low days (1–2), average days (3), and good days (4–5). Don't make every day a 4 or 5.
 - behaviours keys must exactly match the "name" values from config.behaviours
 - supplements keys must exactly match the "name" values from config.supplements
