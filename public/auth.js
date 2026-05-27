@@ -41,6 +41,18 @@ export const authReady = (async () => {
 
   _token = session.access_token
 
+  // Clear any cached data from a previous user session
+  try {
+    const currentUserId = session.user.id
+    const storedUserId = localStorage.getItem('cci-user-id')
+    if (storedUserId && storedUserId !== currentUserId) {
+      Object.keys(localStorage)
+        .filter(k => k.startsWith('cci-cfg-') || k.startsWith('cci-ci-'))
+        .forEach(k => localStorage.removeItem(k))
+    }
+    localStorage.setItem('cci-user-id', currentUserId)
+  } catch { }
+
   _supabase.auth.onAuthStateChange((_, s) => {
     _token = s?.access_token || null
     if (!_token && !location.pathname.endsWith('/login.html')) {
@@ -113,6 +125,11 @@ export async function signOut() {
   } catch { /* ignore sign-out errors */ }
   _token = null
   _profile = null
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('cci-cfg-') || k.startsWith('cci-ci-'))
+      .forEach(k => localStorage.removeItem(k))
+  } catch { }
   location.href = '/login.html'
 }
 
