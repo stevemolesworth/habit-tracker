@@ -228,9 +228,6 @@ function renderMoodContext(days, chart) {
   const container = document.getElementById('mood-context')
   if (!container || !chart) return
 
-  const { left: chartLeft, right: chartRight } = chart.chartArea
-  const paddingRight = chart.canvas.offsetWidth - chartRight
-
   const weatherCells = days.map(d => {
     if (!d.weather_snapshot) return ''
     const snap = d.weather_snapshot
@@ -248,10 +245,16 @@ function renderMoodContext(days, chart) {
     return `🍷&thinsp;${d.alcohol}`
   })
 
-  const cellStyle = 'flex:1;min-width:0;text-align:left;font-size:11px;color:#4c6272;line-height:1.5;white-space:nowrap;overflow:hidden'
-  const rowStyle = `display:flex;padding-left:${chartLeft}px;padding-right:${paddingRight}px`
+  const xScale = chart.scales.x
+  const cellStyle = 'position:absolute;transform:translateX(-50%);font-size:11px;color:#4c6272;white-space:nowrap'
   const makeRow = cells =>
-    `<div style="${rowStyle}">${cells.map(c => `<div style="${cellStyle}">${c}</div>`).join('')}</div>`
+    `<div style="position:relative;height:1.6em">${
+      cells.map((c, i) => {
+        if (!c) return ''
+        const px = xScale.getPixelForIndex(i)
+        return `<span style="${cellStyle};left:${px}px">${c}</span>`
+      }).join('')
+    }</div>`
 
   container.innerHTML = makeRow(weatherCells) + makeRow(exerciseCells) + makeRow(alcoholCells)
 }
