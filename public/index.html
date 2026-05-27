@@ -173,38 +173,50 @@
                   <h3 class="nhsuk-heading-l">
                     Alcohol <span id="alcohol-unit-count" class="nhsuk-u-secondary-text-color" style="font-weight: 400">(units)</span>
                   </h3>
-                  <div style="display: flex; gap: 24px; flex-wrap: wrap">
-                    <div>
-                      <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_spirits">Spirits</label>
-                      <div class="app-stepper">
-                        <button type="button" class="app-stepper__btn" data-target="alcohol_spirits" data-delta="-1" aria-label="Decrease spirits">−</button>
-                        <input
-                          class="app-stepper__input"
-                          id="alcohol_spirits"
-                          name="alcohol_spirits"
-                          type="number"
-                          min="0"
-                          step="1"
-                          value="0"
-                          inputmode="numeric"
-                        />
-                        <button type="button" class="app-stepper__btn" data-target="alcohol_spirits" data-delta="1" aria-label="Increase spirits">+</button>
-                      </div>
+                  <div class="nhsuk-radios nhsuk-radios--inline nhsuk-radios--small" style="margin-bottom:16px">
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="alcohol_logged_yes" name="alcohol_logged" type="radio" value="yes" />
+                      <label class="nhsuk-label nhsuk-radios__label" for="alcohol_logged_yes">Yes</label>
                     </div>
-                    <div>
-                      <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_beer">Beer</label>
-                      <div class="app-stepper">
-                        <button type="button" class="app-stepper__btn" data-target="alcohol_beer" data-delta="-1" aria-label="Decrease beer">−</button>
-                        <input class="app-stepper__input" id="alcohol_beer" name="alcohol_beer" type="number" min="0" step="1" value="0" inputmode="numeric" />
-                        <button type="button" class="app-stepper__btn" data-target="alcohol_beer" data-delta="1" aria-label="Increase beer">+</button>
-                      </div>
+                    <div class="nhsuk-radios__item">
+                      <input class="nhsuk-radios__input" id="alcohol_logged_no" name="alcohol_logged" type="radio" value="no" />
+                      <label class="nhsuk-label nhsuk-radios__label" for="alcohol_logged_no">No</label>
                     </div>
-                    <div>
-                      <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_wine">Wine</label>
-                      <div class="app-stepper">
-                        <button type="button" class="app-stepper__btn" data-target="alcohol_wine" data-delta="-1" aria-label="Decrease wine">−</button>
-                        <input class="app-stepper__input" id="alcohol_wine" name="alcohol_wine" type="number" min="0" step="1" value="0" inputmode="numeric" />
-                        <button type="button" class="app-stepper__btn" data-target="alcohol_wine" data-delta="1" aria-label="Increase wine">+</button>
+                  </div>
+                  <div id="alcohol-units" style="display:none">
+                    <div style="display: flex; gap: 24px; flex-wrap: wrap">
+                      <div>
+                        <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_spirits">Spirits</label>
+                        <div class="app-stepper">
+                          <button type="button" class="app-stepper__btn" data-target="alcohol_spirits" data-delta="-1" aria-label="Decrease spirits">−</button>
+                          <input
+                            class="app-stepper__input"
+                            id="alcohol_spirits"
+                            name="alcohol_spirits"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="0"
+                            inputmode="numeric"
+                          />
+                          <button type="button" class="app-stepper__btn" data-target="alcohol_spirits" data-delta="1" aria-label="Increase spirits">+</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_beer">Beer</label>
+                        <div class="app-stepper">
+                          <button type="button" class="app-stepper__btn" data-target="alcohol_beer" data-delta="-1" aria-label="Decrease beer">−</button>
+                          <input class="app-stepper__input" id="alcohol_beer" name="alcohol_beer" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                          <button type="button" class="app-stepper__btn" data-target="alcohol_beer" data-delta="1" aria-label="Increase beer">+</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="nhsuk-label nhsuk-u-margin-bottom-2" for="alcohol_wine">Wine</label>
+                        <div class="app-stepper">
+                          <button type="button" class="app-stepper__btn" data-target="alcohol_wine" data-delta="-1" aria-label="Decrease wine">−</button>
+                          <input class="app-stepper__input" id="alcohol_wine" name="alcohol_wine" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                          <button type="button" class="app-stepper__btn" data-target="alcohol_wine" data-delta="1" aria-label="Increase wine">+</button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -34,14 +34,14 @@ let currentLocation = null
 let currentWeatherData = null
 let isDirty = false
 const dirtyCategories = new Set()
-let alcoholActivated = false
+let alcoholLogged = null // null = not answered, true = yes, false = no
 
 const FIELD_CATEGORY = {
   bedtime: 'Sleep', wake_time: 'Sleep', sleep_quality: 'Sleep',
   primary_mood: 'Mood', secondary_mood_: 'Mood',
   momentum_: 'Projects',
   exercise_types: 'Exercise', exercise_sessions: 'Exercise', exercise_duration_minutes: 'Exercise',
-  alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
+  alcohol_logged: 'Alcohol', alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
   behaviour: 'Events',
   goals_today_: 'Reflections', highlights_: 'Reflections', goals_tomorrow_: 'Reflections',
@@ -205,12 +205,18 @@ function populateForm(record) {
     })
   }
 
-  // Alcohol — only activate if any field was explicitly recorded
-  if (record.alcohol_spirits !== null || record.alcohol_beer !== null || record.alcohol_wine !== null) {
-    activateAlcohol()
-    setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
-    setVal('alcohol_beer', record.alcohol_beer ?? 0)
-    setVal('alcohol_wine', record.alcohol_wine ?? 0)
+  // Alcohol — backward compat: infer true if units recorded but no alcohol_logged column yet
+  const inferredLogged = record.alcohol_logged !== null && record.alcohol_logged !== undefined
+    ? record.alcohol_logged
+    : (record.alcohol_spirits !== null || record.alcohol_beer !== null || record.alcohol_wine !== null) ? true : null
+  if (inferredLogged !== null) {
+    setAlcohol(inferredLogged)
+    document.getElementById(inferredLogged ? 'alcohol_logged_yes' : 'alcohol_logged_no').checked = true
+    if (inferredLogged) {
+      setVal('alcohol_spirits', record.alcohol_spirits ?? 0)
+      setVal('alcohol_beer', record.alcohol_beer ?? 0)
+      setVal('alcohol_wine', record.alcohol_wine ?? 0)
+    }
   }
 
   ;['goals_today', 'highlights', 'goals_tomorrow'].forEach(field => {
@@ -470,17 +476,25 @@ function setupDurationInput() {
   durationControl = initDurationInput(display, hidden, dec, inc)
 }
 
-// --- Alcohol activation + unit count ---
-function activateAlcohol() {
-  if (alcoholActivated) return
-  alcoholActivated = true
+// --- Alcohol yes/no + unit count ---
+function setAlcohol(val) {
+  alcoholLogged = val
+  const units = document.getElementById('alcohol-units')
+  if (units) units.style.display = val ? '' : 'none'
+  if (val === false) {
+    ;['alcohol_spirits', 'alcohol_beer', 'alcohol_wine'].forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.value = 0
+    })
+  }
   updateAlcoholCount()
 }
 
 function updateAlcoholCount() {
   const el = document.getElementById('alcohol-unit-count')
   if (!el) return
-  if (!alcoholActivated) { el.textContent = '— not logged'; return }
+  if (alcoholLogged === null) { el.textContent = '— not logged'; return }
+  if (alcoholLogged === false) { el.textContent = '— none'; return }
   const total = ['alcohol_spirits', 'alcohol_beer', 'alcohol_wine']
     .reduce((sum, id) => sum + (Number(document.getElementById(id)?.value) || 0), 0)
   el.textContent = total > 0 ? `(${total} unit${total === 1 ? '' : 's'})` : '(0 units)'
@@ -494,16 +508,20 @@ function setupSteppers() {
     btn.addEventListener('click', () => {
       const input = document.getElementById(btn.dataset.target)
       if (!input) return
-      if (ALCOHOL_IDS.has(btn.dataset.target)) activateAlcohol()
+      if (ALCOHOL_IDS.has(btn.dataset.target)) { setAlcohol(true); document.getElementById('alcohol_logged_yes').checked = true }
       const delta = Number(btn.dataset.delta)
       input.value = Math.max(0, (Number(input.value) || 0) + delta)
       input.dispatchEvent(new Event('change', { bubbles: true }))
     })
   })
-  // Also update alcohol count when inputs change directly
+  // Update alcohol count when unit inputs change
   ;['alcohol_spirits', 'alcohol_beer', 'alcohol_wine'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', () => { activateAlcohol(); updateAlcoholCount() })
-    document.getElementById(id)?.addEventListener('input', () => { activateAlcohol(); updateAlcoholCount() })
+    document.getElementById(id)?.addEventListener('change', updateAlcoholCount)
+    document.getElementById(id)?.addEventListener('input', updateAlcoholCount)
+  })
+  // Wire Yes/No radios
+  document.querySelectorAll('input[name="alcohol_logged"]').forEach(radio => {
+    radio.addEventListener('change', () => setAlcohol(radio.value === 'yes'))
   })
 }
 
@@ -628,9 +646,10 @@ function buildPayload() {
     exercise_types: exerciseTypes.length ? exerciseTypes : null,
     exercise_sessions: Number(get('exercise_sessions') || 0) || null,
     exercise_duration_minutes: durationControl ? (durationControl.getValue() || null) : null,
-    alcohol_spirits: alcoholActivated ? Number(get('alcohol_spirits') || 0) : null,
-    alcohol_beer: alcoholActivated ? Number(get('alcohol_beer') || 0) : null,
-    alcohol_wine: alcoholActivated ? Number(get('alcohol_wine') || 0) : null,
+    alcohol_logged: alcoholLogged,
+    alcohol_spirits: alcoholLogged ? Number(get('alcohol_spirits') || 0) : null,
+    alcohol_beer: alcoholLogged ? Number(get('alcohol_beer') || 0) : null,
+    alcohol_wine: alcoholLogged ? Number(get('alcohol_wine') || 0) : null,
     supplements: Object.keys(supplementsObj).length ? supplementsObj : null,
     behaviours: Object.keys(behavioursObj).length ? behavioursObj : null,
     goals_today: [1,2,3].map(n => document.getElementById(`goals_today_${n}`)?.value.trim() || null).filter(Boolean) || null,

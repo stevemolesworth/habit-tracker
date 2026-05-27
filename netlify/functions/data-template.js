@@ -14,9 +14,10 @@ const SCHEMA = {
   hours_slept: "number | null — morning only, decimal hours (e.g. 7.75)",
   exercised: "boolean | null",
   exercise_types: "string[] | null — subset of ['Running', 'Cycling', 'Walking', 'Strength']",
-  alcohol_spirits: "number | null — units of spirits. null = not logged (not zero). Use 0 only if they logged zero spirits.",
-  alcohol_beer: "number | null — units of beer. null = not logged.",
-  alcohol_wine: "number | null — units of wine. null = not logged.",
+  alcohol_logged: "boolean | null — null = not answered (skip section), false = explicitly no alcohol, true = drank (record units below)",
+  alcohol_spirits: "number | null — units of spirits. Only set when alcohol_logged is true. null otherwise.",
+  alcohol_beer: "number | null — units of beer. Only set when alcohol_logged is true. null otherwise.",
+  alcohol_wine: "number | null — units of wine. Only set when alcohol_logged is true. null otherwise.",
   supplements: "{ [name]: boolean } | null — supplement names must exactly match config.supplements",
   behaviours: "{ [name]: boolean } | null — behaviour names must exactly match config.behaviours",
   mindfulness_meditation: "boolean | null",
@@ -43,6 +44,7 @@ const EXAMPLES = {
     hours_slept: 8,
     exercised: null,
     exercise_types: null,
+    alcohol_logged: null,
     alcohol_spirits: null,
     alcohol_beer: null,
     alcohol_wine: null,
@@ -69,6 +71,7 @@ const EXAMPLES = {
     hours_slept: null,
     exercised: true,
     exercise_types: ['Walking'],
+    alcohol_logged: true,
     alcohol_spirits: null,
     alcohol_beer: null,
     alcohol_wine: 1.5,
@@ -141,7 +144,7 @@ Important — config field names:
 
 Important rules for realistic check-in data:
 - goals_today, goals_tomorrow, highlights must be arrays of strings (or null) — e.g. ["Finish report", "Go for a run"]. Never plain strings.
-- Alcohol: null on days with no alcohol logged. Only set a number if the persona actually drank that type on that day.
+- Alcohol: set alcohol_logged to true/false/null. If true, set unit fields (null for types not consumed, number ≥ 0 for types consumed). If false or null, all unit fields must be null.
 - Sleep: bedtime 22:00–01:00, wake time 06:00–08:30. hours_slept should match the difference. sleep_quality is 1–5 (1=bad, 5=excellent).
 - Moods: vary naturally — include low days (1–2), average days (3), and good days (4–5). Don't make every day a 4 or 5.
 - behaviours keys must exactly match the "name" values from config.behaviours
