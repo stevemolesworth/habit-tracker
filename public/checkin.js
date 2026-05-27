@@ -829,6 +829,20 @@ async function init() {
   const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
   const momentumItems = momentumRes.status === 'fulfilled' ? (momentumRes.value ?? []) : []
 
+  const morningDone = morningRecord && (
+    morningRecord.sleep_quality != null ||
+    morningRecord.bedtime != null ||
+    morningRecord.wake_time != null ||
+    morningRecord.primary_mood_morning != null ||
+    (morningRecord.secondary_moods && Object.keys(morningRecord.secondary_moods).length > 0) ||
+    (morningRecord.goals_today?.filter(Boolean).length > 0)
+  )
+
+  if (!params.get('type') && !isPastDate && localHour < 17 && morningDone) {
+    location.replace('/?type=evening')
+    return
+  }
+
   clearTimeout(stallTimer)
   renderCheckinNav()
 
