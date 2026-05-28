@@ -130,6 +130,29 @@ async function loadUserDetail(id) {
   }
 }
 
+document.getElementById('backup-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('backup-btn')
+  const status = document.getElementById('backup-status')
+  btn.disabled = true
+  status.textContent = 'Preparing…'
+  try {
+    const res = await fetch('/api/admin-backup', { headers: { Authorization: `Bearer ${getToken()}` } })
+    if (!res.ok) { const { error } = await res.json(); throw new Error(error || 'Backup failed') }
+    const blob = await res.blob()
+    const date = new Date().toISOString().slice(0, 10)
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `cci-backup-${date}.json`
+    a.click()
+    URL.revokeObjectURL(a.href)
+    status.textContent = `Downloaded ${date}`
+  } catch (err) {
+    status.textContent = err.message || 'Backup failed'
+  } finally {
+    btn.disabled = false
+  }
+})
+
 async function init() {
   await authReady
   await profileReady
