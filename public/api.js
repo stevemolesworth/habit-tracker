@@ -6,6 +6,9 @@ const MEM_TTL = 5 * 60 * 1000    // 5 min in-memory
 const LS_CFG_TTL = 60 * 60 * 1000  // 1 hour for config tables
 const LS_CI_TTL  = 5 * 60 * 1000   // 5 min for check-in records
 
+// Namespace all localStorage keys by user ID so different users can never share cached data
+function uid() { try { return localStorage.getItem('cci-user-id') || '' } catch { return '' } }
+
 function lsGet(key) {
   try {
     const raw = localStorage.getItem(key)
@@ -30,7 +33,7 @@ function cached(key, fn) {
   return async () => {
     const mem = _cache[key]
     if (mem && Date.now() - mem.ts < MEM_TTL) return mem.data
-    const lsKey = `cci-cfg-${key}`
+    const lsKey = `cci-cfg-${uid()}-${key}`
     const ls = lsGet(lsKey)
     if (ls !== undefined) { _cache[key] = { ts: Date.now(), data: ls }; return ls }
     const data = await fn()
@@ -42,14 +45,17 @@ function cached(key, fn) {
 
 export function clearCache(...keys) {
   const targets = keys.length ? keys : Object.keys(_cache)
-  targets.forEach(k => { delete _cache[k]; lsDel(`cci-cfg-${k}`) })
+  targets.forEach(k => { delete _cache[k]; lsDel(`cci-cfg-${uid()}-${k}`) })
 }
 
 // Check-in cache helpers
-function ciKey(type, date) { return `cci-ci-${type}-${date}` }
+function ciKey(type, date) { return `cci-ci-${uid()}-${type}-${date}` }
 
 function clearAllCheckinCache() {
-  try { Object.keys(localStorage).filter(k => k.startsWith('cci-ci-')).forEach(k => localStorage.removeItem(k)) } catch {}
+  try {
+    const prefix = `cci-ci-${uid()}-`
+    Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k))
+  } catch {}
 }
 
 async function request(path, options = {}) {
