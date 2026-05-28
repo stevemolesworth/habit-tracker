@@ -846,9 +846,12 @@ async function init() {
   }
   const [existingRes, morningRes, yesterdayEveningRes, configRes, behavioursRes, moodDimsRes, momentumRes] = results
 
-  existingRecord = existingRes.status === 'fulfilled' ? existingRes.value : null
-  const morningRecord = morningRes.status === 'fulfilled' ? morningRes.value : null
-  const yesterdayEveningRecord = yesterdayEveningRes.status === 'fulfilled' ? yesterdayEveningRes.value : null
+  // Discard any cached record that belongs to a different user (stale cache guard)
+  const _uid = localStorage.getItem('cci-user-id')
+  const _ownedBy = r => !r?.user_id || !_uid || r.user_id === _uid
+  existingRecord = existingRes.status === 'fulfilled' && _ownedBy(existingRes.value) ? existingRes.value : null
+  const morningRecord = morningRes.status === 'fulfilled' && _ownedBy(morningRes.value) ? morningRes.value : null
+  const yesterdayEveningRecord = yesterdayEveningRes.status === 'fulfilled' && _ownedBy(yesterdayEveningRes.value) ? yesterdayEveningRes.value : null
   const config = configRes.status === 'fulfilled' ? configRes.value : null
   const behaviours = behavioursRes.status === 'fulfilled' ? (behavioursRes.value ?? []) : []
   const moodDims = moodDimsRes.status === 'fulfilled' ? (moodDimsRes.value ?? []) : []
