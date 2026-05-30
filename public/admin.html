@@ -58,9 +58,19 @@
         </div>
 
         <!-- Backup -->
-        <div style="margin-bottom:32px">
+        <div style="margin-bottom:16px">
           <button type="button" class="nhsuk-button nhsuk-button--secondary" id="backup-btn">Download full backup</button>
           <span id="backup-status" class="nhsuk-u-secondary-text-color nhsuk-body-s" style="margin-left:12px"></span>
+        </div>
+
+        <!-- Restore -->
+        <div style="margin-bottom:32px">
+          <label class="nhsuk-label" for="restore-file" style="display:inline-block;margin-bottom:8px">Restore from backup</label>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <input type="file" id="restore-file" accept=".json" class="nhsuk-input" style="width:auto;max-width:320px" />
+            <button type="button" class="nhsuk-button nhsuk-button--secondary" id="restore-btn" disabled>Restore</button>
+            <span id="restore-status" class="nhsuk-u-secondary-text-color nhsuk-body-s"></span>
+          </div>
         </div>
 
         <!-- User table -->

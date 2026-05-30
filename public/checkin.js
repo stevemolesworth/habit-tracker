@@ -44,6 +44,7 @@ const FIELD_CATEGORY = {
   alcohol_logged: 'Alcohol', alcohol_spirits: 'Alcohol', alcohol_beer: 'Alcohol', alcohol_wine: 'Alcohol',
   supplement: 'Supplements',
   behaviour: 'Events',
+  life_context: 'Life context',
   goals_today_: 'Reflections', highlights_: 'Reflections', goals_tomorrow_: 'Reflections',
   weather: 'Weather'
 }
@@ -218,6 +219,8 @@ function populateForm(record) {
       setVal('alcohol_wine', record.alcohol_wine ?? 0)
     }
   }
+
+  setVal('life_context', record.life_context)
 
   ;['goals_today', 'highlights', 'goals_tomorrow'].forEach(field => {
     record[field]?.forEach((v, i) => {
@@ -663,6 +666,7 @@ function buildPayload() {
     bedtime: get('bedtime') || null,
     wake_time: get('wake_time') || null,
     sleep_quality: get('sleep_quality') ? Number(get('sleep_quality')) : null,
+    life_context: document.getElementById('life_context')?.value.trim() || null,
     weather_lat: currentLocation?.lat ?? null,
     weather_lng: currentLocation?.lng ?? null,
     weather_location_label: currentLocation?.label ?? null,
@@ -888,6 +892,12 @@ async function init() {
     setVal('wake_time', morningRecord.wake_time?.slice(0, 5))
     setRadio('sleep_quality', morningRecord.sleep_quality)
     updateSleepDuration()
+  }
+
+  // On evening, pre-fill life context from morning if not yet on the evening record
+  if (!isMorning && !existingRecord?.life_context && morningRecord?.life_context) {
+    const el = document.getElementById('life_context')
+    if (el) el.value = morningRecord.life_context
   }
 
   if (behaviours.length === 0 && moodDims.length === 0) {

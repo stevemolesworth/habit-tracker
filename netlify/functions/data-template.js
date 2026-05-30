@@ -28,6 +28,7 @@ const SCHEMA = {
   goals_today_completed: "string[] | null — evening only. Parallel array to the morning's goals_today. Each entry: 'achieved' | 'not_achieved' | null (null = not answered, excluded from analytics)",
   goals_tomorrow: "string[] | null — evening only, goals for tomorrow",
   highlights: "string[] | null — evening only, what made today good",
+  life_context: "text | null — free-text journal context (key life events, ongoing situations). Appears on both morning and evening check-ins; evening pre-fills from morning value if not overridden.",
 }
 
 const EXAMPLES = {
@@ -57,6 +58,7 @@ const EXAMPLES = {
     goals_today: ['Finish the project proposal', 'Get outside for a walk'],
     goals_tomorrow: null,
     highlights: null,
+    life_context: 'Starting a new job next week. Feeling a bit anxious but mostly excited.',
   },
   evening: {
     check_in_type: 'evening',
@@ -85,6 +87,7 @@ const EXAMPLES = {
     goals_today_completed: ['achieved', 'not_achieved'],
     goals_tomorrow: ['Wake up early', 'Finish the proposal'],
     highlights: ['Good walk in the afternoon', 'Productive morning'],
+    life_context: 'Starting a new job next week. Feeling a bit anxious but mostly excited.',
   },
 }
 

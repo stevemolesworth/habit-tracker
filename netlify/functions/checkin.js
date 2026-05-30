@@ -34,6 +34,7 @@ export default async function handler(req) {
     supplements,
     behaviours,
     goals_today, goals_today_completed, highlights, goals_tomorrow,
+    life_context,
     weather_postcode, weather_lat, weather_lng, weather_location_label, weather_snapshot
   } = body
 
@@ -56,6 +57,7 @@ export default async function handler(req) {
       supplements,
       behaviours,
       goals_today, goals_today_completed, highlights, goals_tomorrow,
+      life_context,
       weather_postcode, weather_lat, weather_lng, weather_location_label, weather_snapshot
     }])
     .select()

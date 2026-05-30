@@ -130,6 +130,44 @@ async function loadUserDetail(id) {
   }
 }
 
+document.getElementById('restore-file').addEventListener('change', () => {
+  const hasFile = !!document.getElementById('restore-file').files[0]
+  document.getElementById('restore-btn').disabled = !hasFile
+  document.getElementById('restore-status').textContent = ''
+})
+
+document.getElementById('restore-btn').addEventListener('click', async () => {
+  const fileInput = document.getElementById('restore-file')
+  const file = fileInput.files[0]
+  if (!file) return
+
+  const btn = document.getElementById('restore-btn')
+  const status = document.getElementById('restore-status')
+  btn.disabled = true
+  status.textContent = 'Restoring…'
+
+  try {
+    const text = await file.text()
+    const backup = JSON.parse(text)
+    if (!Array.isArray(backup?.users)) throw new Error('Not a valid backup file')
+
+    const res = await fetch('/api/admin-restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+      body: text
+    })
+    const result = await res.json()
+    if (!res.ok) throw new Error(result.error || 'Restore failed')
+
+    status.textContent = `Restored ${result.restored_users} user(s), ${result.total_check_ins_restored} check-ins. Skipped: ${result.skipped_users}.`
+    fileInput.value = ''
+    btn.disabled = true
+  } catch (err) {
+    status.textContent = err.message || 'Restore failed'
+    btn.disabled = false
+  }
+})
+
 document.getElementById('backup-btn').addEventListener('click', async () => {
   const btn = document.getElementById('backup-btn')
   const status = document.getElementById('backup-status')
