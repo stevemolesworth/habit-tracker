@@ -15,9 +15,7 @@ function hideSplash() {
 
 // Device-local date/time
 const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone
-const localHour = parseInt(
-  new Intl.DateTimeFormat('en-GB', { timeZone: userTZ, hour: 'numeric', hour12: false }).format(new Date())
-)
+const localHour = new Date().getHours()
 const todayLocal = new Intl.DateTimeFormat('en-CA', { timeZone: userTZ }).format(new Date())
 
 const params = new URLSearchParams(location.search)
@@ -221,6 +219,7 @@ function populateForm(record) {
   }
 
   setVal('life_context', record.life_context)
+  setVal('life_context_eve', record.life_context)
 
   ;['goals_today', 'highlights', 'goals_tomorrow'].forEach(field => {
     record[field]?.forEach((v, i) => {
@@ -666,7 +665,10 @@ function buildPayload() {
     bedtime: get('bedtime') || null,
     wake_time: get('wake_time') || null,
     sleep_quality: get('sleep_quality') ? Number(get('sleep_quality')) : null,
-    life_context: document.getElementById('life_context')?.value.trim() || null,
+    life_context: (isMorning
+      ? document.getElementById('life_context')
+      : document.getElementById('life_context_eve')
+    )?.value.trim() || null,
     weather_lat: currentLocation?.lat ?? null,
     weather_lng: currentLocation?.lng ?? null,
     weather_location_label: currentLocation?.label ?? null,
@@ -896,7 +898,7 @@ async function init() {
 
   // On evening, pre-fill life context from morning if not yet on the evening record
   if (!isMorning && !existingRecord?.life_context && morningRecord?.life_context) {
-    const el = document.getElementById('life_context')
+    const el = document.getElementById('life_context_eve')
     if (el) el.value = morningRecord.life_context
   }
 
