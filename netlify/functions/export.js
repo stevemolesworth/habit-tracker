@@ -12,20 +12,41 @@ export default async function handler(req) {
   const url = new URL(req.url)
   const format = url.searchParams.get('format') || 'json'
 
-  const { data, error } = await supabase
-    .from('check_ins')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('check_in_date', { ascending: false })
-    .order('check_in_type', { ascending: true })
+  const [checkInsRes, moodDimsRes, momentumRes] = await Promise.all([
+    supabase.from('check_ins').select('*').eq('user_id', user.id)
+      .order('check_in_date', { ascending: false }).order('check_in_type', { ascending: true }),
+    supabase.from('mood_dimensions').select('id, name, five_is_good').eq('user_id', user.id).order('sort_order'),
+    supabase.from('momentum_items').select('id, name').eq('user_id', user.id).order('sort_order'),
+  ])
 
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
+  if (checkInsRes.error) {
+    return new Response(JSON.stringify({ error: checkInsRes.error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
+
+  const moodDimMap = Object.fromEntries((moodDimsRes.data ?? []).map(d => [d.id, d.name]))
+  const momentumMap = Object.fromEntries((momentumRes.data ?? []).map(d => [d.id, d.name]))
+
+  // Resolve UUID keys to names in secondary_moods and momentum_scores
+  function resolveCheckin(row) {
+    const out = { ...row }
+    if (row.secondary_moods && Object.keys(row.secondary_moods).length) {
+      out.secondary_moods = Object.fromEntries(
+        Object.entries(row.secondary_moods).map(([id, val]) => [moodDimMap[id] ?? id, val])
+      )
+    }
+    if (row.momentum_scores && Object.keys(row.momentum_scores).length) {
+      out.momentum_scores = Object.fromEntries(
+        Object.entries(row.momentum_scores).map(([id, val]) => [momentumMap[id] ?? id, val])
+      )
+    }
+    return out
+  }
+
+  const data = (checkInsRes.data ?? []).map(resolveCheckin)
 
   if (format === 'csv') {
     if (!data.length) {
-      return new Response('', { status: 200, headers: { 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="habit-tracker-export.csv"' } })
+      return new Response('', { status: 200, headers: { 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="cci-export.csv"' } })
     }
 
     const columns = Object.keys(data[0])
@@ -46,16 +67,24 @@ export default async function handler(req) {
       status: 200,
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="habit-tracker-export.csv"'
+        'Content-Disposition': 'attachment; filename="cci-export.csv"'
       }
     })
   }
 
-  return new Response(JSON.stringify(data, null, 2), {
+  const config = {
+    mood_dimensions: (moodDimsRes.data ?? []).map(({ id, name, five_is_good }) => ({
+      id, name,
+      scale: five_is_good === false ? '1=best, 5=worst' : '1=worst, 5=best'
+    })),
+    momentum_items: (momentumRes.data ?? []).map(({ id, name }) => ({ id, name })),
+  }
+
+  return new Response(JSON.stringify({ exported_at: new Date().toISOString(), config, check_ins: data }, null, 2), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename="habit-tracker-export.json"'
+      'Content-Disposition': 'attachment; filename="cci-export.json"'
     }
   })
 }
