@@ -587,16 +587,13 @@ async function loadReport() {
 
 // ── Init ──────────────────────────────────────────────────────
 
-function weekRange(offset = 0) {
-  const now = new Date()
-  const day = (now.getDay() + 6) % 7 // Monday = 0
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - day + offset * 7)
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
+function last14Range() {
+  const to = new Date()
+  const from = new Date(to)
+  from.setDate(to.getDate() - 13)
   return {
-    from: monday.toISOString().slice(0, 10),
-    to: sunday.toISOString().slice(0, 10)
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10)
   }
 }
 
@@ -631,8 +628,7 @@ function applyPreset(value) {
   dateRangeInputs.style.display = 'none'
   const ranges = {
     'last-7': last7Range(),
-    'this-week': weekRange(0),
-    'last-week': weekRange(-1),
+    'last-14': last14Range(),
     'this-month': monthRange(0),
     'last-month': monthRange(-1)
   }
