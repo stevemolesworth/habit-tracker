@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Events — 🐔 Chicken Check-In</title>
+    <link rel="icon" href="/gfx/cci-favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/gfx/cci-favicon.png" />
+    <meta property="og:image" content="https://chickencheckin.netlify.app/gfx/cci-favicon.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" content="https://chickencheckin.netlify.app/gfx/cci-favicon.png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.4.2/dist/nhsuk/nhsuk-frontend.min.css" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="app-global-header">
+      <div class="nhsuk-width-container">
+        <div class="app-global-header__inner">
+          <a href="/" class="app-global-header__title">🐔 <span class="app-global-header__title-text">Chicken Check-In</span></a>
+          <nav class="app-global-header__nav" aria-label="Main navigation">
+            <a href="/"><span class="material-icons app-btn-icon" aria-hidden="true">add_circle</span><span class="app-btn-label">Check-in</span></a>
+            <a href="/calendar.html"><span class="material-icons app-btn-icon" aria-hidden="true">calendar_today</span><span class="app-btn-label">Calendar</span></a>
+            <a href="/reports.html"><span class="material-icons app-btn-icon" aria-hidden="true">bar_chart</span><span class="app-btn-label">Reports</span></a>
+            <a href="/events.html"><span class="material-icons app-btn-icon" aria-hidden="true">event</span><span class="app-btn-label">Events</span></a>
+            <a href="/settings.html" id="nav-settings-link"><span class="material-icons app-btn-icon" aria-hidden="true">settings</span><span class="app-btn-label">Settings</span></a>
+            <a href="/account.html" id="nav-account-link" style="display:none"><span class="material-icons app-btn-icon" aria-hidden="true">person</span><span class="app-btn-label">—</span></a>
+            <button type="button" id="nav-logout-btn" class="app-nav-signout" style="display:none"><span class="material-icons app-btn-icon" aria-hidden="true">logout</span><span class="app-btn-label">Sign out</span></button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <div class="nhsuk-width-container">
+      <main class="nhsuk-main-wrapper" id="maincontent">
+        <div class="nhsuk-grid-row">
+          <div class="nhsuk-grid-column-two-thirds">
+            <p class="nhsuk-body"><a href="/settings.html" class="nhsuk-link">&lsaquo; Back to Settings</a></p>
+            <h1 class="nhsuk-heading-xl">Manage events</h1>
+            <p class="nhsuk-body">Events appear on the <a href="/events.html" class="nhsuk-link">Events page</a> with a timer showing days until or since the date.</p>
+
+            <!-- Add event form -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Add event</h2>
+
+              <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="new-event-name">Name <span aria-hidden="true" style="color:#d5281b">*</span></label>
+                <input class="nhsuk-input nhsuk-input--width-20" id="new-event-name" type="text" placeholder="e.g. Summer holiday" autocomplete="off" />
+              </div>
+
+              <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="new-event-description">Description <span class="nhsuk-u-secondary-text-color">(optional)</span></label>
+                <input class="nhsuk-input nhsuk-input--width-20" id="new-event-description" type="text" placeholder="Optional details" autocomplete="off" />
+              </div>
+
+              <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="new-event-url">Link <span class="nhsuk-u-secondary-text-color">(optional)</span></label>
+                <input class="nhsuk-input nhsuk-input--width-20" id="new-event-url" type="url" placeholder="https://…" autocomplete="off" />
+              </div>
+
+              <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="new-event-date">Date <span aria-hidden="true" style="color:#d5281b">*</span></label>
+                <input class="nhsuk-input nhsuk-input--width-10" id="new-event-date" type="date" />
+              </div>
+
+              <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="new-event-time">Time <span class="nhsuk-u-secondary-text-color">(optional — enables H:M:S countdown when &lt;24h away)</span></label>
+                <input class="nhsuk-input nhsuk-input--width-10" id="new-event-time" type="time" />
+              </div>
+
+              <fieldset class="nhsuk-fieldset nhsuk-u-margin-bottom-4">
+                <legend class="nhsuk-fieldset__legend nhsuk-label">Timer direction</legend>
+                <div class="nhsuk-radios nhsuk-radios--small">
+                  <div class="nhsuk-radios__item">
+                    <input class="nhsuk-radios__input" id="new-event-dir-countdown" name="new_event_direction" type="radio" value="countdown" checked />
+                    <label class="nhsuk-label nhsuk-radios__label" for="new-event-dir-countdown">Countdown — "X days until…"</label>
+                  </div>
+                  <div class="nhsuk-radios__item">
+                    <input class="nhsuk-radios__input" id="new-event-dir-countup" name="new_event_direction" type="radio" value="countup" />
+                    <label class="nhsuk-label nhsuk-radios__label" for="new-event-dir-countup">Count up — "X days since…"</label>
+                  </div>
+                </div>
+              </fieldset>
+
+              <p id="add-event-error" class="nhsuk-body-s" style="display:none; color:#d5281b; margin-bottom:12px"></p>
+
+              <div class="nhsuk-button-group">
+                <button class="nhsuk-button" id="add-event-btn" disabled>Add event</button>
+                <button class="nhsuk-button nhsuk-button--secondary" id="cancel-event-btn" disabled>Clear</button>
+              </div>
+            </section>
+
+            <!-- Event list -->
+            <section class="app-section">
+              <h2 class="nhsuk-heading-m">Your events</h2>
+              <ul class="nhsuk-list" id="event-list">
+                <li class="nhsuk-u-secondary-text-color">Loading…</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer class="nhsuk-footer" role="contentinfo">
+      <div class="nhsuk-width-container">
+        <ul class="nhsuk-footer__list">
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/about.html">About</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/settings.html">Settings</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/account.html">Manage account</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/calendar.html">Calendar</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/reports.html">Reports</a></li>
+          <li class="nhsuk-footer__list-item"><a class="nhsuk-footer__list-item-link" href="/events.html">Events</a></li>
+          <li class="nhsuk-footer__list-item" id="admin-footer-item" style="display:none"><a class="nhsuk-footer__list-item-link" href="/admin.html">Admin</a></li>
+        </ul>
+        <p class="nhsuk-footer__copyright">&copy; Chicken Check-In 2026</p>
+      </div>
+    </footer>
+
+    <!-- Event edit modal -->
+    <div
+      id="event-edit-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 480px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); max-height: 90vh; overflow-y: auto">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-4">Edit event</h2>
+        <div class="nhsuk-form-group">
+          <label class="nhsuk-label" for="edit-event-name">Name</label>
+          <input class="nhsuk-input" id="edit-event-name" type="text" />
+        </div>
+        <div class="nhsuk-form-group">
+          <label class="nhsuk-label" for="edit-event-description">Description</label>
+          <input class="nhsuk-input" id="edit-event-description" type="text" />
+        </div>
+        <div class="nhsuk-form-group">
+          <label class="nhsuk-label" for="edit-event-url">Link</label>
+          <input class="nhsuk-input" id="edit-event-url" type="url" />
+        </div>
+        <div class="nhsuk-form-group">
+          <label class="nhsuk-label" for="edit-event-date">Date</label>
+          <input class="nhsuk-input nhsuk-input--width-10" id="edit-event-date" type="date" />
+        </div>
+        <div class="nhsuk-form-group">
+          <label class="nhsuk-label" for="edit-event-time">Time <span class="nhsuk-u-secondary-text-color">(optional)</span></label>
+          <input class="nhsuk-input nhsuk-input--width-10" id="edit-event-time" type="time" />
+        </div>
+        <fieldset class="nhsuk-fieldset nhsuk-u-margin-bottom-4">
+          <legend class="nhsuk-fieldset__legend nhsuk-label">Timer direction</legend>
+          <div class="nhsuk-radios nhsuk-radios--small">
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="edit-event-dir-countdown" name="edit_event_direction" type="radio" value="countdown" />
+              <label class="nhsuk-label nhsuk-radios__label" for="edit-event-dir-countdown">Countdown — "X days until…"</label>
+            </div>
+            <div class="nhsuk-radios__item">
+              <input class="nhsuk-radios__input" id="edit-event-dir-countup" name="edit_event_direction" type="radio" value="countup" />
+              <label class="nhsuk-label nhsuk-radios__label" for="edit-event-dir-countup">Count up — "X days since…"</label>
+            </div>
+          </div>
+        </fieldset>
+        <p id="event-edit-error" class="nhsuk-body-s" style="display:none; color:#d5281b; margin-top:8px"></p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button" id="event-edit-save-btn" style="margin: 0">Save</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="event-edit-cancel-btn" style="margin: 0">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event delete confirm modal -->
+    <div
+      id="event-delete-modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(33, 43, 50, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      "
+    >
+      <div style="background: #fff; padding: 24px 24px 16px; border-radius: 4px; max-width: 420px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)">
+        <h2 class="nhsuk-heading-m nhsuk-u-margin-bottom-2">Remove event?</h2>
+        <p class="nhsuk-body" id="event-delete-summary"></p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px">
+          <button class="nhsuk-button nhsuk-button--warning" id="event-delete-confirm-btn" style="margin: 0">Remove</button>
+          <button class="nhsuk-button nhsuk-button--secondary" id="event-delete-cancel-btn" style="margin: 0">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script type="module" src="/manage-events.js"></script>
+  </body>
+</html>

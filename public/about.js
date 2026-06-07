@@ -21,6 +21,7 @@ if (session) {
   show('nav-checkin-link')
   show('nav-calendar-link')
   show('nav-reports-link')
+  show('nav-events-link')
   show('nav-settings-link')
   show('nav-logout-btn')
 
